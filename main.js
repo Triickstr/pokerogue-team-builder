@@ -496,41 +496,45 @@ const exportTeamToJson = () => {
   const teamData = [];
 
   document.querySelectorAll('.team-slot').forEach(slot => {
-    // Pokémon selection
-    const pokemonSelect = slot.querySelector('select');
-    const pokemonIndex = pokemonSelect?.value;
-    const pokemon = pokemonIndex !== '' ? Number(pokemonIndex) : null;
+    // Base Pokémon select (first select inside slot)
+    const allSelects = slot.querySelectorAll('select');
+    const pokemonSelect = allSelects[0];
+    const pokemonIndex = pokemonSelect?.value || null;
 
-    // Fusion selection
-    const fusionSelect = slot.querySelector('.fusion-container select');
-    const fusionIndex = fusionSelect?.value;
-    const fusion = fusionIndex !== '' ? Number(fusionIndex) : null;
+    // Fusion Pokémon select (select inside .fusion-container, but not ability select)
+    const fusionContainer = slot.querySelector('.fusion-container');
+    const fusionSelects = fusionContainer?.querySelectorAll('select') || [];
+    const fusionSelect = fusionSelects[0] || null;
+    const fusionIndex = fusionSelect?.value || null;
 
     // Moves
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
       const ts = s.tomselect;
-      const value = ts?.getValue();
-      return value !== '' ? Number(value) : null;
-    }).slice(0, 4);
+      return ts?.getValue() || null;
+    });
 
-    // Base Ability
+    // Base ability
     const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    const abilityValue = baseAbilitySelect?.getValue();
-    const ability = abilityValue !== '' ? Number(abilityValue) : null;
+    const ability = baseAbilitySelect?.getValue() || null;
 
-    // Fusion Ability
-    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
-    const fusionAbilityValue = fusionAbilitySelect?.getValue();
-    const fusionAbility = fusionAbilityValue !== '' ? Number(fusionAbilityValue) : null;
+    // Fusion ability (look only for the second select in fusion-container if exists)
+    let fusionAbility = null;
+    const fusionAbilitySelect = fusionSelects.length > 1
+      ? fusionSelects[1]?.tomselect
+      : slot.querySelector('.fusion-ability-select')?.tomselect;
+
+    if (fusionAbilitySelect) {
+      fusionAbility = fusionAbilitySelect.getValue() || null;
+    }
 
     // Nature
     const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
 
     teamData.push({
-      pokemon,
-      fusion,
-      moves,
+      pokemon: pokemonIndex,
+      fusion: fusionIndex || null,
+      moves: moves.slice(0, 4), // Limit to 4
       ability,
       fusionAbility,
       nature
@@ -545,6 +549,7 @@ const exportTeamToJson = () => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
 
 
 
