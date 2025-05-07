@@ -479,7 +479,7 @@ const exportTeamToJson = () => {
     teamData.push({
       pokemon: pokemonIndex,
       fusion: fusionIndex || null,
-      moves,
+      moves: moves.slice(0, 4),  // Only include first 4
       ability,
       fusionAbility,
       nature
@@ -494,5 +494,6 @@ const exportTeamToJson = () => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
 
 document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
