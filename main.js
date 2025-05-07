@@ -122,6 +122,7 @@ const getAllMoves = () => {
   slot.appendChild(typeContainer);
 
     const stats = document.createElement('div');
+    stats.className = 'stats';
     stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
     slot.appendChild(stats);
 
