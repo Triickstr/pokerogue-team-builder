@@ -191,7 +191,7 @@ const getAllMoves = () => {
     }).join('');
 
   select.onchange = () => {
-    select.dataset.pokemonIndex = select.value; //  store selected index
+    select.dataset.pokemonIndex = pokemonData[select.value]?.row || '';
     onSelect(select.value);
   };
 
@@ -393,7 +393,7 @@ const renderFusionSelector = () => {
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
 
   select.onchange = () => {
-    select.dataset.fusionIndex = select.value; // ✅ store selected fusion index
+    select.dataset.fusionIndex = pokemonData[select.value]?.row || '';
     const selected = pokemonData[select.value];
     renderFusionInfo(selected);
     fusionAbilitySelect.dataset.fusionIndex = select.value; // <- in renderFusionInfo, after creating the select
@@ -465,8 +465,11 @@ async function importTeamData(data) {
     // Step 2: Set fusion Pokémon
     if (entry.fusion !== null && entry.fusion !== undefined) {
       const fusionSelect = slot.querySelector('.fusion-container select');
-      fusionSelect.value = parseInt(entry.fusion);
-      fusionSelect.dispatchEvent(new Event('change'));
+      const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
+      if (fusionIndex !== -1) {
+        fusionSelect.value = fusionIndex;
+        fusionSelect.dispatchEvent(new Event('change'));
+      }
 
       // Wait for fusion render
       await new Promise(res => setTimeout(res, 300));
@@ -510,11 +513,13 @@ const exportTeamToJson = () => {
   document.querySelectorAll('.team-slot').forEach(slot => {
     // Retrieve the correct Pokémon index from a custom attribute we store
     const select = slot.querySelector('select');
-    const pokemonIndex = parseInt(select?.value) || null;
+    const selectedPokemon = pokemonData[select?.value];
+    const pokemonIndex = selectedPokemon?.row ?? null;
 
     // Get fusion Pokémon index from its stored dataset too
     const fusionSelect = slot.querySelector('.fusion-container select');
-    const fusionIndex = parseInt(fusionSelect?.dataset.fusionIndex) || null;
+    const selectedFusion = pokemonData[fusionSelect?.value];
+    const fusionIndex = selectedFusion?.row ?? null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
