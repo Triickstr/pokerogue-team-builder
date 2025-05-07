@@ -62,11 +62,16 @@ const getAllMoves = () => {
     setTimeout(() => new TomSelect(sel, {
       maxOptions: null,
       render: {
-      option: function(data, escape) {
-        const isCompatible = pokemon.hasOwnProperty(data.value);
-        const color = isCompatible ? '#d4edda' : '#ffeeba'; // green or orange
-        return `<div style="background-color:${color};padding:5px;">${escape(data.text)}</div>`;
-        } 
+        option: function(data, escape) {
+          const isCompatible = pokemon.hasOwnProperty(data.value);
+          const color = isCompatible ? '#d4edda' : '#ffeeba';
+          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+          },
+        item: function(data, escape) {
+          const isCompatible = pokemon.hasOwnProperty(data.value);
+          const color = isCompatible ? '#d4edda' : '#ffeeba';
+          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+        }
       }
     }), 0);
     sel.className = 'move-select';
