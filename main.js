@@ -95,16 +95,17 @@ const getAllMoves = () => {
 
   const typeContainer = document.createElement('div');
     typeContainer.className = 'type-container';
-    pokemon.types?.forEach(type => {
-      const properType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-      const typeBox = document.createElement('div');
-      typeBox.className = 'type-box';
-      typeBox.innerText = properType;
-      typeBox.style.backgroundColor = window.typeColors?.[properType] || '#777';
-      typeContainer.appendChild(typeBox);
-    });
 
-    slot.appendChild(typeContainer); 
+    pokemon.types?.forEach(type => {
+    const typeName = window.fidToName?.[type] || `Type ${type}`;
+    const typeBox = document.createElement('div');
+    typeBox.className = 'type-box';
+    typeBox.innerText = typeName;
+    typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+    typeContainer.appendChild(typeBox);
+  });
+
+  slot.appendChild(typeContainer);
 
     const stats = document.createElement('div');
     stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
