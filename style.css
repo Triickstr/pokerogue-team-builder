@@ -114,3 +114,18 @@ select {
   margin-top: 6px;
   width: 75%;
 }
+
+.fusion-ability-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.fusion-ability-select {
+  width: 75%;
+}
+
+.fusion-ability-checkbox {
+  transform: scale(1.2);
+}
