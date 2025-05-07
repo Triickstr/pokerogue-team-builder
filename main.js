@@ -46,8 +46,6 @@ const updateTeamSummary = () => {
           const ts = baseAbilitySelect?.tomselect;
           ability = ts?.getItem(ts.getValue())?.textContent || '—';
       }
-    const fusionAbilityTS = fusionAbilitySelect?.tomselect;
-    ability = fusionAbilityTS?.getItem?.(fusionAbilityTS.getValue())?.textContent || '—';
     const passiveText = Array.from(slot.childNodes).find(el => el?.innerText?.startsWith('Passive Ability:'))?.innerText.replace('Passive Ability: ', '') || '—';
     const nature = slot.querySelector('.nature-select')?.selectedOptions[0]?.textContent || '—';
 
@@ -111,6 +109,7 @@ const updateTeamSummary = () => {
 
     statRow.textContent = `HP: ${finalStats[0]}, Atk: ${finalStats[1]}, Def: ${finalStats[2]}, SpA: ${finalStats[3]}, SpD: ${finalStats[4]}, Spe: ${finalStats[5]}`;
     }
+    summaryBox.appendChild(statRow);
 
     const moveRow = document.createElement('div');
     moveRow.className = 'summary-moves';
