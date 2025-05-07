@@ -398,7 +398,6 @@ setTimeout(updateTeamSummary, 10);
   
 });
 
-document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
 
 document.getElementById('importFile').addEventListener('change', async (event) => {
   const file = event.target.files[0];
@@ -495,3 +494,5 @@ const exportTeamToJson = () => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
+document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
