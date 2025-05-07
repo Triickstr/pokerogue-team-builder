@@ -1,4 +1,22 @@
 
+// Utility to wait for TomSelect to be ready
+async function waitForTomSelect(selectElement, timeout = 1000) {
+  return new Promise((resolve) => {
+    const interval = 50;
+    const maxTries = timeout / interval;
+    let tries = 0;
+
+    const check = () => {
+      const ts = selectElement.tomselect;
+      if (ts) return resolve(ts);
+      tries++;
+      if (tries >= maxTries) return resolve(null);
+      setTimeout(check, interval);
+    };
+
+    check();
+  });
+}
 window.typeColors = {
   Normal: '#A8A77A',
   Fire: '#EE8130',
@@ -431,14 +449,19 @@ async function importTeamData(data) {
     await new Promise(res => setTimeout(res, 300)); // Let base Pokémon render
 
     const moveDropdowns = slot.querySelectorAll('.move-select');
-    (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
-      const ts = moveDropdowns[idx]?.tomselect;
-      if (ts && moveId !== null) ts.setValue(String(moveId));
-    });
+    for (let idx = 0; idx < 4; idx++) {
+      const moveId = entry.moves?.[idx];
+      if (moveId !== null && moveId !== undefined) {
+        const sel = moveDropdowns[idx];
+        const ts = await waitForTomSelect(sel);
+        ts?.setValue(String(moveId));
+      }
+    }
 
-    const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    if (entry.ability !== undefined && abilitySelect) {
-      abilitySelect.setValue(String(entry.ability));
+    const abilitySelectEl = slot.querySelector('.ability-select');
+    if (entry.ability !== undefined && abilitySelectEl) {
+      const ts = await waitForTomSelect(abilitySelectEl);
+      ts?.setValue(String(entry.ability));
     }
 
     const fusionSelector = slot.querySelector('.fusion-container select');
@@ -449,21 +472,24 @@ async function importTeamData(data) {
       await new Promise(res => setTimeout(res, 300)); // Let fusion Pokémon render
 
       const updatedSlot = document.querySelectorAll('.team-slot')[i];
-      const fusionAbilitySelect = updatedSlot.querySelector('.fusion-ability-select')?.tomselect;
-      if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
-        fusionAbilitySelect.setValue(String(entry.fusionAbility));
+      const fusionAbilitySelectEl = updatedSlot.querySelector('.fusion-ability-select');
+      if (entry.fusionAbility !== undefined && fusionAbilitySelectEl) {
+        const ts = await waitForTomSelect(fusionAbilitySelectEl);
+        ts?.setValue(String(entry.fusionAbility));
       }
     }
 
-    const natureSelect = slot.querySelector('.nature-select')?.tomselect;
-    if (entry.nature !== undefined && natureSelect) {
-      natureSelect.setValue(entry.nature);
+    const natureSelectEl = slot.querySelector('.nature-select');
+    if (entry.nature !== undefined && natureSelectEl) {
+      const ts = await waitForTomSelect(natureSelectEl);
+      ts?.setValue(entry.nature);
     }
 
     updateTeamSummary();
-    await new Promise(res => setTimeout(res, 100)); // buffer before next slot
+    await new Promise(res => setTimeout(res, 100)); // small buffer before next slot
   }
 }
+
 const exportTeamToJson = () => {
   const teamData = [];
 
