@@ -397,3 +397,108 @@ setTimeout(updateTeamSummary, 10);
 
   
 });
+
+document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
+
+  const blob = new Blob([JSON.stringify(team, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'poke_team.json';
+  a.click();
+});
+
+document.getElementById('importFile').addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const text = await file.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    alert("Invalid JSON file.");
+    return;
+  }
+
+  const slots = document.querySelectorAll('.team-slot');
+  data.forEach((entry, i) => {
+    const slot = slots[i];
+    if (!slot || !entry.pokemon) return;
+
+    const select = slot.querySelector('select');
+    select.value = entry.pokemon;
+    select.dispatchEvent(new Event('change'));
+
+    setTimeout(() => {
+      const moveDropdowns = slot.querySelectorAll('.move-select');
+      const moves = Array.isArray(entry.moves) ? entry.moves.slice(0, 4) : [null, null, null, null];
+      moves.forEach((moveId, idx) => {
+        const ts = slot.querySelectorAll('.move-select')[idx]?.tomselect;
+        if (ts && moveId !== null) ts.setValue(moveId);
+      });
+
+      const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
+      if (entry.ability !== undefined && abilitySelect) abilitySelect.setValue(entry.ability);
+
+      const fusionSelector = slot.querySelector('.fusion-container select');
+      if (fusionSelector && entry.fusion) {
+        fusionSelector.value = entry.fusion;
+        fusionSelector.dispatchEvent(new Event('change'));
+      }
+
+      const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+      if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
+        fusionAbilitySelect.setValue(entry.fusionAbility);
+      }
+
+      const natureSelect = slot.querySelector('.nature-select')?.tomselect;
+      if (entry.nature !== undefined && natureSelect) {
+        natureSelect.setValue(entry.nature);
+      }
+
+      updateTeamSummary();
+    }, 300); // Delay to let DOM finish rendering fusion data
+  });
+});
+const exportTeamToJson = () => {
+  const teamData = [];
+
+  document.querySelectorAll('.team-slot').forEach(slot => {
+    const pokemonSelect = slot.querySelector('select');
+    const pokemonIndex = pokemonSelect?.value || null;
+
+    const fusionSelect = slot.querySelector('.fusion-container select');
+    const fusionIndex = fusionSelect?.value || null;
+
+    const moveSelects = slot.querySelectorAll('.move-select');
+    const moves = Array.from(moveSelects).map(s => {
+      const ts = s.tomselect;
+      return ts?.getValue() || null;
+    });
+
+    const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
+    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+
+    const ability = baseAbilitySelect?.getValue() || null;
+    const fusionAbility = fusionAbilitySelect?.getValue() || null;
+
+    const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
+
+    teamData.push({
+      pokemon: pokemonIndex,
+      fusion: fusionIndex || null,
+      moves,
+      ability,
+      fusionAbility,
+      nature
+    });
+  });
+
+  const blob = new Blob([JSON.stringify(teamData, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "poke_team.json";
+  a.click();
+  URL.revokeObjectURL(url);
+};
