@@ -166,7 +166,6 @@ const getAllMoves = () => {
     }).join('');
     return sel;
   };
-  observeChanges(abilityDropdown);
   const renderPokemonBox = (slot, pokemon) => {
     slot.innerHTML = '';
 
@@ -211,7 +210,10 @@ const getAllMoves = () => {
       slot.appendChild(moveWrapper);
     }
 
-    slot.appendChild(createAbilityDropdown(pokemon));
+    const abilityDropdown = createAbilityDropdown(pokemon);
+    observeChanges(abilityDropdown);
+    slot.appendChild(abilityDropdown);
+
 
     const passive = document.createElement('div');
     const passiveName = window.fidToName?.[pokemon.pa] || `Passive ${pokemon.pa}`;
