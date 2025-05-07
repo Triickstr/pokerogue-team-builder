@@ -127,7 +127,17 @@ const getAllMoves = () => {
     slot.appendChild(stats);
 
     for (let i = 0; i < 4; i++) {
-      slot.appendChild(createMoveDropdown(pokemon));
+      const moveWrapper = document.createElement('div');
+      moveWrapper.className = 'move-wrapper';
+
+      const moveDropdown = createMoveDropdown(pokemon);
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'move-checkbox';
+
+      moveWrapper.appendChild(moveDropdown);
+      moveWrapper.appendChild(checkbox);
+      slot.appendChild(moveWrapper);
     }
 
     slot.appendChild(createAbilityDropdown(pokemon));
