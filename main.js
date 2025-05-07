@@ -102,10 +102,9 @@ const getAllMoves = () => {
       typeBox.innerText = properType;
       typeBox.style.backgroundColor = window.typeColors?.[properType] || '#777';
       typeContainer.appendChild(typeBox);
-  });
-}
-});
-slot.appendChild(typeContainer);
+    });
+
+    slot.appendChild(typeContainer); 
 
     const stats = document.createElement('div');
     stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
