@@ -68,6 +68,21 @@ const getAllMoves = () => {
     img.onclick = () => slot.replaceWith(createTeamSlot());
     slot.appendChild(img);
 
+    const typeContainer = document.createElement('div');
+    typeContainer.className = 'type-container';
+
+    pokemon.types.forEach(typeId => {
+    const typeName = window.fidToName?.[typeId] || `Type ${typeId}`;
+    const typeBox = document.createElement('span');
+    typeBox.className = 'type-box';
+    typeBox.textContent = typeName;
+    typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+    typeContainer.appendChild(typeBox);
+});
+
+slot.appendChild(typeContainer);
+
+
     const stats = document.createElement('div');
     stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
     slot.appendChild(stats);
