@@ -74,7 +74,7 @@ const getAllMoves = () => {
     const typeContainer = document.createElement('div');
     typeContainer.className = 'type-container';
 
-    pokemon.types.forEach(typeId => {
+    (pokemon.types || []).forEach(typeId => {
       const typeName = window.fidToName?.[typeId] || `Type ${typeId}`;
       const typeBox = document.createElement('span');
       typeBox.className = 'type-box';
