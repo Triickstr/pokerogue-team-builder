@@ -19,6 +19,64 @@ window.typeColors = {
   Steel: '#B7B7CE',
   Fairy: '#D685AD'
 };
+const updateTeamSummary = () => {
+  const summaryContainer = document.getElementById('teamSummary');
+  summaryContainer.innerHTML = '';
+
+  document.querySelectorAll('.team-slot').forEach((slot, i) => {
+    const summaryBox = document.createElement('div');
+    summaryBox.className = 'summary-box';
+
+    const images = slot.querySelectorAll('img');
+    const types = slot.querySelectorAll('.type-box');
+    const statText = slot.querySelector('.stats')?.innerText || '';
+    const moveNames = Array.from(slot.querySelectorAll('.move-select')).map(s => s.selectedOptions[0]?.textContent || '—');
+    const ability = slot.querySelector('.fusion-ability-select')?.selectedOptions[0]?.textContent || '—';
+    const passiveText = Array.from(slot.childNodes).find(el => el?.innerText?.startsWith('Passive Ability:'))?.innerText.replace('Passive Ability: ', '') || '—';
+    const nature = slot.querySelector('.nature-select')?.selectedOptions[0]?.textContent || '—';
+
+    const imageRow = document.createElement('div');
+    imageRow.className = 'summary-images';
+    imageRow.appendChild(images[0]?.cloneNode(true) || document.createElement('div'));
+    imageRow.appendChild(images[1]?.cloneNode(true) || document.createElement('div'));
+    summaryBox.appendChild(imageRow);
+
+    const typeRow = document.createElement('div');
+    typeRow.className = 'summary-types';
+    types.forEach(t => {
+      const box = document.createElement('div');
+      box.className = 'summary-type-box';
+      box.style.backgroundColor = t.style.backgroundColor;
+      box.textContent = t.textContent;
+      typeRow.appendChild(box);
+    });
+    summaryBox.appendChild(typeRow);
+
+    const statRow = document.createElement('div');
+    statRow.className = 'summary-stats';
+    statRow.textContent = statText;
+    summaryBox.appendChild(statRow);
+
+    const moveRow = document.createElement('div');
+    moveRow.className = 'summary-moves';
+    moveNames.forEach(m => {
+      const div = document.createElement('div');
+      div.textContent = m;
+      moveRow.appendChild(div);
+    });
+    summaryBox.appendChild(moveRow);
+
+    const infoRow = document.createElement('div');
+    infoRow.className = 'summary-info';
+    [ability, passiveText, nature].forEach(val => {
+      const div = document.createElement('div');
+      div.textContent = val;
+      infoRow.appendChild(div);
+    });
+    summaryBox.appendChild(infoRow);
+    summaryContainer.appendChild(summaryBox);
+  });
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   const pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
@@ -247,7 +305,7 @@ const renderFusionSelector = () => {
 
 renderFusionSelector();
 slot.appendChild(fusionContainer);
-
+updateTeamSummary();
   };
 
   const createTeamSlot = () => {
@@ -266,4 +324,6 @@ slot.appendChild(fusionContainer);
   for (let i = 0; i < 6; i++) {
     teamGrid.appendChild(createTeamSlot());
   }
+
+  
 });
