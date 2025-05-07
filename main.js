@@ -401,6 +401,7 @@ const renderFusionSelector = () => {
     select.dataset.fusionIndex = pokemonData[select.value]?.row || '';
     const selected = pokemonData[select.value];
     renderFusionInfo(selected);
+    select.dataset.fusionIndex = selected?.row || '';
     setTimeout(updateTeamSummary, 10);
   };
 
@@ -516,7 +517,7 @@ const exportTeamToJson = () => {
 
   document.querySelectorAll('.team-slot').forEach(slot => {
     const select = slot.querySelector('select');
-    const pokemonIndex = parseInt(select?.dataset.pokemonIndex) || null;
+    const pokemonIndex = parseInt(select?.dataset.pokemonRow) || null;
 
     const fusionSelect = slot.querySelector('.fusion-container select');
     const fusionIndex = parseInt(fusionSelect?.dataset.fusionIndex) || null;
