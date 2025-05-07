@@ -93,17 +93,19 @@ const getAllMoves = () => {
     img.onclick = () => slot.replaceWith(createTeamSlot());
     slot.appendChild(img);
 
-  const typeContainer = document.createElement('div');
-    typeContainer.className = 'type-container';
+const typeContainer = document.createElement('div');
+typeContainer.className = 'type-container';
 
-    pokemon.types?.forEach(type => {
-    const typeName = window.fidToName?.[type] || `Type ${type}`;
-    const typeBox = document.createElement('div');
-    typeBox.className = 'type-box';
-    typeBox.innerText = typeName;
-    typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
-    typeContainer.appendChild(typeBox);
-  });
+pokemon.types?.forEach(type => {
+  const typeName = window.fidToName?.[type] || `Type ${type}`;
+  const typeBox = document.createElement('div');
+  typeBox.className = 'type-box';
+  typeBox.innerText = typeName;
+  typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+  typeContainer.appendChild(typeBox);
+});
+
+slot.appendChild(typeContainer);
 
   slot.appendChild(typeContainer);
 
