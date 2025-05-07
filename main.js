@@ -47,7 +47,7 @@ const updateTeamSummary = () => {
           ability = ts?.getItem(ts.getValue())?.textContent || '—';
       }
     const fusionAbilityTS = fusionAbilitySelect?.tomselect;
-    const ability = fusionAbilityTS?.getItem?.(fusionAbilityTS.getValue())?.textContent || '—';
+    ability = fusionAbilityTS?.getItem?.(fusionAbilityTS.getValue())?.textContent || '—';
     const passiveText = Array.from(slot.childNodes).find(el => el?.innerText?.startsWith('Passive Ability:'))?.innerText.replace('Passive Ability: ', '') || '—';
     const nature = slot.querySelector('.nature-select')?.selectedOptions[0]?.textContent || '—';
 
