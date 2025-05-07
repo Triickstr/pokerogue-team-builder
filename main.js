@@ -181,17 +181,23 @@ const getAllMoves = () => {
   const allMoves = getAllMoves();
 
   const createPokemonSelector = (onSelect) => {
-    const select = document.createElement('select');
-    setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
-    select.innerHTML = '<option value="">Select a Pokémon</option>' +
-      pokemonData.map((p, i) => {
-        const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
-        return `<option value="${i}">${name}</option>`;
-      }).join('');
-    select.onchange = () => onSelect(select.value);
-    select.addEventListener('change', updateTeamSummary);
-    return select;
+  const select = document.createElement('select');
+  setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
+
+  select.innerHTML = '<option value="">Select a Pokémon</option>' +
+    pokemonData.map((p, i) => {
+      const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
+      return `<option value="${i}">${name}</option>`;
+    }).join('');
+
+  select.onchange = () => {
+    select.dataset.pokemonIndex = select.value; //  store selected index
+    onSelect(select.value);
   };
+
+  select.addEventListener('change', updateTeamSummary);
+  return select;
+};
 
   const createMoveDropdown = (pokemon) => {
     const sel = document.createElement('select');
@@ -377,17 +383,23 @@ const renderFusionInfo = (fusionPoke) => {
 const renderFusionSelector = () => {
   fusionContainer.innerHTML = '';
   const select = document.createElement('select');
+
   select.innerHTML = `<option value="">Select Fusion Pokémon</option>` +
     pokemonData.map((p, i) => {
       const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
       return `<option value="${i}">${name}</option>`;
     }).join('');
+
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
+
   select.onchange = () => {
+    select.dataset.fusionIndex = select.value; // ✅ store selected fusion index
     const selected = pokemonData[select.value];
     renderFusionInfo(selected);
+    fusionAbilitySelect.dataset.fusionIndex = select.value; // <- in renderFusionInfo, after creating the select
     setTimeout(updateTeamSummary, 10);
   };
+
   fusionContainer.appendChild(select);
 };
 
@@ -496,27 +508,26 @@ const exportTeamToJson = () => {
   const teamData = [];
 
   document.querySelectorAll('.team-slot').forEach(slot => {
-    const pokemonSelect = slot.querySelector('select');
-    const pokemonIndex = pokemonSelect?.value ? parseInt(pokemonSelect.value) : null;
+    // Retrieve the correct Pokémon index from a custom attribute we store
+    const select = slot.querySelector('select');
+    const pokemonIndex = parseInt(select?.value) || null;
 
+    // Get fusion Pokémon index from its stored dataset too
     const fusionSelect = slot.querySelector('.fusion-container select');
-    const fusionIndex = fusionSelect?.value ? parseInt(fusionSelect.value) : null;
+    const fusionIndex = parseInt(fusionSelect?.dataset.fusionIndex) || null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
       const ts = s.tomselect;
-      const val = ts?.getValue();
-      return val !== null && val !== "" ? parseInt(val) : null;
+      const value = ts?.getValue();
+      return value !== '' ? parseInt(value) : null;
     });
 
     const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
     const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
 
-    const abilityRaw = baseAbilitySelect?.getValue();
-    const fusionAbilityRaw = fusionAbilitySelect?.getValue();
-
-    const ability = abilityRaw !== null && abilityRaw !== "" ? parseInt(abilityRaw) : null;
-    const fusionAbility = fusionAbilityRaw !== null && fusionAbilityRaw !== "" ? parseInt(fusionAbilityRaw) : null;
+    const ability = baseAbilitySelect?.getValue() || null;
+    const fusionAbility = fusionAbilitySelect?.getValue() || null;
 
     const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
 
@@ -538,6 +549,7 @@ const exportTeamToJson = () => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
 
 
 
