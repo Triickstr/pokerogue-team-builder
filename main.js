@@ -30,8 +30,14 @@ const updateTeamSummary = () => {
     const images = slot.querySelectorAll('img');
     const types = slot.querySelectorAll('.type-box');
     const statText = slot.querySelector('.stats')?.innerText || '';
-    const moveNames = Array.from(slot.querySelectorAll('.move-select')).map(s => s.selectedOptions[0]?.textContent || '—');
-    const ability = slot.querySelector('.fusion-ability-select')?.selectedOptions[0]?.textContent || '—';
+    const moveNames = Array.from(slot.querySelectorAll('.move-select')).map(s => {
+      const ts = s.tomselect;
+      const value = ts?.getValue?.();
+      return ts?.getItem?.(value)?.textContent || '—';
+    });
+    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select');
+    const fusionAbilityTS = fusionAbilitySelect?.tomselect;
+    const ability = fusionAbilityTS?.getItem?.(fusionAbilityTS.getValue())?.textContent || '—';
     const passiveText = Array.from(slot.childNodes).find(el => el?.innerText?.startsWith('Passive Ability:'))?.innerText.replace('Passive Ability: ', '') || '—';
     const nature = slot.querySelector('.nature-select')?.selectedOptions[0]?.textContent || '—';
 
@@ -78,6 +84,11 @@ const updateTeamSummary = () => {
   });
 };
 
+const observeChanges = (element) => {
+  if (!element) return;
+  element.addEventListener('change', updateTeamSummary);
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   const pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
   const teamGrid = document.getElementById("teamGrid");
@@ -112,6 +123,7 @@ const getAllMoves = () => {
         return `<option value="${i}">${name}</option>`;
       }).join('');
     select.onchange = () => onSelect(select.value);
+    select.addEventListener('change', updateTeamSummary);
     return select;
   };
 
@@ -154,7 +166,7 @@ const getAllMoves = () => {
     }).join('');
     return sel;
   };
-
+  observeChanges(abilityDropdown);
   const renderPokemonBox = (slot, pokemon) => {
     slot.innerHTML = '';
 
@@ -189,6 +201,7 @@ const getAllMoves = () => {
       moveWrapper.className = 'move-wrapper';
 
       const moveDropdown = createMoveDropdown(pokemon);
+      observeChanges(moveDropdown);
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.className = 'move-checkbox';
@@ -209,6 +222,7 @@ const getAllMoves = () => {
     natureWrapper.className = 'nature-wrapper';
 
     const natureSelect = document.createElement('select');
+    observeChanges(natureSelect);
     natureSelect.className = 'nature-select';
 
     const natures = [
@@ -269,6 +283,7 @@ const renderFusionInfo = (fusionPoke) => {
   fusionAbilityWrapper.className = 'fusion-ability-wrapper';
 
   const fusionAbilitySelect = document.createElement('select');
+  observeChanges(fusionAbilitySelect);
   fusionAbilitySelect.className = 'fusion-ability-select';
   const abilities = [fusionPoke.a1, fusionPoke.a2, fusionPoke.ha].filter(Boolean);
   fusionAbilitySelect.innerHTML = abilities.map(a => {
@@ -305,7 +320,7 @@ const renderFusionSelector = () => {
 
 renderFusionSelector();
 slot.appendChild(fusionContainer);
-updateTeamSummary();
+setTimeout(updateTeamSummary, 10);
   };
 
   const createTeamSlot = () => {
