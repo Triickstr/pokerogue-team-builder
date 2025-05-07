@@ -500,30 +500,41 @@ const exportTeamToJson = () => {
   const teamData = [];
 
   document.querySelectorAll('.team-slot').forEach(slot => {
+    // Pokémon selection
     const pokemonSelect = slot.querySelector('select');
-    const pokemonIndex = pokemonSelect?.value || null;
+    const pokemonIndex = pokemonSelect?.value;
+    const pokemon = pokemonIndex !== '' ? Number(pokemonIndex) : null;
 
+    // Fusion selection
     const fusionSelect = slot.querySelector('.fusion-container select');
-    const fusionIndex = fusionSelect?.value || null;
+    const fusionIndex = fusionSelect?.value;
+    const fusion = fusionIndex !== '' ? Number(fusionIndex) : null;
 
+    // Moves
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
       const ts = s.tomselect;
-      return ts?.getValue() || null;
-    });
+      const value = ts?.getValue();
+      return value !== '' ? Number(value) : null;
+    }).slice(0, 4);
 
+    // Base Ability
     const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
+    const abilityValue = baseAbilitySelect?.getValue();
+    const ability = abilityValue !== '' ? Number(abilityValue) : null;
+
+    // Fusion Ability
     const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+    const fusionAbilityValue = fusionAbilitySelect?.getValue();
+    const fusionAbility = fusionAbilityValue !== '' ? Number(fusionAbilityValue) : null;
 
-    const ability = baseAbilitySelect?.getValue() || null;
-    const fusionAbility = fusionAbilitySelect?.getValue() || null;
-
+    // Nature
     const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
 
     teamData.push({
-      pokemon: pokemonIndex,
-      fusion: fusionIndex || null,
-      moves: moves.slice(0, 4),  // Only include first 4
+      pokemon,
+      fusion,
+      moves,
       ability,
       fusionAbility,
       nature
@@ -538,6 +549,7 @@ const exportTeamToJson = () => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
 
 
 document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
