@@ -442,56 +442,48 @@ async function importTeamData(data) {
     const slot = slots[i];
     if (!slot || entry.pokemon === undefined || entry.pokemon === null) continue;
 
-    // Select base Pokémon
+    // Set base Pokémon
     const select = slot.querySelector('select');
     select.value = parseInt(entry.pokemon);
     select.dispatchEvent(new Event('change'));
 
-    // Wait for base Pokémon render
-    await new Promise(res => setTimeout(res, 300));
+    await new Promise(res => setTimeout(res, 300)); // Let base Pokémon render
 
-    // Moves
+    // Set fusion Pokémon (wait for rendering)
+    const fusionSelector = slot.querySelector('.fusion-container select');
+    if (fusionSelector && entry.fusion !== null && entry.fusion !== undefined) {
+      fusionSelector.value = parseInt(entry.fusion);
+      fusionSelector.dispatchEvent(new Event('change'));
+
+      await new Promise(res => setTimeout(res, 300)); // Let fusion DOM render
+
+      const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+      if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
+        fusionAbilitySelect.setValue(String(entry.fusionAbility));
+      }
+    }
+
+    // Set moves
     const moveDropdowns = slot.querySelectorAll('.move-select');
     (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
       const ts = moveDropdowns[idx]?.tomselect;
       if (ts && moveId !== null) ts.setValue(String(moveId));
     });
 
-    // Ability
+    // Set ability
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
     if (entry.ability !== undefined && abilitySelect) {
       abilitySelect.setValue(String(entry.ability));
     }
 
-    // Fusion Pokémon
-    if (entry.fusion !== null && entry.fusion !== undefined) {
-      const fusionSelect = slot.querySelector('.fusion-container select');
-      if (fusionSelect) {
-        fusionSelect.value = parseInt(entry.fusion);
-        fusionSelect.dispatchEvent(new Event('change'));
-      }
-
-      // Wait for fusion render
-      await new Promise(res => setTimeout(res, 300));
-
-      // 🔁 Re-query after fusion DOM changes
-      const updatedSlot = document.querySelectorAll('.team-slot')[i];
-
-      // Fusion ability
-      const fusionAbilitySelect = updatedSlot.querySelector('.fusion-ability-select')?.tomselect;
-      if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
-        fusionAbilitySelect.setValue(String(entry.fusionAbility));
-      }
-    }
-
-    // Nature
+    // Set nature
     const natureSelect = slot.querySelector('.nature-select')?.tomselect;
     if (entry.nature !== undefined && natureSelect) {
       natureSelect.setValue(entry.nature);
     }
 
     updateTeamSummary();
-    await new Promise(res => setTimeout(res, 100));
+    await new Promise(res => setTimeout(res, 150)); // buffer before next slot
   }
 }
 
