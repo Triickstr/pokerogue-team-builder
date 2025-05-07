@@ -183,7 +183,7 @@ const getAllMoves = () => {
 
   const allMoves = getAllMoves();
 
-  const createPokemonSelector = (onSelect) => {
+const createPokemonSelector = (onSelect) => {
   const select = document.createElement('select');
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
 
@@ -193,12 +193,12 @@ const getAllMoves = () => {
       return `<option value="${i}">${name}</option>`;
     }).join('');
 
-select.onchange = () => {
-  const selected = pokemonData[select.value];
-  select.dataset.fusionRow = selected?.row || '';
-  renderFusionInfo(selected);
-  setTimeout(updateTeamSummary, 10);
-};
+  select.onchange = () => {
+    const selected = pokemonData[select.value];
+    select.dataset.pokemonRow = selected?.row || ''; // ✅ Save correct row ID
+    onSelect(select.value); // ✅ Pass index to render the full base Pokémon
+    setTimeout(updateTeamSummary, 10);
+  };
 
   select.addEventListener('change', updateTeamSummary);
   return select;
