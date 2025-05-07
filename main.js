@@ -59,7 +59,16 @@ const getAllMoves = () => {
 
   const createMoveDropdown = (pokemon) => {
     const sel = document.createElement('select');
-    setTimeout(() => new TomSelect(sel, { maxOptions: null }), 0);
+    setTimeout(() => new TomSelect(sel, {
+      maxOptions: null,
+      render: {
+      option: function(data, escape) {
+        const isCompatible = pokemon.hasOwnProperty(data.value);
+        const color = isCompatible ? '#d4edda' : '#ffeeba'; // green or orange
+        return `<div style="background-color:${color};padding:5px;">${escape(data.text)}</div>`;
+        } 
+      }
+    }), 0);
     sel.className = 'move-select';
     sel.innerHTML = '<option value="">Select a Move</option>' +
       allMoves.map(m => {
@@ -93,19 +102,17 @@ const getAllMoves = () => {
     img.onclick = () => slot.replaceWith(createTeamSlot());
     slot.appendChild(img);
 
-const typeContainer = document.createElement('div');
-typeContainer.className = 'type-container';
+  const typeContainer = document.createElement('div');
+    typeContainer.className = 'type-container';
 
-pokemon.types?.forEach(type => {
-  const typeName = window.fidToName?.[type] || `Type ${type}`;
-  const typeBox = document.createElement('div');
-  typeBox.className = 'type-box';
-  typeBox.innerText = typeName;
-  typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
-  typeContainer.appendChild(typeBox);
-});
-
-slot.appendChild(typeContainer);
+    pokemon.types?.forEach(type => {
+    const typeName = window.fidToName?.[type] || `Type ${type}`;
+    const typeBox = document.createElement('div');
+    typeBox.className = 'type-box';
+    typeBox.innerText = typeName;
+    typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+    typeContainer.appendChild(typeBox);
+  });
 
   slot.appendChild(typeContainer);
 
