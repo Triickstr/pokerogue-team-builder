@@ -10,7 +10,8 @@ h1 {
 .team-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: 16px;
+  padding: 16px;
 }
 .team-slot {
   border: 1px dashed #666;
