@@ -193,10 +193,12 @@ const getAllMoves = () => {
       return `<option value="${i}">${name}</option>`;
     }).join('');
 
-  select.onchange = () => {
-    select.dataset.pokemonIndex = pokemonData[select.value]?.row || '';
-    onSelect(select.value);
-  };
+select.onchange = () => {
+  const selected = pokemonData[select.value];
+  select.dataset.fusionRow = selected?.row || '';
+  renderFusionInfo(selected);
+  setTimeout(updateTeamSummary, 10);
+};
 
   select.addEventListener('change', updateTeamSummary);
   return select;
@@ -514,14 +516,10 @@ const exportTeamToJson = () => {
 
   document.querySelectorAll('.team-slot').forEach(slot => {
     const select = slot.querySelector('select');
-    const index = parseInt(select?.value);
-    const selectedPokemon = pokemonData[index];
-    const pokemonIndex = selectedPokemon?.row ?? null;
+    const pokemonIndex = parseInt(select?.dataset.pokemonRow) || null;
 
     const fusionSelect = slot.querySelector('.fusion-container select');
-    const fusionIndex = parseInt(fusionSelect?.value);
-    const selectedFusion = pokemonData[fusionIndex];
-    const fusionRow = selectedFusion?.row ?? null;
+    const fusionIndex = parseInt(fusionSelect?.dataset.fusionRow) || null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
@@ -535,11 +533,12 @@ const exportTeamToJson = () => {
 
     const ability = baseAbilitySelect?.getValue() || null;
     const fusionAbility = fusionAbilitySelect?.getValue() || null;
+
     const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
 
     teamData.push({
       pokemon: pokemonIndex,
-      fusion: fusionRow,
+      fusion: fusionIndex,
       moves: moves.slice(0, 4),
       ability,
       fusionAbility,
@@ -555,10 +554,5 @@ const exportTeamToJson = () => {
   a.click();
   URL.revokeObjectURL(url);
 };
-
-
-
-
-
 
 document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
