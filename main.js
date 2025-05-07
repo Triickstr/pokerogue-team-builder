@@ -442,48 +442,52 @@ async function importTeamData(data) {
     const slot = slots[i];
     if (!slot || entry.pokemon === undefined || entry.pokemon === null) continue;
 
-    // Set base Pokémon
-    const select = slot.querySelector('select');
-    select.value = parseInt(entry.pokemon);
-    select.dispatchEvent(new Event('change'));
+    // Step 1: Set base Pokémon
+    const baseSelect = slot.querySelector('select');
+    baseSelect.value = parseInt(entry.pokemon);
+    baseSelect.dispatchEvent(new Event('change'));
 
-    await new Promise(res => setTimeout(res, 300)); // Let base Pokémon render
+    // Wait for base render
+    await new Promise(res => setTimeout(res, 300));
 
-    // Set fusion Pokémon (wait for rendering)
-    const fusionSelector = slot.querySelector('.fusion-container select');
-    if (fusionSelector && entry.fusion !== null && entry.fusion !== undefined) {
-      fusionSelector.value = parseInt(entry.fusion);
-      fusionSelector.dispatchEvent(new Event('change'));
+    // Step 2: Set fusion Pokémon
+    if (entry.fusion !== null && entry.fusion !== undefined) {
+      const fusionSelect = slot.querySelector('.fusion-container select');
+      fusionSelect.value = parseInt(entry.fusion);
+      fusionSelect.dispatchEvent(new Event('change'));
 
-      await new Promise(res => setTimeout(res, 300)); // Let fusion DOM render
+      // Wait for fusion render
+      await new Promise(res => setTimeout(res, 300));
 
-      const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+      // Re-select slot DOM in case it was re-rendered
+      const updatedSlot = document.querySelectorAll('.team-slot')[i];
+      const fusionAbilitySelect = updatedSlot.querySelector('.fusion-ability-select')?.tomselect;
       if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
         fusionAbilitySelect.setValue(String(entry.fusionAbility));
       }
     }
 
-    // Set moves
+    // Step 3: Set moves
     const moveDropdowns = slot.querySelectorAll('.move-select');
     (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
       const ts = moveDropdowns[idx]?.tomselect;
       if (ts && moveId !== null) ts.setValue(String(moveId));
     });
 
-    // Set ability
+    // Step 4: Set ability
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
     if (entry.ability !== undefined && abilitySelect) {
       abilitySelect.setValue(String(entry.ability));
     }
 
-    // Set nature
+    // Step 5: Set nature
     const natureSelect = slot.querySelector('.nature-select')?.tomselect;
     if (entry.nature !== undefined && natureSelect) {
       natureSelect.setValue(entry.nature);
     }
 
     updateTeamSummary();
-    await new Promise(res => setTimeout(res, 150)); // buffer before next slot
+    await new Promise(res => setTimeout(res, 150));
   }
 }
 
