@@ -513,15 +513,15 @@ const exportTeamToJson = () => {
   const teamData = [];
 
   document.querySelectorAll('.team-slot').forEach(slot => {
-    // Retrieve the correct Pokémon index from a custom attribute we store
     const select = slot.querySelector('select');
-    const selectedPokemon = pokemonData[select?.value];
+    const index = parseInt(select?.value);
+    const selectedPokemon = pokemonData[index];
     const pokemonIndex = selectedPokemon?.row ?? null;
 
-    // Get fusion Pokémon index from its stored dataset too
     const fusionSelect = slot.querySelector('.fusion-container select');
-    const selectedFusion = pokemonData[fusionSelect?.value];
-    const fusionIndex = selectedFusion?.row ?? null;
+    const fusionIndex = parseInt(fusionSelect?.value);
+    const selectedFusion = pokemonData[fusionIndex];
+    const fusionRow = selectedFusion?.row ?? null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
@@ -535,12 +535,11 @@ const exportTeamToJson = () => {
 
     const ability = baseAbilitySelect?.getValue() || null;
     const fusionAbility = fusionAbilitySelect?.getValue() || null;
-
     const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
 
     teamData.push({
       pokemon: pokemonIndex,
-      fusion: fusionIndex,
+      fusion: fusionRow,
       moves: moves.slice(0, 4),
       ability,
       fusionAbility,
@@ -556,6 +555,7 @@ const exportTeamToJson = () => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
 
 
 
