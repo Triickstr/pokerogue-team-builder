@@ -105,7 +105,10 @@ slot.appendChild(typeContainer);
     const slot = document.createElement('div');
     slot.className = 'team-slot';
     slot.appendChild(createPokemonSelector((idx) => {
-      const pokemon = pokemonData[idx];
+      const pokemon = {
+      ...pokemonData[idx],
+      types: [pokemonData[idx].t1, pokemonData[idx].t2].filter(Boolean)
+    };
       renderPokemonBox(slot, pokemon);
     }));
     return slot;
