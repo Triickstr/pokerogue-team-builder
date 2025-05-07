@@ -146,6 +146,31 @@ const getAllMoves = () => {
     const passiveName = window.fidToName?.[pokemon.pa] || `Passive ${pokemon.pa}`;
     passive.innerText = `Passive Ability: ${passiveName}`;
     slot.appendChild(passive);
+
+      const natureWrapper = document.createElement('div');
+    natureWrapper.className = 'nature-wrapper';
+
+    const natureSelect = document.createElement('select');
+    natureSelect.className = 'nature-select';
+
+    const natures = [
+      "Adamant", "Bashful", "Bold", "Brave", "Calm", "Careful", "Docile", "Gentle",
+      "Hardy", "Hasty", "Impish", "Jolly", "Lax", "Lonely", "Mild", "Modest", "Naive",
+      "Naughty", "Quiet", "Quirky", "Rash", "Relaxed", "Sassy", "Serious", "Timid"
+    ];
+
+    natureSelect.innerHTML = `<option value="">Select Nature</option>` +
+      natures.map(n => `<option value="${n}">${n}</option>`).join('');
+
+    const natureCheckbox = document.createElement('input');
+    natureCheckbox.type = 'checkbox';
+    natureCheckbox.className = 'nature-checkbox';
+
+    natureWrapper.appendChild(natureSelect);
+    natureWrapper.appendChild(natureCheckbox);
+    slot.appendChild(natureWrapper);
+
+    setTimeout(() => new TomSelect(natureSelect, { maxOptions: null }), 0);
   };
 
   const createTeamSlot = () => {
