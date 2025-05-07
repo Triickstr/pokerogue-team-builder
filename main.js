@@ -516,10 +516,10 @@ const exportTeamToJson = () => {
 
   document.querySelectorAll('.team-slot').forEach(slot => {
     const select = slot.querySelector('select');
-    const pokemonIndex = parseInt(select?.dataset.pokemonRow) || null;
+    const pokemonIndex = parseInt(select?.dataset.pokemonIndex) || null;
 
     const fusionSelect = slot.querySelector('.fusion-container select');
-    const fusionIndex = parseInt(fusionSelect?.dataset.fusionRow) || null;
+    const fusionIndex = parseInt(fusionSelect?.dataset.fusionIndex) || null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
