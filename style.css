@@ -129,3 +129,60 @@ select {
 .fusion-ability-checkbox {
   transform: scale(1.2);
 }
+
+.team-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 16px;
+  margin-bottom: 30px;
+}
+
+.summary-box {
+  background-color: #1e1e1e;
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.summary-images {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.summary-images img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.summary-types {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.summary-type-box {
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+
+.summary-stats {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.summary-moves,
+.summary-info {
+  display: flex;
+  justify-content: space-around;
+  gap: 4px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
