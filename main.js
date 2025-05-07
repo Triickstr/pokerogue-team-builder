@@ -77,14 +77,17 @@ const updateTeamSummary = () => {
       resultTypes = [primaryFirst, fusionPick];
     }
 
+    const typeRow = document.createElement('div');
+    typeRow.className = 'summary-types';
     typeRow.innerHTML = '';
     resultTypes.forEach(typeName => {
-      const box = document.createElement('div');
-      box.className = 'summary-type-box';
-      box.style.backgroundColor = window.typeColors?.[typeName] || '#777';
-      box.textContent = typeName;
-      typeRow.appendChild(box);
+    const box = document.createElement('div');
+    box.className = 'summary-type-box';
+    box.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+    box.textContent = typeName;
+    typeRow.appendChild(box);
     });
+    summaryBox.appendChild(typeRow);
 
     let statRow = document.createElement('div');
     statRow.className = 'summary-stats';
@@ -365,7 +368,7 @@ const renderFusionSelector = () => {
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
   select.onchange = () => {
     const selected = pokemonData[select.value];
-    rrenderFusionInfo(selected);
+    renderFusionInfo(selected);
     setTimeout(updateTeamSummary, 10);
   };
   fusionContainer.appendChild(select);
