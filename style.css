@@ -64,3 +64,20 @@ select {
 .move-incompatible {
   background-color: #ef6c00;
 }
+.move-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.move-select {
+  width: 75%;
+}
+
+.move-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: #5ec86f; /* Nice green check */
+  cursor: pointer;
+}
