@@ -206,7 +206,10 @@ const renderFusionInfo = (fusionPoke) => {
   stats.innerText = `HP: ${fusionPoke.hp}, Atk: ${fusionPoke.atk}, Def: ${fusionPoke.def}, SpA: ${fusionPoke.spa}, SpD: ${fusionPoke.spd}, Spe: ${fusionPoke.spe}`;
   fusionContainer.appendChild(stats);
 
-  // Ability selector
+  // Fusion Ability wrapper
+  const fusionAbilityWrapper = document.createElement('div');
+  fusionAbilityWrapper.className = 'fusion-ability-wrapper';
+
   const fusionAbilitySelect = document.createElement('select');
   fusionAbilitySelect.className = 'fusion-ability-select';
   const abilities = [fusionPoke.a1, fusionPoke.a2, fusionPoke.ha].filter(Boolean);
@@ -214,7 +217,15 @@ const renderFusionInfo = (fusionPoke) => {
     const name = window.fidToName?.[a] || `Ability ${a}`;
     return `<option value="${a}">${name}</option>`;
   }).join('');
-  fusionContainer.appendChild(fusionAbilitySelect);
+
+  const fusionAbilityCheckbox = document.createElement('input');
+  fusionAbilityCheckbox.type = 'checkbox';
+  fusionAbilityCheckbox.className = 'fusion-ability-checkbox';
+
+  fusionAbilityWrapper.appendChild(fusionAbilitySelect);
+  fusionAbilityWrapper.appendChild(fusionAbilityCheckbox);
+  fusionContainer.appendChild(fusionAbilityWrapper);
+
   setTimeout(() => new TomSelect(fusionAbilitySelect, { maxOptions: null }), 0);
 };
 
