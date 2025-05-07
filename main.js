@@ -25,6 +25,7 @@ const getAllMoves = () => {
 
   const createPokemonSelector = (onSelect) => {
     const select = document.createElement('select');
+    setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
     select.innerHTML = '<option value="">Select a Pokémon</option>' +
       pokemonData.map((p, i) => {
         const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
@@ -36,6 +37,7 @@ const getAllMoves = () => {
 
   const createMoveDropdown = (pokemon) => {
     const sel = document.createElement('select');
+    setTimeout(() => new TomSelect(sel, { maxOptions: null }), 0);
     sel.className = 'move-select';
     sel.innerHTML = '<option value="">Select a Move</option>' +
       allMoves.map(m => {
@@ -50,6 +52,7 @@ const getAllMoves = () => {
   const createAbilityDropdown = (pokemon) => {
     const abilities = [pokemon.a1, pokemon.a2, pokemon.ha].filter(Boolean);
     const sel = document.createElement('select');
+    setTimeout(() => new TomSelect(sel, { maxOptions: null }), 0);
     sel.className = 'ability-select';
     sel.innerHTML = abilities.map(a => {
       const name = window.fidToName?.[a] || `Ability ${a}`;
@@ -72,16 +75,15 @@ const getAllMoves = () => {
     typeContainer.className = 'type-container';
 
     pokemon.types.forEach(typeId => {
-    const typeName = window.fidToName?.[typeId] || `Type ${typeId}`;
-    const typeBox = document.createElement('span');
-    typeBox.className = 'type-box';
-    typeBox.textContent = typeName;
-    typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
-    typeContainer.appendChild(typeBox);
+      const typeName = window.fidToName?.[typeId] || `Type ${typeId}`;
+      const typeBox = document.createElement('span');
+      typeBox.className = 'type-box';
+      typeBox.textContent = typeName;
+      typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+      typeContainer.appendChild(typeBox);
 });
 
 slot.appendChild(typeContainer);
-
 
     const stats = document.createElement('div');
     stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
