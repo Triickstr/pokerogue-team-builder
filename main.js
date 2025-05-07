@@ -413,44 +413,47 @@ document.getElementById('importFile').addEventListener('change', async (event) =
   }
 
   const slots = document.querySelectorAll('.team-slot');
-  data.forEach((entry, i) => {
-    const slot = slots[i];
-    if (!slot || entry.pokemon === undefined || entry.pokemon === null) return;
+data.forEach((entry, i) => {
+  const slot = slots[i];
+  if (!slot || entry.pokemon === undefined || entry.pokemon === null) return;
 
-    const select = slot.querySelector('select');
-select.value = parseInt(entry.pokemon); // convert to number
-select.dispatchEvent(new Event('change'));
+  const select = slot.querySelector('select');
+  select.value = parseInt(entry.pokemon);
+  select.dispatchEvent(new Event('change'));
 
-setTimeout(() => {
-  const moveDropdowns = slot.querySelectorAll('.move-select');
-  (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
-    const ts = moveDropdowns[idx]?.tomselect;
-    if (ts && moveId !== null) ts.setValue(String(moveId)); // ensure string if expected
-  });
+  setTimeout(() => {
+    const moveDropdowns = slot.querySelectorAll('.move-select');
+    (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
+      const ts = moveDropdowns[idx]?.tomselect;
+      if (ts && moveId !== null) ts.setValue(String(moveId));
+    });
 
-  const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-  if (entry.ability !== undefined && abilitySelect) abilitySelect.setValue(String(entry.ability));
+    const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
+    if (entry.ability !== undefined && abilitySelect) abilitySelect.setValue(String(entry.ability));
 
-  const fusionSelector = slot.querySelector('.fusion-container select');
-  if (fusionSelector && entry.fusion !== null) {
-    fusionSelector.value = parseInt(entry.fusion);
-    fusionSelector.dispatchEvent(new Event('change'));
-  }
+    const fusionSelector = slot.querySelector('.fusion-container select');
+    if (fusionSelector && entry.fusion !== null && entry.fusion !== undefined) {
+      fusionSelector.value = parseInt(entry.fusion);
+      fusionSelector.dispatchEvent(new Event('change'));
 
-  const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
-  if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
-    fusionAbilitySelect.setValue(String(entry.fusionAbility));
-  }
+      // Wait for fusion to render before setting ability
+      setTimeout(() => {
+        const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+        if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
+          fusionAbilitySelect.setValue(String(entry.fusionAbility));
+        }
+        updateTeamSummary();
+      }, 300);
+    } else {
+      const natureSelect = slot.querySelector('.nature-select')?.tomselect;
+      if (entry.nature !== undefined && natureSelect) {
+        natureSelect.setValue(entry.nature);
+      }
+      updateTeamSummary();
+    }
+  }, 300); // Wait for Pokémon render
+});
 
-  const natureSelect = slot.querySelector('.nature-select')?.tomselect;
-  if (entry.nature !== undefined && natureSelect) {
-    natureSelect.setValue(entry.nature);
-  }
-
-  updateTeamSummary();
-}, 300);
- // Delay to let DOM finish rendering fusion data
-  });
 });
 
 const exportTeamToJson = () => {
