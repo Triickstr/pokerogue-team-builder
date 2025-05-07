@@ -160,10 +160,11 @@ const getAllMoves = () => {
     const sel = document.createElement('select');
     setTimeout(() => new TomSelect(sel, { maxOptions: null }), 0);
     sel.className = 'ability-select';
-    sel.innerHTML = abilities.map(a => {
-      const name = window.fidToName?.[a] || `Ability ${a}`;
-      return `<option value="${a}">${name}</option>`;
-    }).join('');
+    sel.innerHTML = `<option value="">Select an Ability</option>` +
+      abilities.map(a => {
+        const name = window.fidToName?.[a] || `Ability ${a}`;
+        return `<option value="${a}">${name}</option>`;
+      }).join('');
     return sel;
   };
   const renderPokemonBox = (slot, pokemon) => {
