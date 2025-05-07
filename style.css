@@ -1,60 +1,52 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #121212;
-  color: #e0e0e0;
-  padding: 20px;
-}
-h1 {
-  color: #ffffff;
-}
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-}
 .team-slot {
-  background: #1e1e1e;
-  border: 2px dashed #555;
-  padding: 10px;
-  height: 300px;
-  position: relative;
-  cursor: pointer;
-  overflow: auto;
-  color: #e0e0e0;
+  border: 1px dashed #666;
+  padding: 16px;
+  background-color: #1a1a1a;
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
 }
+
 .pokemon-img {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  margin-bottom: 8px;
 }
-.move-select,
-.ability-select,
-select {
-  margin-top: 5px;
-  width: 100%;
-  background: #2a2a2a;
-  color: #e0e0e0;
-  border: 1px solid #444;
-  padding: 5px;
-}
-.move-compatible {
-  background-color: #2e7d32;
-}
-.move-incompatible {
-  background-color: #ef6c00;
-}
+
 .type-container {
   display: flex;
   gap: 8px;
-  margin: 8px 0;
+  margin-bottom: 4px;
 }
 
 .type-box {
-  display: inline-block;
-  padding: 4px 8px;
-  margin: 2px;
+  padding: 4px 10px;
+  border-radius: 12px;
   color: white;
   font-weight: bold;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 0.9em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.move-select,
+.ability-select {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+select {
+  padding: 6px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: none;
+}
+
+.stats {
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  line-height: 1.4;
 }
