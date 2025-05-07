@@ -171,6 +171,72 @@ const getAllMoves = () => {
     slot.appendChild(natureWrapper);
 
     setTimeout(() => new TomSelect(natureSelect, { maxOptions: null }), 0);
+
+    // Fusion Pokémon container
+const fusionContainer = document.createElement('div');
+fusionContainer.className = 'fusion-container';
+
+const renderFusionInfo = (fusionPoke) => {
+  fusionContainer.innerHTML = ''; // Clear before rendering
+
+  // Image
+  const img = document.createElement('img');
+  img.src = `images/${fusionPoke.img}_0.png`;
+  img.className = 'pokemon-img';
+  img.onerror = () => img.style.display = 'none';
+  img.onclick = () => renderFusionSelector(); // Reset to selector
+  fusionContainer.appendChild(img);
+
+  // Types
+  const typeContainer = document.createElement('div');
+  typeContainer.className = 'type-container';
+  [fusionPoke.t1, fusionPoke.t2].filter(Boolean).forEach(type => {
+    const typeName = window.fidToName?.[type] || `Type ${type}`;
+    const typeBox = document.createElement('div');
+    typeBox.className = 'type-box';
+    typeBox.innerText = typeName;
+    typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+    typeContainer.appendChild(typeBox);
+  });
+  fusionContainer.appendChild(typeContainer);
+
+  // Stats
+  const stats = document.createElement('div');
+  stats.className = 'stats';
+  stats.innerText = `HP: ${fusionPoke.hp}, Atk: ${fusionPoke.atk}, Def: ${fusionPoke.def}, SpA: ${fusionPoke.spa}, SpD: ${fusionPoke.spd}, Spe: ${fusionPoke.spe}`;
+  fusionContainer.appendChild(stats);
+
+  // Ability selector
+  const fusionAbilitySelect = document.createElement('select');
+  fusionAbilitySelect.className = 'fusion-ability-select';
+  const abilities = [fusionPoke.a1, fusionPoke.a2, fusionPoke.ha].filter(Boolean);
+  fusionAbilitySelect.innerHTML = abilities.map(a => {
+    const name = window.fidToName?.[a] || `Ability ${a}`;
+    return `<option value="${a}">${name}</option>`;
+  }).join('');
+  fusionContainer.appendChild(fusionAbilitySelect);
+  setTimeout(() => new TomSelect(fusionAbilitySelect, { maxOptions: null }), 0);
+};
+
+const renderFusionSelector = () => {
+  fusionContainer.innerHTML = '';
+  const select = document.createElement('select');
+  select.innerHTML = `<option value="">Select Fusion Pokémon</option>` +
+    pokemonData.map((p, i) => {
+      const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
+      return `<option value="${i}">${name}</option>`;
+    }).join('');
+  setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
+  select.onchange = () => {
+    const selected = pokemonData[select.value];
+    renderFusionInfo(selected);
+  };
+  fusionContainer.appendChild(select);
+};
+
+renderFusionSelector();
+slot.appendChild(fusionContainer);
+
   };
 
   const createTeamSlot = () => {
