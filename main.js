@@ -447,11 +447,14 @@ async function importTeamData(data) {
 
       await new Promise(res => setTimeout(res, 300)); // Let fusion Pokémon render
 
-      const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+      // Re-query the updated slot DOM after fusion DOM change
+      const updatedSlot = document.querySelectorAll('.team-slot')[i];
+
+      const fusionAbilitySelect = updatedSlot.querySelector('.fusion-ability-select')?.tomselect;
       if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
         fusionAbilitySelect.setValue(String(entry.fusionAbility));
       }
-    }
+
 
     const natureSelect = slot.querySelector('.nature-select')?.tomselect;
     if (entry.nature !== undefined && natureSelect) {
