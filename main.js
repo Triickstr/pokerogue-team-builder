@@ -400,13 +400,6 @@ setTimeout(updateTeamSummary, 10);
 
 document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
 
-  const blob = new Blob([JSON.stringify(team, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'poke_team.json';
-  a.click();
-});
-
 document.getElementById('importFile').addEventListener('change', async (event) => {
   const file = event.target.files[0];
   if (!file) return;
