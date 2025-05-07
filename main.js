@@ -396,7 +396,6 @@ const renderFusionSelector = () => {
     select.dataset.fusionIndex = pokemonData[select.value]?.row || '';
     const selected = pokemonData[select.value];
     renderFusionInfo(selected);
-    fusionAbilitySelect.dataset.fusionIndex = select.value; // <- in renderFusionInfo, after creating the select
     setTimeout(updateTeamSummary, 10);
   };
 
