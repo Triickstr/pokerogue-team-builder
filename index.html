@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PokeRogue Team Builder</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+    .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .team-slot { background: white; border: 2px dashed #aaa; padding: 10px; height: 300px; position: relative; cursor: pointer; overflow: auto; }
+    .pokemon-img { width: 80px; height: 80px; }
+    .move-select, .ability-select { margin-top: 5px; width: 100%; }
+    .move-compatible { background-color: #c8facc; }
+    .move-incompatible { background-color: #ffe6cc; }
+  </style>
+</head>
+<body>
+  <h1>PokeRogue Team Builder</h1>
+  <div class="team-grid" id="teamGrid"></div>
+
+  <script src="pokedex_data.js"></script>
+  <script>
+    const teamGrid = document.getElementById("teamGrid");
+    const items = window.items;
+
+    const getAllMoves = () => {
+      const moveSet = new Set();
+      items.forEach(p => {
+        Object.keys(p).forEach(key => {
+          if (!isNaN(key)) moveSet.add(parseInt(key));
+        });
+      });
+      return Array.from(moveSet);
+    };
+
+    const allMoves = getAllMoves();
+
+    const createPokemonSelector = (onSelect) => {
+      const select = document.createElement('select');
+      select.innerHTML = '<option value="">Select a Pokemon</option>' +
+        items.map((p, i) => `<option value="${i}">${p.row + 1} - ${p.img}</option>`).join('');
+      select.onchange = () => onSelect(select.value);
+      return select;
+    };
+
+    const createMoveDropdown = (pokemon) => {
+      const sel = document.createElement('select');
+      sel.className = 'move-select';
+      sel.innerHTML = '<option value="">Select a Move</option>' +
+        allMoves.map(m => {
+          const isCompatible = String(m) in pokemon;
+          const opt = `<option value="${m}" class="${isCompatible ? 'move-compatible' : 'move-incompatible'}">Move ID: ${m}</option>`;
+          return opt;
+        }).join('');
+      return sel;
+    };
+
+    const createAbilityDropdown = (pokemon) => {
+      const abilities = [pokemon.a1, pokemon.a2, pokemon.ha].filter(Boolean);
+      const sel = document.createElement('select');
+      sel.className = 'ability-select';
+      sel.innerHTML = abilities.map(a => `<option value="${a}">Ability ID: ${a}</option>`).join('');
+      return sel;
+    };
+
+    const createTeamSlot = () => {
+      const slot = document.createElement('div');
+      slot.className = 'team-slot';
+
+      const openSelector = () => {
+        slot.innerHTML = '';
+        const select = createPokemonSelector((idx) => {
+          const pokemon = items[idx];
+          renderPokemonBox(slot, pokemon);
+        });
+        slot.appendChild(select);
+      };
+
+      openSelector();
+      return slot;
+    };
+
+    const renderPokemonBox = (slot, pokemon) => {
+      slot.innerHTML = '';
+
+      const img = document.createElement('img');
+      img.src = `images/${pokemon.img}_0.png`;
+      img.className = 'pokemon-img';
+      img.onclick = () => slot.replaceWith(createTeamSlot());
+      slot.appendChild(img);
+
+      const stats = document.createElement('div');
+      stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
+      slot.appendChild(stats);
+
+      for (let i = 0; i < 4; i++) {
+        slot.appendChild(createMoveDropdown(pokemon));
+      }
+
+      slot.appendChild(createAbilityDropdown(pokemon));
+
+      const passive = document.createElement('div');
+      passive.innerText = `Passive Ability ID: ${pokemon.pa}`;
+      slot.appendChild(passive);
+
+      // Optional: Future fusion mechanic
+    };
+
+    for (let i = 0; i < 6; i++) {
+      teamGrid.appendChild(createTeamSlot());
+    }
+  </script>
+</body>
+</html>
