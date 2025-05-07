@@ -81,3 +81,20 @@ select {
   accent-color: #5ec86f; /* Nice green check */
   cursor: pointer;
 }
+.nature-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.nature-select {
+  width: 75%;
+}
+
+.nature-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: #5ec86f;
+  cursor: pointer;
+}
