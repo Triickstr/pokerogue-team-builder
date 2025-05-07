@@ -35,7 +35,17 @@ const updateTeamSummary = () => {
       const value = ts?.getValue?.();
       return ts?.getItem?.(value)?.textContent || '—';
     });
+    let ability = '—';
+
     const fusionAbilitySelect = slot.querySelector('.fusion-ability-select');
+      if (fusionAbilitySelect?.tomselect) {
+        const ts = fusionAbilitySelect.tomselect;
+        ability = ts.getItem(ts.getValue())?.textContent || '—';
+      } else {
+          const baseAbilitySelect = slot.querySelector('.ability-select');
+          const ts = baseAbilitySelect?.tomselect;
+          ability = ts?.getItem(ts.getValue())?.textContent || '—';
+      }
     const fusionAbilityTS = fusionAbilitySelect?.tomselect;
     const ability = fusionAbilityTS?.getItem?.(fusionAbilityTS.getValue())?.textContent || '—';
     const passiveText = Array.from(slot.childNodes).find(el => el?.innerText?.startsWith('Passive Ability:'))?.innerText.replace('Passive Ability: ', '') || '—';
@@ -47,21 +57,57 @@ const updateTeamSummary = () => {
     imageRow.appendChild(images[1]?.cloneNode(true) || document.createElement('div'));
     summaryBox.appendChild(imageRow);
 
-    const typeRow = document.createElement('div');
-    typeRow.className = 'summary-types';
-    types.forEach(t => {
+    const primaryTypes = Array.from(types).slice(0, 2).map(t => t.textContent);
+    const fusionTypes = Array.from(types).slice(2, 4).map(t => t.textContent);  // adjust if more types show
+
+    let resultTypes = [];
+
+    if (fusionTypes.length === 0) {
+      resultTypes = primaryTypes;
+    } else {
+      const [primaryFirst] = primaryTypes;
+      let fusionPick = fusionTypes[1] || fusionTypes[0];
+
+      if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
+        fusionPick = fusionTypes[0];
+    } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
+      fusionPick = primaryTypes[1] || primaryFirst;
+    }
+
+      resultTypes = [primaryFirst, fusionPick];
+    }
+
+    typeRow.innerHTML = '';
+    resultTypes.forEach(typeName => {
       const box = document.createElement('div');
       box.className = 'summary-type-box';
-      box.style.backgroundColor = t.style.backgroundColor;
-      box.textContent = t.textContent;
+      box.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+      box.textContent = typeName;
       typeRow.appendChild(box);
     });
-    summaryBox.appendChild(typeRow);
 
-    const statRow = document.createElement('div');
+    let statRow = document.createElement('div');
     statRow.className = 'summary-stats';
-    statRow.textContent = statText;
-    summaryBox.appendChild(statRow);
+
+    const statRegex = /HP: (\d+), Atk: (\d+), Def: (\d+), SpA: (\d+), SpD: (\d+), Spe: (\d+)/;
+    const statMatch = statText.match(statRegex);
+
+    let fusionStatText = '';
+    const fusionStatNode = slot.querySelector('.fusion-container .stats');
+    if (fusionStatNode) fusionStatText = fusionStatNode.textContent;
+
+    const fusionMatch = fusionStatText.match(statRegex);
+
+    if (statMatch) {
+    const baseStats = statMatch.slice(1).map(Number);
+    const fusionStats = fusionMatch ? fusionMatch.slice(1).map(Number) : null;
+
+    const finalStats = fusionStats
+      ? baseStats.map((val, i) => Math.floor((val + fusionStats[i]) / 2))
+      : baseStats;
+
+    statRow.textContent = `HP: ${finalStats[0]}, Atk: ${finalStats[1]}, Def: ${finalStats[2]}, SpA: ${finalStats[3]}, SpD: ${finalStats[4]}, Spe: ${finalStats[5]}`;
+    }
 
     const moveRow = document.createElement('div');
     moveRow.className = 'summary-moves';
@@ -259,7 +305,10 @@ const renderFusionInfo = (fusionPoke) => {
   img.src = `images/${fusionPoke.img}_0.png`;
   img.className = 'pokemon-img';
   img.onerror = () => img.style.display = 'none';
-  img.onclick = () => renderFusionSelector(); // Reset to selector
+  img.onclick = () => {
+    renderFusionSelector();
+    setTimeout(updateTeamSummary, 10);  // force re-check
+  };
   fusionContainer.appendChild(img);
 
   // Types
@@ -316,7 +365,8 @@ const renderFusionSelector = () => {
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
   select.onchange = () => {
     const selected = pokemonData[select.value];
-    renderFusionInfo(selected);
+    rrenderFusionInfo(selected);
+    setTimeout(updateTeamSummary, 10);
   };
   fusionContainer.appendChild(select);
 };
