@@ -379,17 +379,18 @@ setTimeout(updateTeamSummary, 10);
   };
 
   const createTeamSlot = () => {
-    const slot = document.createElement('div');
-    slot.className = 'team-slot';
-    slot.appendChild(createPokemonSelector((idx) => {
-      const pokemon = {
+  const slot = document.createElement('div');
+  slot.className = 'team-slot';
+  slot.appendChild(createPokemonSelector((idx) => {
+    const pokemon = {
       ...pokemonData[idx],
       types: [pokemonData[idx].t1, pokemonData[idx].t2].filter(Boolean)
     };
-      renderPokemonBox(slot, pokemon);
-    }));
-    return slot;
-  };
+    renderPokemonBox(slot, pokemon);
+    })); // Closing parentheses for createPokemonSelector
+      return slot;
+    };
+
 
   for (let i = 0; i < 6; i++) {
     teamGrid.appendChild(createTeamSlot());
