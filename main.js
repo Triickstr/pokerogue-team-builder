@@ -428,8 +428,8 @@ const exportTeamToJson = () => {
     const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
 
     teamData.push({
-      pokemon: pokemonRow,
-      fusion: fusionRow,
+      pokemon: pokemonIndex,
+      fusion: fusionIndex,
       moves: moves,
       ability: baseAbility ? parseInt(baseAbility) : null,
       fusionAbility: fusionAbility ? parseInt(fusionAbility) : null,
