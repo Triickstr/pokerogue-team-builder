@@ -168,7 +168,7 @@ const getAllMoves = () => {
     select.innerHTML = '<option value="">Select a Pokémon</option>' +
       pokemonData.map((p, i) => {
         const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
-        return `<option value="${i}">${name}</option>`;
+        return `<option value="${i}" data-row="${p.row}">${name}</option>`;
       }).join('');
     select.onchange = () => onSelect(select.value);
     select.addEventListener('change', updateTeamSummary);
@@ -363,8 +363,8 @@ const renderFusionSelector = (slot) => {
   select.innerHTML = `<option value="">Select Fusion Pokémon</option>` +
     pokemonData.map((p, i) => {
       const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
-      return `<option value="${i}">${name}</option>`;
-    }).join('');
+      return `<option value="${i}" data-row="${p.row}">${name}</option>`;
+  }).join('');
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
   select.onchange = () => {
     const selected = pokemonData[select.value];
@@ -406,7 +406,8 @@ const exportTeamToJson = () => {
     const baseSelect = slot.querySelector('select');
     const selectedPokemonIndex = parseInt(baseSelect?.value);
     const selectedPokemon = isNaN(selectedPokemonIndex) ? null : pokemonData[selectedPokemonIndex];
-    const pokemonRow = selectedPokemon?.row ?? null;
+    const selectedOption = baseSelect?.selectedOptions[0];
+    const pokemonRow = selectedOption?.dataset?.row !== undefined ? parseInt(selectedOption.dataset.row) : null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
@@ -425,7 +426,8 @@ const exportTeamToJson = () => {
     const fusionSelect = slot.querySelector('.fusion-container select');
     const selectedFusionIndex = parseInt(fusionSelect?.value);
     const selectedFusion = isNaN(selectedFusionIndex) ? null : pokemonData[selectedFusionIndex];
-    const fusionRow = selectedFusion?.row ?? null;
+    const fusionSelectedOption = fusionSelect?.selectedOptions[0];
+    const fusionRow = fusionSelectedOption?.dataset?.row !== undefined ? parseInt(fusionSelectedOption.dataset.row) : null;
 
     const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
 
