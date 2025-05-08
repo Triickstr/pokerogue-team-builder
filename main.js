@@ -194,11 +194,11 @@ const createPokemonSelector = (onSelect) => {
     }).join('');
 
   select.onchange = () => {
-    const selected = pokemonData[select.value];
-    select.dataset.pokemonRow = selected?.row || ''; // ✅ Save correct row ID
-    onSelect(select.value); // ✅ Pass index to render the full base Pokémon
-    setTimeout(updateTeamSummary, 10);
-  };
+  const selected = pokemonData[select.value];
+  select.dataset.pokemonRow = selected?.row || '';
+  onSelect(select.value);
+  setTimeout(updateTeamSummary, 10);
+};
 
   select.addEventListener('change', updateTeamSummary);
   return select;
@@ -328,7 +328,7 @@ const createPokemonSelector = (onSelect) => {
 const fusionContainer = document.createElement('div');
 fusionContainer.className = 'fusion-container';
 
-const renderFusionInfo = (fusionPoke) => {
+const renderFusionInfo = (fusionPoke, fusionSelect) => {
   fusionContainer.innerHTML = ''; // Clear before rendering
 
   // Image
@@ -382,8 +382,14 @@ const renderFusionInfo = (fusionPoke) => {
   fusionAbilityWrapper.appendChild(fusionAbilityCheckbox);
   fusionContainer.appendChild(fusionAbilityWrapper);
 
+  // Set the fusionIndex on the original fusionSelect dropdown
+  if (fusionSelect && fusionPoke?.row) {
+    fusionSelect.dataset.fusionIndex = fusionPoke.row;
+  }
+
   setTimeout(() => new TomSelect(fusionAbilitySelect, { maxOptions: null }), 0);
 };
+
 
 const renderFusionSelector = () => {
   fusionContainer.innerHTML = '';
@@ -397,14 +403,12 @@ const renderFusionSelector = () => {
 
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
 
-  select.onchange = () => {
-    select.dataset.fusionIndex = pokemonData[select.value]?.row || '';
-    const selected = pokemonData[select.value];
-    renderFusionInfo(selected);
-    select.dataset.fusionIndex = selected?.row || '';
-    setTimeout(updateTeamSummary, 10);
-  };
-
+select.onchange = () => {
+  const selected = pokemonData[select.value];
+  select.dataset.fusionIndex = selected?.row || ''; //  Save fusion row
+  renderFusionInfo(selected, select);
+  setTimeout(updateTeamSummary, 10);
+};
   fusionContainer.appendChild(select);
 };
 
