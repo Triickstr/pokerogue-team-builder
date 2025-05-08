@@ -186,7 +186,6 @@ const getAllMoves = () => {
 
   const createPokemonSelector = (onSelect) => {
     const select = document.createElement('select');
-    setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
     select.innerHTML = '<option value="">Select a Pokémon</option>' +
       pokemonData.map((p, i) => {
         const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
