@@ -1,3 +1,134 @@
+const renderPokemonBox = (slot, pokemon) => {
+    slot.dataset.pokemonRow = pokemon.row;
+    slot.innerHTML = '';
+
+    const img = document.createElement('img');
+    img.src = `images/${pokemon.img}_0.png`;
+    img.className = 'pokemon-img';
+    img.onerror = () => img.style.display = 'none';
+    img.onclick = () => slot.replaceWith(createTeamSlot());
+    slot.appendChild(img);
+
+  const typeContainer = document.createElement('div');
+    typeContainer.className = 'type-container';
+
+    pokemon.types?.forEach(type => {
+    const typeName = window.fidToName?.[type] || `Type ${type}`;
+    const typeBox = document.createElement('div');
+    typeBox.className = 'type-box';
+    typeBox.innerText = typeName;
+    typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+    typeContainer.appendChild(typeBox);
+  });
+
+  slot.appendChild(typeContainer);
+
+    const stats = document.createElement('div');
+    stats.className = 'stats';
+    stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
+    slot.appendChild(stats);
+
+    for (let i = 0; i < 4; i++) {
+      const moveWrapper = document.createElement('div');
+      moveWrapper.className = 'move-wrapper';
+
+      const moveDropdown = createMoveDropdown(pokemon);
+      observeChanges(moveDropdown);
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'move-checkbox';
+
+      moveWrapper.appendChild(moveDropdown);
+      moveWrapper.appendChild(checkbox);
+      slot.appendChild(moveWrapper);
+    }
+
+    const abilityDropdown = createAbilityDropdown(pokemon);
+    observeChanges(abilityDropdown);
+    slot.appendChild(abilityDropdown);
+
+
+    const passive = document.createElement('div');
+    const passiveName = window.fidToName?.[pokemon.pa] || `Passive ${pokemon.pa}`;
+    passive.innerText = `Passive Ability: ${passiveName}`;
+    slot.appendChild(passive);
+
+      const natureWrapper = document.createElement('div');
+    natureWrapper.className = 'nature-wrapper';
+
+    const natureSelect = document.createElement('select');
+    observeChanges(natureSelect);
+    natureSelect.className = 'nature-select';
+
+    const natures = [
+      "Adamant", "Bashful", "Bold", "Brave", "Calm", "Careful", "Docile", "Gentle",
+      "Hardy", "Hasty", "Impish", "Jolly", "Lax", "Lonely", "Mild", "Modest", "Naive",
+      "Naughty", "Quiet", "Quirky", "Rash", "Relaxed", "Sassy", "Serious", "Timid"
+    ];
+
+    natureSelect.innerHTML = `<option value="">Select Nature</option>` +
+      natures.map(n => `<option value="${n}">${n}</option>`).join('');
+
+    const natureCheckbox = document.createElement('input');
+    natureCheckbox.type = 'checkbox';
+    natureCheckbox.className = 'nature-checkbox';
+
+    natureWrapper.appendChild(natureSelect);
+    natureWrapper.appendChild(natureCheckbox);
+    slot.appendChild(natureWrapper);
+
+    setTimeout(() => new TomSelect(natureSelect, { maxOptions: null }), 0);
+
+    // Fusion Pokémon container
+const fusionContainer = document.createElement('div');
+fusionContainer.className = 'fusion-container';
+
+const renderFusionInfo = (fusionPoke, slot) => {
+  slot.dataset.fusionRow = fusionPoke.row;
+  fusionContainer.innerHTML = ''; // Clear before rendering
+
+  // Image
+  const img = document.createElement('img');
+  img.src = `images/${fusionPoke.img}_0.png`;
+  img.className = 'pokemon-img';
+  img.onerror = () => img.style.display = 'none';
+  img.onclick = () => {
+    renderFusionSelector(slot);
+    setTimeout(updateTeamSummary, 10);  // force re-check
+  };
+  fusionContainer.appendChild(img);
+
+  // Types
+  const typeContainer = document.createElement('div');
+  typeContainer.className = 'type-container';
+  [fusionPoke.t1, fusionPoke.t2].filter(Boolean).forEach(type => {
+    const typeName = window.fidToName?.[type] || `Type ${type}`;
+    const typeBox = document.createElement('div');
+    typeBox.className = 'type-box';
+    typeBox.innerText = typeName;
+    typeBox.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+    typeContainer.appendChild(typeBox);
+  });
+  fusionContainer.appendChild(typeContainer);
+
+  // Stats
+  const stats = document.createElement('div');
+  stats.className = 'stats';
+  stats.innerText = `HP: ${fusionPoke.hp}, Atk: ${fusionPoke.atk}, Def: ${fusionPoke.def}, SpA: ${fusionPoke.spa}, SpD: ${fusionPoke.spd}, Spe: ${fusionPoke.spe}`;
+  fusionContainer.appendChild(stats);
+
+  // Fusion Ability wrapper
+  const fusionAbilityWrapper = document.createElement('div');
+  fusionAbilityWrapper.className = 'fusion-ability-wrapper';
+
+  const fusionAbilitySelect = document.createElement('select');
+  observeChanges(fusionAbilitySelect);
+  fusionAbilitySelect.className = 'fusion-ability-select';
+  const abilities = [fusionPoke.a1, fusionPoke.a2, fusionPoke.ha].filter(Boolean);
+  fusionAbilitySelect.innerHTML = abilities.map(a => {
+    const name = window.fidToName?.[a] || `Ability ${a}`;
+    return `<opti
+
 async function waitForTomSelect(selectElement, timeout = 1000) {
   return new Promise((resolve) => {
     const interval = 50;
