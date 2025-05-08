@@ -216,8 +216,8 @@ const getAllMoves = () => {
     return sel;
   };
   const renderPokemonBox = (slot, pokemon) => {
+    slot.dataset.pokemonRow = pokemon.row;
     slot.innerHTML = '';
-
     const img = document.createElement('img');
     img.src = `images/${pokemon.img}_0.png`;
     img.className = 'pokemon-img';
@@ -300,15 +300,16 @@ const fusionContainer = document.createElement('div');
 fusionContainer.className = 'fusion-container';
 
 const renderFusionInfo = (fusionPoke) => {
+  slot.dataset.fusionRow = fusionPoke.row;
   fusionContainer.innerHTML = ''; // Clear before rendering
-
+  
   // Image
   const img = document.createElement('img');
   img.src = `images/${fusionPoke.img}_0.png`;
   img.className = 'pokemon-img';
   img.onerror = () => img.style.display = 'none';
   img.onclick = () => {
-    renderFusionSelector();
+   renderFusionSelector(slot);
     setTimeout(updateTeamSummary, 10);  // force re-check
   };
   fusionContainer.appendChild(img);
@@ -356,7 +357,7 @@ const renderFusionInfo = (fusionPoke) => {
   setTimeout(() => new TomSelect(fusionAbilitySelect, { maxOptions: null }), 0);
 };
 
-const renderFusionSelector = () => {
+const renderFusionSelector = (slot) => {
   fusionContainer.innerHTML = '';
   const select = document.createElement('select');
   select.innerHTML = `<option value="">Select Fusion Pokémon</option>` +
@@ -367,13 +368,13 @@ const renderFusionSelector = () => {
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
   select.onchange = () => {
     const selected = pokemonData[select.value];
-    renderFusionInfo(selected);
+    renderFusionInfo(selected, slot);  // <-- pass slot here too
     setTimeout(updateTeamSummary, 10);
   };
   fusionContainer.appendChild(select);
 };
 
-renderFusionSelector();
+renderFusionSelector(slot);
 slot.appendChild(fusionContainer);
 setTimeout(updateTeamSummary, 10);
   };
@@ -404,7 +405,7 @@ const exportTeamToJson = () => {
   document.querySelectorAll('.team-slot').forEach(slot => {
     const baseSelect = slot.querySelector('select');
     const selectedPokemon = pokemonData[baseSelect?.value];
-    const pokemonRow = selectedPokemon?.row ?? null;
+    const pokemonRow = parseInt(slot.dataset.pokemonRow) || null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
@@ -422,7 +423,7 @@ const exportTeamToJson = () => {
 
     const fusionSelect = slot.querySelector('.fusion-container select');
     const selectedFusion = pokemonData[fusionSelect?.value];
-    const fusionRow = selectedFusion?.row ?? null;
+    const fusionRow = parseInt(slot.dataset.fusionRow) || null;
 
     const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
 
