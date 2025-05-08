@@ -407,7 +407,9 @@ const exportTeamToJson = () => {
     const selectedPokemonIndex = parseInt(baseSelect?.value);
     const selectedPokemon = isNaN(selectedPokemonIndex) ? null : pokemonData[selectedPokemonIndex];
     const selectedOption = baseSelect?.selectedOptions[0];
-    const pokemonRow = selectedOption?.dataset?.row !== undefined ? parseInt(selectedOption.dataset.row) : null;
+    const pokemonRow = selectedOption?.dataset?.row !== undefined
+    ? parseInt(selectedOption.dataset.row)
+    : null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
@@ -427,7 +429,9 @@ const exportTeamToJson = () => {
     const selectedFusionIndex = parseInt(fusionSelect?.value);
     const selectedFusion = isNaN(selectedFusionIndex) ? null : pokemonData[selectedFusionIndex];
     const fusionSelectedOption = fusionSelect?.selectedOptions[0];
-    const fusionRow = fusionSelectedOption?.dataset?.row !== undefined ? parseInt(fusionSelectedOption.dataset.row) : null;
+    const fusionRow = fusionSelectedOption?.hasAttribute('data-row')
+    ? parseInt(fusionSelectedOption.getAttribute('data-row'))
+    : null;
 
     const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
 
