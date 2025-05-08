@@ -572,18 +572,24 @@ async function importTeamData(data) {
     }
 
     // Step 3: Set moves (with checkboxes)
-    const moveDropdowns = slot.querySelectorAll('.move-select');
-    const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
+const moveDropdowns = slot.querySelectorAll('.move-select');
+const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
 
-    (entry.moves || []).forEach((moveId, idx) => {
-      const ts = moveDropdowns[idx]?.tomselect;
-      const cb = moveCheckboxes[idx];
-      if (ts && moveId !== null) {
+await Promise.all(
+  (entry.moves || []).map(async (moveId, idx) => {
+    const dropdown = moveDropdowns[idx];
+    const checkbox = moveCheckboxes[idx];
+
+    if (dropdown && moveId !== null) {
+      const ts = await waitForTomSelect(dropdown);
+      if (ts) {
         ts.setValue(String(moveId));
-        if (cb) cb.checked = true;
+        if (checkbox) checkbox.checked = true;
         console.log(`Set move ${idx + 1} to ID ${moveId}`);
       }
-    });
+    }
+  })
+);
 
     // Step 4: Set ability
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
