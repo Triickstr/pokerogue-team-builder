@@ -1,27 +1,4 @@
 
-// Utility to wait for TomSelect to be ready
-async function waitForTomSelect(selectElement, timeout = 1000) {
-  return new Promise((resolve) => {
-    const interval = 50;
-    const maxTries = timeout / interval;
-    let tries = 0;
-
-    const check = () => {
-      const ts = selectElement.tomselect;
-      if (ts) return resolve(ts);
-      tries++;
-      if (tries >= maxTries) return resolve(null);
-      setTimeout(check, interval);
-    };
-
-    check();
-  });
-}
-
-let pokemonData = [];
-window.pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
-window.items = window.pokemonData;
-
 window.typeColors = {
   Normal: '#A8A77A',
   Fire: '#EE8130',
@@ -161,7 +138,7 @@ const observeChanges = (element) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
+  const pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
   const teamGrid = document.getElementById("teamGrid");
 
   if (!pokemonData || !Array.isArray(pokemonData) || pokemonData.length === 0) {
@@ -185,27 +162,18 @@ const getAllMoves = () => {
 
   const allMoves = getAllMoves();
 
-const createPokemonSelector = (onSelect) => {
-  const select = document.createElement('select');
-  setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
-
-  select.innerHTML = '<option value="">Select a Pokémon</option>' +
-    pokemonData.map((p, i) => {
-      const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
-      return `<option value="${i}">${name}</option>`;
-    }).join('');
-
-  select.onchange = () => {
-  const selected = pokemonData[select.value];
-  select.dataset.pokemonRow = selected?.row || '';
-  onSelect(select.value);
-  select.dataset.pokemonRow = pokemonData[select.value]?.row || '';
-  setTimeout(updateTeamSummary, 10);
-};
-
-  select.addEventListener('change', updateTeamSummary);
-  return select;
-};
+  const createPokemonSelector = (onSelect) => {
+    const select = document.createElement('select');
+    setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
+    select.innerHTML = '<option value="">Select a Pokémon</option>' +
+      pokemonData.map((p, i) => {
+        const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
+        return `<option value="${i}">${name}</option>`;
+      }).join('');
+    select.onchange = () => onSelect(select.value);
+    select.addEventListener('change', updateTeamSummary);
+    return select;
+  };
 
   const createMoveDropdown = (pokemon) => {
     const sel = document.createElement('select');
@@ -331,7 +299,7 @@ const createPokemonSelector = (onSelect) => {
 const fusionContainer = document.createElement('div');
 fusionContainer.className = 'fusion-container';
 
-const renderFusionInfo = (fusionPoke, fusionSelect) => {
+const renderFusionInfo = (fusionPoke) => {
   fusionContainer.innerHTML = ''; // Clear before rendering
 
   // Image
@@ -385,33 +353,23 @@ const renderFusionInfo = (fusionPoke, fusionSelect) => {
   fusionAbilityWrapper.appendChild(fusionAbilityCheckbox);
   fusionContainer.appendChild(fusionAbilityWrapper);
 
-  // Set the fusionIndex on the original fusionSelect dropdown
-  if (fusionSelect && fusionPoke?.row) {
-    fusionSelect.dataset.fusionIndex = fusionPoke.row;
-  }
-
   setTimeout(() => new TomSelect(fusionAbilitySelect, { maxOptions: null }), 0);
 };
-
 
 const renderFusionSelector = () => {
   fusionContainer.innerHTML = '';
   const select = document.createElement('select');
-
   select.innerHTML = `<option value="">Select Fusion Pokémon</option>` +
     pokemonData.map((p, i) => {
       const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
       return `<option value="${i}">${name}</option>`;
     }).join('');
-
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
-
-select.onchange = () => {
-  const selected = pokemonData[select.value];
-  select.dataset.fusionRow = selected?.row || '';
-  renderFusionInfo(selected, select);
-  setTimeout(updateTeamSummary, 10);
-};
+  select.onchange = () => {
+    const selected = pokemonData[select.value];
+    renderFusionInfo(selected);
+    setTimeout(updateTeamSummary, 10);
+  };
   fusionContainer.appendChild(select);
 };
 
@@ -421,18 +379,17 @@ setTimeout(updateTeamSummary, 10);
   };
 
   const createTeamSlot = () => {
-  const slot = document.createElement('div');
-  slot.className = 'team-slot';
-  slot.appendChild(createPokemonSelector((idx) => {
-    const pokemon = {
+    const slot = document.createElement('div');
+    slot.className = 'team-slot';
+    slot.appendChild(createPokemonSelector((idx) => {
+      const pokemon = {
       ...pokemonData[idx],
       types: [pokemonData[idx].t1, pokemonData[idx].t2].filter(Boolean)
     };
-    renderPokemonBox(slot, pokemon);
-    })); // Closing parentheses for createPokemonSelector
-      return slot;
-    };
-
+      renderPokemonBox(slot, pokemon);
+    }));
+    return slot;
+  };
 
   for (let i = 0; i < 6; i++) {
     teamGrid.appendChild(createTeamSlot());
@@ -440,137 +397,3 @@ setTimeout(updateTeamSummary, 10);
 
   
 });
-
-
-document.getElementById('importFile').addEventListener('change', async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const text = await file.text();
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch (err) {
-    alert("Invalid JSON file.");
-    return;
-  }
-
-  await importTeamData(data);
-});
-
-async function importTeamData(data) {
-  const slots = document.querySelectorAll('.team-slot');
-
-  for (let i = 0; i < data.length; i++) {
-    const entry = data[i];
-    const slot = slots[i];
-    if (!slot || entry.pokemon === undefined || entry.pokemon === null) continue;
-
-    // Step 1: Set base Pokémon
-    const baseSelect = slot.querySelector('select');
-    baseSelect.value = parseInt(entry.pokemon);
-    baseSelect.dispatchEvent(new Event('change'));
-
-    // Wait for base render
-    await new Promise(res => setTimeout(res, 300));
-
-    // Step 2: Set fusion Pokémon
-    if (entry.fusion !== null && entry.fusion !== undefined) {
-      const fusionSelect = slot.querySelector('.fusion-container select');
-      const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
-      if (fusionIndex !== -1) {
-        fusionSelect.value = fusionIndex;
-        fusionSelect.dispatchEvent(new Event('change'));
-      }
-
-      // Wait for fusion render
-      await new Promise(res => setTimeout(res, 300));
-
-      // Re-select slot DOM in case it was re-rendered
-      const updatedSlot = document.querySelectorAll('.team-slot')[i];
-      const fusionAbilitySelect = updatedSlot.querySelector('.fusion-ability-select')?.tomselect;
-      if (entry.fusionAbility !== undefined && fusionAbilitySelect) {
-        fusionAbilitySelect.setValue(String(entry.fusionAbility));
-      }
-    }
-
-    // Step 3: Set moves
-    const moveDropdowns = slot.querySelectorAll('.move-select');
-    (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
-      const ts = moveDropdowns[idx]?.tomselect;
-      if (ts && moveId !== null) ts.setValue(String(moveId));
-    });
-
-    // Step 4: Set ability
-    const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    if (entry.ability !== undefined && abilitySelect) {
-      abilitySelect.setValue(String(entry.ability));
-    }
-
-    // Step 5: Set nature
-    const natureSelect = slot.querySelector('.nature-select')?.tomselect;
-    if (entry.nature !== undefined && natureSelect) {
-      natureSelect.setValue(entry.nature);
-    }
-
-    updateTeamSummary();
-    await new Promise(res => setTimeout(res, 150));
-  }
-}
-
-
-const exportTeamToJson = () => {
-  const teamData = [];
-
-  document.querySelectorAll('.team-slot').forEach(slot => {
-    // Get the selected Pokémon and its dataset row ID
-    const baseSelect = slot.querySelector('select');
-    const baseIndex = baseSelect?.value;
-    const basePokemon = window.items?.[baseIndex];
-    const pokemonRow = parseInt(baseSelect?.dataset.pokemonRow) || null;
-
-    // Get the selected fusion and its dataset row ID
-    const fusionSelect = slot.querySelector('.fusion-container select');
-    const fusionIndex = fusionSelect?.value;
-    const fusionPokemon = window.items?.[fusionIndex];
-    const fusionRow = parseInt(fusionSelect?.dataset.fusionRow) || null;
-
-    // Moves
-    const moveSelects = slot.querySelectorAll('.move-select');
-    const moves = Array.from(moveSelects).map(s => {
-      const ts = s.tomselect;
-      const value = ts?.getValue();
-      return value !== '' ? parseInt(value) : null;
-    });
-
-    // Abilities
-    const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
-
-    const ability = baseAbilitySelect?.getValue() || null;
-    const fusionAbility = fusionAbilitySelect?.getValue() || null;
-
-    // Nature
-    const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
-
-    teamData.push({
-      pokemon: pokemonRow,
-      fusion: fusionRow,
-      moves: moves.slice(0, 4),
-      ability,
-      fusionAbility,
-      nature
-    });
-  });
-
-  const blob = new Blob([JSON.stringify(teamData, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "poke_team.json";
-  a.click();
-  URL.revokeObjectURL(url);
-};
-
-
-document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
