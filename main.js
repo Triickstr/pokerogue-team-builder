@@ -405,7 +405,7 @@ const exportTeamToJson = () => {
   document.querySelectorAll('.team-slot').forEach(slot => {
     const baseSelect = slot.querySelector('select');
     const selectedPokemon = pokemonData[baseSelect?.value];
-    const pokemonRow = parseInt(slot.dataset.pokemonRow) || null;
+    const pokemonIndex = (selectedPokemon?.row !== undefined) ? selectedPokemon.row : null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
@@ -423,7 +423,7 @@ const exportTeamToJson = () => {
 
     const fusionSelect = slot.querySelector('.fusion-container select');
     const selectedFusion = pokemonData[fusionSelect?.value];
-    const fusionRow = parseInt(slot.dataset.fusionRow) || null;
+    const fusionIndex = (selectedFusion?.row !== undefined) ? selectedFusion.row : null;
 
     const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
 
