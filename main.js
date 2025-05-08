@@ -165,7 +165,11 @@ document.addEventListener("DOMContentLoaded", () => {
     teamGrid.innerHTML = '<p>Failed to load Pokémon data.</p>';
     return;
   }
-  
+
+  // Create 6 team slots only if Pokémon data is successfully loaded
+  for (let i = 0; i < 6; i++) {
+    teamGrid.appendChild(createTeamSlot());
+  }
 });
 
 const getAllMoves = () => {
