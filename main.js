@@ -158,15 +158,19 @@ const observeChanges = (element) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
+  // Ensure no duplicate slots
   const teamGrid = document.getElementById("teamGrid");
+  teamGrid.innerHTML = '';
 
+  // Load Pokémon data into global variable
+  pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
+  
   if (!pokemonData || !Array.isArray(pokemonData) || pokemonData.length === 0) {
     teamGrid.innerHTML = '<p>Failed to load Pokémon data.</p>';
     return;
   }
 
-  // Create 6 team slots only if Pokémon data is successfully loaded
+  // Create exactly 6 team slots
   for (let i = 0; i < 6; i++) {
     teamGrid.appendChild(createTeamSlot());
   }
