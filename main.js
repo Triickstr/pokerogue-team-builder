@@ -1,3 +1,21 @@
+async function waitForTomSelect(selectElement, timeout = 1000) {
+  return new Promise((resolve) => {
+    const interval = 50;
+    const maxTries = timeout / interval;
+    let tries = 0;
+
+    const check = () => {
+      const ts = selectElement.tomselect;
+      if (ts) return resolve(ts);
+      tries++;
+      if (tries >= maxTries) return resolve(null);
+      setTimeout(check, interval);
+    };
+
+    check();
+  });
+}
+
 let pokemonData = [];
 window.typeColors = {
   Normal: '#A8A77A',
@@ -465,59 +483,81 @@ const exportTeamToJson = () => {
 
 
 //  Basic import logic using .row field matching
+async function waitForTomSelect(select, timeout = 1000) {
+  return new Promise(resolve => {
+    const interval = 50;
+    const maxTries = timeout / interval;
+    let tries = 0;
+
+    const check = () => {
+      if (select?.tomselect) return resolve(select.tomselect);
+      if (++tries >= maxTries) return resolve(null);
+      setTimeout(check, interval);
+    };
+
+    check();
+  });
+}
+
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
 
   for (let i = 0; i < data.length; i++) {
     const entry = data[i];
     const slot = slots[i];
-    if (!slot || entry.pokemon === null || entry.pokemon === undefined) continue;
+    if (!slot || entry.pokemon === undefined || entry.pokemon === null) continue;
 
-    const baseSelect = slot.querySelector('select');
+    // Step 1: Set base Pokémon
     const baseIndex = pokemonData.findIndex(p => p.row === entry.pokemon);
     if (baseIndex !== -1) {
+      const baseSelect = slot.querySelector('select');
       baseSelect.value = baseIndex;
       baseSelect.dispatchEvent(new Event('change'));
       await new Promise(res => setTimeout(res, 300));
     }
 
-    const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    if (abilitySelect && entry.ability !== null) {
-      abilitySelect.setValue(String(entry.ability));
-    }
-
-    const natureSelect = slot.querySelector('.nature-select')?.tomselect;
-    const natureCheckbox = slot.querySelector('.nature-checkbox');
-    if (natureSelect && natureCheckbox && entry.nature) {
-      natureCheckbox.checked = true;
-      natureSelect.setValue(entry.nature);
-    }
-
-    const moveDropdowns = slot.querySelectorAll('.move-select');
-    const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
-    (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
-      const ts = moveDropdowns[idx]?.tomselect;
-      const cb = moveCheckboxes[idx];
-      if (ts && cb && moveId !== null) {
-        ts.setValue(String(moveId));
-        cb.checked = true;
-      }
-    });
-
+    // Step 2: Set fusion Pokémon
     if (entry.fusion !== null && entry.fusion !== undefined) {
-      const fusionSelect = slot.querySelector('.fusion-container select');
       const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
       if (fusionIndex !== -1) {
+        const fusionSelect = slot.querySelector('.fusion-container select');
         fusionSelect.value = fusionIndex;
         fusionSelect.dispatchEvent(new Event('change'));
         await new Promise(res => setTimeout(res, 300));
-
-        const updatedSlot = document.querySelectorAll('.team-slot')[i]; // re-grab slot
-        const fusionAbilitySelect = updatedSlot.querySelector('.fusion-ability-select')?.tomselect;
-        if (fusionAbilitySelect && entry.fusionAbility !== null) {
-          fusionAbilitySelect.setValue(String(entry.fusionAbility));
-        }
       }
+
+      const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+      if (entry.fusionAbility !== null && fusionAbilitySelect) {
+        fusionAbilitySelect.setValue(String(entry.fusionAbility));
+      }
+    }
+
+    // Step 3: Set moves (with checkboxes)
+    const moveDropdowns = slot.querySelectorAll('.move-select');
+    const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
+
+    (entry.moves || []).forEach((moveId, idx) => {
+      if (idx >= moveDropdowns.length) return;
+      const ts = moveDropdowns[idx]?.tomselect;
+      const cb = moveCheckboxes[idx];
+      if (ts && moveId !== null) {
+        ts.setValue(String(moveId));
+        if (cb) cb.checked = true;
+      }
+    });
+
+    // Step 4: Set ability
+    const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
+    if (entry.ability !== undefined && entry.ability !== null && abilitySelect) {
+      abilitySelect.setValue(String(entry.ability));
+    }
+
+    // Step 5: Set nature
+    const natureSelect = slot.querySelector('.nature-select')?.tomselect;
+    const natureCheckbox = slot.querySelector('.nature-checkbox');
+    if (entry.nature && natureSelect && natureCheckbox) {
+      natureCheckbox.checked = true;
+      natureSelect.setValue(entry.nature);
     }
 
     updateTeamSummary();
