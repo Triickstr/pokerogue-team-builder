@@ -471,7 +471,7 @@ async function importTeamData(data) {
   for (let i = 0; i < data.length; i++) {
     const entry = data[i];
     const slot = slots[i];
-    if (!slot || !entry.pokemon) continue;
+    if (!slot || entry.pokemon === null || entry.pokemon === undefined) continue;
 
     const baseIndex = pokemonData.findIndex(p => p.row === entry.pokemon);
     if (baseIndex !== -1) {
