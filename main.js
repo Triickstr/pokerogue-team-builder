@@ -520,11 +520,13 @@ const exportTeamToJson = () => {
   const teamData = [];
 
   document.querySelectorAll('.team-slot').forEach(slot => {
-    const select = slot.querySelector('select');
-    const pokemonIndex = parseInt(select?.dataset.pokemonRow) || null;
+const select = slot.querySelector('select');
+const baseIndex = parseInt(select?.value);
+const pokemonIndex = !isNaN(baseIndex) ? pokemonData[baseIndex]?.row ?? null : null;
 
-    const fusionSelect = slot.querySelector('.fusion-container select');
-    const fusionIndex = parseInt(fusionSelect?.dataset.fusionIndex) || null;
+const fusionSelect = slot.querySelector('.fusion-container select');
+const fusionIdx = parseInt(fusionSelect?.value);
+const fusionIndex = !isNaN(fusionIdx) ? pokemonData[fusionIdx]?.row ?? null : null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
