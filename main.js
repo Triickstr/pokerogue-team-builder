@@ -138,7 +138,7 @@ const observeChanges = (element) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  const pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
+  pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
   const teamGrid = document.getElementById("teamGrid");
 
   if (!pokemonData || !Array.isArray(pokemonData) || pokemonData.length === 0) {
