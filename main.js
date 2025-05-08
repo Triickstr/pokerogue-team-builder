@@ -427,6 +427,9 @@ const exportTeamToJson = () => {
 
     const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
 
+     // Nature
+    const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
+
     teamData.push({
       pokemon: pokemonRow,
       fusion: fusionRow,
@@ -446,7 +449,7 @@ const exportTeamToJson = () => {
   URL.revokeObjectURL(url);
 };
 
-// ✅ Basic import logic using .row field matching
+//  Basic import logic using .row field matching
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
 
