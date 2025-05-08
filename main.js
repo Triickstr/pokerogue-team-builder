@@ -322,6 +322,47 @@ slot.appendChild(fusionContainer);
 setTimeout(updateTeamSummary, 10);
   };
 
+  const createMoveDropdown = (pokemon) => {
+    const sel = document.createElement('select');
+    setTimeout(() => new TomSelect(sel, {
+      maxOptions: null,
+      render: {
+        option: function(data, escape) {
+          const isCompatible = pokemon.hasOwnProperty(data.value);
+          const color = isCompatible ? '#d4edda' : '#ffeeba';
+          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+          },
+        item: function(data, escape) {
+          const isCompatible = pokemon.hasOwnProperty(data.value);
+          const color = isCompatible ? '#d4edda' : '#ffeeba';
+          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+        }
+      }
+    }), 0);
+    sel.className = 'move-select';
+    sel.innerHTML = '<option value="">Select a Move</option>' +
+      allMoves.map(m => {
+        const isCompatible = String(m) in pokemon;
+        const name = window.fidToName?.[m] || `Move ${m}`;
+        const opt = `<option value="${m}" class="${isCompatible ? 'move-compatible' : 'move-incompatible'}">${name}</option>`;
+        return opt;
+      }).join('');
+    return sel;
+  };
+
+  const createAbilityDropdown = (pokemon) => {
+    const abilities = [pokemon.a1, pokemon.a2, pokemon.ha].filter(Boolean);
+    const sel = document.createElement('select');
+    setTimeout(() => new TomSelect(sel, { maxOptions: null }), 0);
+    sel.className = 'ability-select';
+    sel.innerHTML = `<option value="">Select an Ability</option>` +
+      abilities.map(a => {
+        const name = window.fidToName?.[a] || `Ability ${a}`;
+        return `<option value="${a}">${name}</option>`;
+      }).join('');
+    return sel;
+  };
+
 document.addEventListener("DOMContentLoaded", () => {
   pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
   const teamGrid = document.getElementById("teamGrid");
@@ -367,46 +408,9 @@ const getAllMoves = () => {
     return select;
   };
 
-  const createMoveDropdown = (pokemon) => {
-    const sel = document.createElement('select');
-    setTimeout(() => new TomSelect(sel, {
-      maxOptions: null,
-      render: {
-        option: function(data, escape) {
-          const isCompatible = pokemon.hasOwnProperty(data.value);
-          const color = isCompatible ? '#d4edda' : '#ffeeba';
-          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-          },
-        item: function(data, escape) {
-          const isCompatible = pokemon.hasOwnProperty(data.value);
-          const color = isCompatible ? '#d4edda' : '#ffeeba';
-          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-        }
-      }
-    }), 0);
-    sel.className = 'move-select';
-    sel.innerHTML = '<option value="">Select a Move</option>' +
-      allMoves.map(m => {
-        const isCompatible = String(m) in pokemon;
-        const name = window.fidToName?.[m] || `Move ${m}`;
-        const opt = `<option value="${m}" class="${isCompatible ? 'move-compatible' : 'move-incompatible'}">${name}</option>`;
-        return opt;
-      }).join('');
-    return sel;
-  };
 
-  const createAbilityDropdown = (pokemon) => {
-    const abilities = [pokemon.a1, pokemon.a2, pokemon.ha].filter(Boolean);
-    const sel = document.createElement('select');
-    setTimeout(() => new TomSelect(sel, { maxOptions: null }), 0);
-    sel.className = 'ability-select';
-    sel.innerHTML = `<option value="">Select an Ability</option>` +
-      abilities.map(a => {
-        const name = window.fidToName?.[a] || `Ability ${a}`;
-        return `<option value="${a}">${name}</option>`;
-      }).join('');
-    return sel;
-  };
+
+
   
 
   const createTeamSlot = () => {
