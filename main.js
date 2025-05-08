@@ -18,6 +18,7 @@ async function waitForTomSelect(selectElement, timeout = 1000) {
   });
 }
 
+
 let pokemonData = [];
 window.typeColors = {
   Normal: '#A8A77A',
@@ -512,6 +513,12 @@ const exportTeamToJson = () => {
   URL.revokeObjectURL(url);
 };
 
+function clearAllCheckboxes() {
+  document.querySelectorAll('.move-checkbox, .nature-checkbox, .fusion-ability-checkbox').forEach(cb => {
+    cb.checked = false;
+  });
+}
+
 
 //  Basic import logic using .row field matching
 async function waitForTomSelect(select, timeout = 1000) {
@@ -642,6 +649,8 @@ await Promise.all(
   }
 
   console.log("Import finished.");
+
+  
 }
 
 
@@ -657,5 +666,9 @@ document.getElementById('importFile').addEventListener('change', async (event) =
     alert("Invalid JSON file.");
     return;
   }
+
   await importTeamData(data);
+
+  //  Reset checkboxes after everything is imported
+  clearAllCheckboxes();
 });
