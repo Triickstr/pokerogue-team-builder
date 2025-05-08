@@ -519,7 +519,11 @@ async function importTeamData(data) {
     if (baseIndex !== -1) {
       const baseSelect = slot.querySelector('select');
       baseSelect.value = baseIndex;
-      baseSelect.dispatchEvent(new Event('change'));
+      const selectedPokemon = {
+        ...pokemonData[baseIndex],
+        types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(Boolean)
+      };
+      renderPokemonBox(slot, selectedPokemon);
       await new Promise(res => setTimeout(res, 300));
     }
 
