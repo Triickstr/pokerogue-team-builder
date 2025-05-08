@@ -157,6 +157,17 @@ const observeChanges = (element) => {
   element.addEventListener('change', updateTeamSummary);
 };
 
+document.addEventListener("DOMContentLoaded", () => {
+  pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
+  const teamGrid = document.getElementById("teamGrid");
+
+  if (!pokemonData || !Array.isArray(pokemonData) || pokemonData.length === 0) {
+    teamGrid.innerHTML = '<p>Failed to load Pokémon data.</p>';
+    return;
+  }
+  
+});
+
 const getAllMoves = () => {
   const moveSet = new Set();
   pokemonData.forEach(p => {
@@ -424,18 +435,6 @@ setTimeout(updateTeamSummary, 10);
   for (let i = 0; i < 6; i++) {
     teamGrid.appendChild(createTeamSlot());
   }
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
-  const teamGrid = document.getElementById("teamGrid");
-
-  if (!pokemonData || !Array.isArray(pokemonData) || pokemonData.length === 0) {
-    teamGrid.innerHTML = '<p>Failed to load Pokémon data.</p>';
-    return;
-  }
-  
-});
 
 const exportTeamToJson = () => {
   const teamData = [];
