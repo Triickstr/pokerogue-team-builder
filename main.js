@@ -508,14 +508,27 @@ async function waitForTomSelect(select, timeout = 1000) {
 
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
+  console.log("Starting import of team data:", data);
 
   for (let i = 0; i < data.length; i++) {
     const entry = data[i];
     const slot = slots[i];
-    if (!slot || entry.pokemon === undefined || entry.pokemon === null) continue;
+    console.log(`\n--- Processing slot ${i + 1} ---`);
+    console.log("Entry:", entry);
+
+    if (!slot) {
+      console.warn(`Slot ${i} does not exist. Skipping.`);
+      continue;
+    }
+    if (entry.pokemon === undefined || entry.pokemon === null) {
+      console.warn(`Slot ${i} has no base Pokémon. Skipping.`);
+      continue;
+    }
 
     // Step 1: Set base Pokémon
     const baseIndex = pokemonData.findIndex(p => p.row === entry.pokemon);
+    console.log("Base Pokémon Row:", entry.pokemon, " -> Index:", baseIndex);
+
     if (baseIndex !== -1) {
       const baseSelect = slot.querySelector('select');
       baseSelect.value = baseIndex;
@@ -524,22 +537,31 @@ async function importTeamData(data) {
         types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(Boolean)
       };
       renderPokemonBox(slot, selectedPokemon);
+      console.log("Rendered base Pokémon:", selectedPokemon);
       await new Promise(res => setTimeout(res, 300));
+    } else {
+      console.warn("Base Pokémon not found in data.");
     }
 
     // Step 2: Set fusion Pokémon
     if (entry.fusion !== null && entry.fusion !== undefined) {
       const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
+      console.log("Fusion Pokémon Row:", entry.fusion, " -> Index:", fusionIndex);
+
       if (fusionIndex !== -1) {
         const fusionSelect = slot.querySelector('.fusion-container select');
         fusionSelect.value = fusionIndex;
         fusionSelect.dispatchEvent(new Event('change'));
         await new Promise(res => setTimeout(res, 300));
+        console.log("Fusion Pokémon selected:", pokemonData[fusionIndex]);
+      } else {
+        console.warn("Fusion Pokémon not found.");
       }
 
       const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
-      if (entry.fusionAbility !== null && fusionAbilitySelect) {
+      if (fusionAbilitySelect && entry.fusionAbility !== null) {
         fusionAbilitySelect.setValue(String(entry.fusionAbility));
+        console.log("Set fusion ability to:", entry.fusionAbility);
       }
     }
 
@@ -548,12 +570,12 @@ async function importTeamData(data) {
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
 
     (entry.moves || []).forEach((moveId, idx) => {
-      if (idx >= moveDropdowns.length) return;
       const ts = moveDropdowns[idx]?.tomselect;
       const cb = moveCheckboxes[idx];
       if (ts && moveId !== null) {
         ts.setValue(String(moveId));
         if (cb) cb.checked = true;
+        console.log(`Set move ${idx + 1} to ID ${moveId}`);
       }
     });
 
@@ -561,6 +583,7 @@ async function importTeamData(data) {
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
     if (entry.ability !== undefined && entry.ability !== null && abilitySelect) {
       abilitySelect.setValue(String(entry.ability));
+      console.log("Set base ability to:", entry.ability);
     }
 
     // Step 5: Set nature
@@ -569,12 +592,16 @@ async function importTeamData(data) {
     if (entry.nature && natureSelect && natureCheckbox) {
       natureCheckbox.checked = true;
       natureSelect.setValue(entry.nature);
+      console.log("Set nature to:", entry.nature);
     }
 
     updateTeamSummary();
     await new Promise(res => setTimeout(res, 150));
   }
+
+  console.log("Import finished.");
 }
+
 
 document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
 document.getElementById('importFile').addEventListener('change', async (event) => {
