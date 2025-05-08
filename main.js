@@ -411,9 +411,9 @@ const exportTeamToJson = () => {
     const baseSelect = slot.querySelector('select');
     const selectedPokemonIndex = parseInt(baseSelect?.value);
     const selectedPokemon = isNaN(selectedPokemonIndex) ? null : pokemonData[selectedPokemonIndex];
-    const pokemonRow = baseSelect?.selectedOptions?.[0]?.dataset?.row !== undefined
-    ? parseInt(baseSelect.selectedOptions[0].dataset.row)
-    : null;
+    const selectedOption = baseSelect?.selectedOptions?.[0];
+    const pokemonRow = selectedOption?.dataset?.row !== undefined ? parseInt(selectedOption.dataset.row) : null;
+
 
 
 
@@ -433,9 +433,9 @@ const exportTeamToJson = () => {
     const fusionSelect = slot.querySelector('.fusion-container select');
     const selectedFusionIndex = parseInt(fusionSelect?.value);
     const selectedFusion = isNaN(selectedFusionIndex) ? null : pokemonData[selectedFusionIndex];
-    const fusionRow = fusionSelect?.selectedOptions?.[0]?.dataset?.row !== undefined
-    ? parseInt(fusionSelect.selectedOptions[0].dataset.row)
-    : null;
+    const fusionOption = fusionSelect?.selectedOptions?.[0];
+    const fusionRow = fusionOption?.dataset?.row !== undefined ? parseInt(fusionOption.dataset.row) : null;
+
 
 
 
