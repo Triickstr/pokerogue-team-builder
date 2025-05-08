@@ -532,16 +532,20 @@ async function importTeamData(data) {
     if (baseIndex !== -1) {
       const baseSelect = slot.querySelector('select');
       baseSelect.value = baseIndex;
-      const selectedPokemon = {
-        ...pokemonData[baseIndex],
-        types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(Boolean)
-      };
-      renderPokemonBox(slot, selectedPokemon);
-      console.log("Rendered base Pokémon:", selectedPokemon);
-      await new Promise(res => setTimeout(res, 300));
-    } else {
-      console.warn("Base Pokémon not found in data.");
-    }
+
+    const selectedPokemon = {
+      ...pokemonData[baseIndex],
+      types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(Boolean)
+    };
+
+    renderPokemonBox(slot, selectedPokemon);
+    console.log("Rendered base Pokémon:", selectedPokemon);
+
+    await new Promise(res => setTimeout(res, 300));
+  } else {
+    console.warn("Base Pokémon not found in data.");
+  }
+
 
     // Step 2: Set fusion Pokémon
     if (entry.fusion !== null && entry.fusion !== undefined) {
