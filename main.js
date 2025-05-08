@@ -404,8 +404,9 @@ const exportTeamToJson = () => {
 
   document.querySelectorAll('.team-slot').forEach(slot => {
     const baseSelect = slot.querySelector('select');
-    const selectedPokemon = pokemonData[baseSelect?.value];
-    const pokemonRow = (selectedPokemon?.row !== undefined) ? selectedPokemon.row : null;
+    const selectedPokemonIndex = parseInt(baseSelect?.value);
+    const selectedPokemon = isNaN(selectedPokemonIndex) ? null : pokemonData[selectedPokemonIndex];
+    const pokemonRow = selectedPokemon?.row ?? null;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
@@ -422,8 +423,9 @@ const exportTeamToJson = () => {
     const nature = natureCheckbox?.checked ? natureSelect?.tomselect?.getValue() : null;
 
     const fusionSelect = slot.querySelector('.fusion-container select');
-    const selectedFusion = pokemonData[fusionSelect?.value];
-    const fusionRow = (selectedFusion?.row !== undefined) ? selectedFusion.row : null;
+    const selectedFusionIndex = parseInt(fusionSelect?.value);
+    const selectedFusion = isNaN(selectedFusionIndex) ? null : pokemonData[selectedFusionIndex];
+    const fusionRow = selectedFusion?.row ?? null;
 
     const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
 
