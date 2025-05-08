@@ -188,7 +188,14 @@ const getAllMoves = () => {
         const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
         return `<option value="${i}">${name}</option>`;
       }).join('');
-    select.onchange = () => onSelect(select.value);
+    
+    select.onchange = () => {
+      const idx = select.value;
+      const selected = pokemonData[idx];
+      select.closest('.team-slot').dataset.pokemonRow = selected?.row ?? '';
+      onSelect(idx);
+    };
+
     select.addEventListener('change', updateTeamSummary);
     return select;
   };
