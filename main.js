@@ -168,7 +168,7 @@ const getAllMoves = () => {
     select.innerHTML = '<option value="">Select a Pokémon</option>' +
       pokemonData.map((p, i) => {
         const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
-        return `<option value="${i}" data-row="${p.row}">${name}</option>`;
+        return `<option value="${i}" data-row="${p.row}">${name}</option>`; // ✅ Add data-row here
       }).join('');
     select.onchange = () => onSelect(select.value);
     select.addEventListener('change', updateTeamSummary);
@@ -361,9 +361,9 @@ const renderFusionSelector = (slot) => {
   fusionContainer.innerHTML = '';
   const select = document.createElement('select');
   select.innerHTML = `<option value="">Select Fusion Pokémon</option>` +
-    pokemonData.map((p, i) => {
-      const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
-      return `<option value="${i}" data-row="${p.row}">${name}</option>`;
+  pokemonData.map((p, i) => {
+    const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
+    return `<option value="${i}" data-row="${p.row}">${name}</option>`; // ✅ Add data-row here
   }).join('');
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
   select.onchange = () => {
@@ -412,11 +412,10 @@ const exportTeamToJson = () => {
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
-    const moves = Array.from(moveSelects).map((s, i) => {
+    const moves = Array.from(moveSelects).map((s) => {
       const ts = s.tomselect;
-      const isChecked = moveCheckboxes[i]?.checked;
       const val = ts?.getValue();
-      return (isChecked && val !== '') ? parseInt(val) : null;
+      return val !== '' ? parseInt(val) : null;
     });
 
     const baseAbility = slot.querySelector('.ability-select')?.tomselect?.getValue();
