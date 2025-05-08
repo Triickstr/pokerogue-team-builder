@@ -19,6 +19,8 @@ async function waitForTomSelect(selectElement, timeout = 1000) {
 }
 
 let pokemonData = [];
+window.pokemonData = typeof window.items !== 'undefined' ? window.items : (typeof items !== 'undefined' ? items : []);
+window.items = window.pokemonData;
 
 window.typeColors = {
   Normal: '#A8A77A',
@@ -197,6 +199,7 @@ const createPokemonSelector = (onSelect) => {
   const selected = pokemonData[select.value];
   select.dataset.pokemonRow = selected?.row || '';
   onSelect(select.value);
+  select.dataset.pokemonRow = pokemonData[select.value]?.row || '';
   setTimeout(updateTeamSummary, 10);
 };
 
@@ -405,7 +408,7 @@ const renderFusionSelector = () => {
 
 select.onchange = () => {
   const selected = pokemonData[select.value];
-  select.dataset.fusionIndex = selected?.row || ''; //  Save fusion row
+  select.dataset.fusionRow = selected?.row || '';
   renderFusionInfo(selected, select);
   setTimeout(updateTeamSummary, 10);
 };
@@ -520,14 +523,19 @@ const exportTeamToJson = () => {
   const teamData = [];
 
   document.querySelectorAll('.team-slot').forEach(slot => {
-const select = slot.querySelector('select');
-const baseIndex = parseInt(select?.value);
-const pokemonIndex = !isNaN(baseIndex) ? pokemonData[baseIndex]?.row ?? null : null;
+    // Get the selected Pokémon and its dataset row ID
+    const baseSelect = slot.querySelector('select');
+    const baseIndex = baseSelect?.value;
+    const basePokemon = window.items?.[baseIndex];
+    const pokemonRow = parseInt(baseSelect?.dataset.pokemonRow) || null;
 
-const fusionSelect = slot.querySelector('.fusion-container select');
-const fusionIdx = parseInt(fusionSelect?.value);
-const fusionIndex = !isNaN(fusionIdx) ? pokemonData[fusionIdx]?.row ?? null : null;
+    // Get the selected fusion and its dataset row ID
+    const fusionSelect = slot.querySelector('.fusion-container select');
+    const fusionIndex = fusionSelect?.value;
+    const fusionPokemon = window.items?.[fusionIndex];
+    const fusionRow = parseInt(fusionSelect?.dataset.fusionRow) || null;
 
+    // Moves
     const moveSelects = slot.querySelectorAll('.move-select');
     const moves = Array.from(moveSelects).map(s => {
       const ts = s.tomselect;
@@ -535,17 +543,19 @@ const fusionIndex = !isNaN(fusionIdx) ? pokemonData[fusionIdx]?.row ?? null : nu
       return value !== '' ? parseInt(value) : null;
     });
 
+    // Abilities
     const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
     const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
 
     const ability = baseAbilitySelect?.getValue() || null;
     const fusionAbility = fusionAbilitySelect?.getValue() || null;
 
+    // Nature
     const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
 
     teamData.push({
-      pokemon: pokemonIndex,
-      fusion: fusionIndex,
+      pokemon: pokemonRow,
+      fusion: fusionRow,
       moves: moves.slice(0, 4),
       ability,
       fusionAbility,
@@ -561,5 +571,6 @@ const fusionIndex = !isNaN(fusionIdx) ? pokemonData[fusionIdx]?.row ?? null : nu
   a.click();
   URL.revokeObjectURL(url);
 };
+
 
 document.getElementById('exportBtn').addEventListener('click', exportTeamToJson);
