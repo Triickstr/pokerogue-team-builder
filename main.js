@@ -597,6 +597,9 @@ async function importTeamData(data) {
 const moveDropdowns = slot.querySelectorAll('.move-select');
 const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
 
+// Uncheck all move checkboxes before assigning values
+moveCheckboxes.forEach(cb => cb.checked = false);
+
 await Promise.all(
   (entry.moves || []).map(async (moveId, idx) => {
     const dropdown = moveDropdowns[idx];
@@ -623,11 +626,16 @@ await Promise.all(
     // Step 5: Set nature
     const natureSelect = slot.querySelector('.nature-select')?.tomselect;
     const natureCheckbox = slot.querySelector('.nature-checkbox');
+
+    // Always uncheck before applying imported value
+    if (natureCheckbox) natureCheckbox.checked = false;
+
     if (entry.nature && natureSelect && natureCheckbox) {
       natureCheckbox.checked = true;
       natureSelect.setValue(entry.nature);
       console.log("Set nature to:", entry.nature);
     }
+
 
     updateTeamSummary();
     await new Promise(res => setTimeout(res, 150));
