@@ -473,40 +473,13 @@ async function importTeamData(data) {
     const slot = slots[i];
     if (!slot || entry.pokemon === null || entry.pokemon === undefined) continue;
 
+    const baseSelect = slot.querySelector('select');
     const baseIndex = pokemonData.findIndex(p => p.row === entry.pokemon);
     if (baseIndex !== -1) {
-      const baseSelect = slot.querySelector('select');
       baseSelect.value = baseIndex;
       baseSelect.dispatchEvent(new Event('change'));
       await new Promise(res => setTimeout(res, 300));
     }
-
-    if (entry.fusion !== null && entry.fusion !== undefined) {
-      const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
-      if (fusionIndex !== -1) {
-        const fusionSelect = slot.querySelector('.fusion-container select');
-        fusionSelect.value = fusionIndex;
-        fusionSelect.dispatchEvent(new Event('change'));
-        await new Promise(res => setTimeout(res, 300));
-        const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
-        if (fusionAbilitySelect && entry.fusionAbility !== null) {
-          fusionAbilitySelect.setValue(String(entry.fusionAbility));
-        }
-      }
-    }
-
-    const moveDropdowns = slot.querySelectorAll('.move-select');
-    const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
-    (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
-      if (moveId !== null) {
-        const ts = moveDropdowns[idx]?.tomselect;
-        const cb = moveCheckboxes[idx];
-        if (ts && cb) {
-          ts.setValue(String(moveId));
-          cb.checked = true;
-        }
-      }
-    });
 
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
     if (abilitySelect && entry.ability !== null) {
@@ -518,6 +491,33 @@ async function importTeamData(data) {
     if (natureSelect && natureCheckbox && entry.nature) {
       natureCheckbox.checked = true;
       natureSelect.setValue(entry.nature);
+    }
+
+    const moveDropdowns = slot.querySelectorAll('.move-select');
+    const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
+    (entry.moves || []).slice(0, 4).forEach((moveId, idx) => {
+      const ts = moveDropdowns[idx]?.tomselect;
+      const cb = moveCheckboxes[idx];
+      if (ts && cb && moveId !== null) {
+        ts.setValue(String(moveId));
+        cb.checked = true;
+      }
+    });
+
+    if (entry.fusion !== null && entry.fusion !== undefined) {
+      const fusionSelect = slot.querySelector('.fusion-container select');
+      const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
+      if (fusionIndex !== -1) {
+        fusionSelect.value = fusionIndex;
+        fusionSelect.dispatchEvent(new Event('change'));
+        await new Promise(res => setTimeout(res, 300));
+
+        const updatedSlot = document.querySelectorAll('.team-slot')[i]; // re-grab slot
+        const fusionAbilitySelect = updatedSlot.querySelector('.fusion-ability-select')?.tomselect;
+        if (fusionAbilitySelect && entry.fusionAbility !== null) {
+          fusionAbilitySelect.setValue(String(entry.fusionAbility));
+        }
+      }
     }
 
     updateTeamSummary();
