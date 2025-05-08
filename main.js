@@ -181,7 +181,14 @@ const getAllMoves = () => {
         const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
         return `<option value="${i}">${name}</option>`;
       }).join('');
-    
+    select.className = 'base-pokemon-select';
+    // Append it now so TomSelect can attach properly
+    setTimeout(() => {
+      if (!select.tomselect) {
+        new TomSelect(select, { maxOptions: null });
+      }
+    }, 0);
+
     select.onchange = () => {
       const idx = select.value;
       const selected = pokemonData[idx];
@@ -189,7 +196,10 @@ const getAllMoves = () => {
       onSelect(idx);
     };
 
-    select.addEventListener('change', updateTeamSummary);
+    select.addEventListener('change', () => {
+    onSelect(select.value);
+    updateTeamSummary();
+  });
     return select;
   };
 
