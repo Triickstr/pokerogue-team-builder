@@ -417,9 +417,8 @@ const exportTeamToJson = () => {
     });
 
     const baseAbility = slot.querySelector('.ability-select')?.tomselect?.getValue();
-    const natureSelect = slot.querySelector('.nature-select');
-    const natureCheckbox = slot.querySelector('.nature-checkbox');
-    const nature = natureCheckbox?.checked ? natureSelect?.tomselect?.getValue() : null;
+    // Nature
+    const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
 
     const fusionSelect = slot.querySelector('.fusion-container select');
     const selectedFusion = pokemonData[fusionSelect?.value];
@@ -427,8 +426,7 @@ const exportTeamToJson = () => {
 
     const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
 
-     // Nature
-    const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
+   
 
     teamData.push({
       pokemon: pokemonRow,
