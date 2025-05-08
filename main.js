@@ -406,7 +406,8 @@ const exportTeamToJson = () => {
   document.querySelectorAll('.team-slot').forEach(slot => {
     const baseSelect = slot.querySelector('select');
     const selectedPokemon = pokemonData[baseSelect?.value];
-    const pokemonRow = parseInt(slot.dataset.pokemonRow) || null;
+    let pokemonRow = parseInt(slot.dataset.pokemonRow);
+    pokemonRow = isNaN(pokemonRow) ? null : pokemonRow;
 
     const moveSelects = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
@@ -417,23 +418,38 @@ const exportTeamToJson = () => {
     });
 
     const baseAbility = slot.querySelector('.ability-select')?.tomselect?.getValue();
-    // Nature
+    const baseAbilityParsed = baseAbility ? parseInt(baseAbility) : null;
+
     const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
+
+    // Bulbasaur fallback logic
+    const hasAnyMoves = moves.some(m => m !== null && !isNaN(m));
+    const hasBaseAbility = baseAbilityParsed !== null;
+    const hasNature = !!nature;
+
+    if (pokemonRow === null && (hasAnyMoves || hasBaseAbility || hasNature)) {
+      pokemonRow = 0; // fallback to Bulbasaur
+    }
 
     const fusionSelect = slot.querySelector('.fusion-container select');
     const selectedFusion = pokemonData[fusionSelect?.value];
-    const fusionRow = parseInt(slot.dataset.fusionRow) || null;
+    let fusionRow = parseInt(slot.dataset.fusionRow);
+    fusionRow = isNaN(fusionRow) ? null : fusionRow;
 
-    const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue() || null;
+    const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue();
+    const fusionAbilityParsed = fusionAbility ? parseInt(fusionAbility) : null;
 
-   
+    // Fusion fallback logic
+    if (fusionRow === null && fusionAbilityParsed !== null) {
+      fusionRow = 0;
+    }
 
     teamData.push({
       pokemon: pokemonRow,
       fusion: fusionRow,
       moves: moves,
-      ability: baseAbility ? parseInt(baseAbility) : null,
-      fusionAbility: fusionAbility ? parseInt(fusionAbility) : null,
+      ability: baseAbilityParsed,
+      fusionAbility: fusionAbilityParsed,
       nature
     });
   });
@@ -446,6 +462,7 @@ const exportTeamToJson = () => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
 
 //  Basic import logic using .row field matching
 async function importTeamData(data) {
