@@ -170,19 +170,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Move generation after data is loaded
-  window.allMoves = (() => {
-    const moveSet = new Set();
-    pokemonData.forEach(p => {
-      const exclude = [p.t1, p.t2, p.a1, p.a2, p.ha, p.pa];
-      Object.keys(p).forEach(key => {
-        const val = parseInt(key);
-        if (!isNaN(val) && !exclude.includes(val)) {
+window.allMoves = (() => {
+  const moveSet = new Set();
+
+  pokemonData.forEach(p => {
+    const exclude = [p.t1, p.t2, p.a1, p.a2, p.ha, p.pa];
+    Object.keys(p).forEach(key => {
+      const val = parseInt(key);
+      if (!isNaN(val) && !exclude.includes(val)) {
+        const category = window.catToName?.[val];
+        if (category === 'Move') { // Dynamically confirm it's a move
           moveSet.add(val);
         }
-      });
+      }
     });
-    return Array.from(moveSet);
-  })();
+  });
+
+  return Array.from(moveSet);
+})();
 
   // Create exactly 6 team slots
   for (let i = 0; i < 6; i++) {
