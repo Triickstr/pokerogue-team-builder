@@ -226,36 +226,30 @@ window.allMoves = (() => {
     return select;
   };
 
+const getValidMoves = () => {
+  const moves = [];
+  let foundStart = false;
+  for (const [fid, name] of Object.entries(window.fidToName || {})) {
+    if (name === 'Tackle') foundStart = true;
+    if (foundStart) moves.push({ id: parseInt(fid), name });
+    if (name === 'Eternabeam') break;
+  }
+  return moves;
+};
+
+// Now define createMoveDropdown after this
 const createMoveDropdown = (pokemon) => {
+  const validMoves = getValidMoves();
   const sel = document.createElement('select');
+  setTimeout(() => new TomSelect(sel, { maxOptions: null }), 0);
+
   sel.className = 'move-select';
-
   sel.innerHTML = '<option value="">Select a Move</option>' +
-    window.allMoves.map(m => {
-      const isCompatible = pokemon && pokemon.hasOwnProperty(String(m));
-      const name = window.fidToName?.[m] || `Move ${m}`;
-      return `<option value="${m}" class="${isCompatible ? 'move-compatible' : 'move-incompatible'}">${name}</option>`;
+    validMoves.map(m => {
+      const isCompatible = String(m.id) in pokemon;
+      const optClass = isCompatible ? 'move-compatible' : 'move-incompatible';
+      return `<option value="${m.id}" class="${optClass}">${m.name}</option>`;
     }).join('');
-
-  setTimeout(() => {
-    if (!sel.tomselect) {
-      new TomSelect(sel, {
-        maxOptions: null,
-        render: {
-          option: (data, escape) => {
-            const isCompatible = pokemon && pokemon.hasOwnProperty(data.value);
-            const color = isCompatible ? '#d4edda' : '#ffeeba';
-            return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-          },
-          item: (data, escape) => {
-            const isCompatible = pokemon && pokemon.hasOwnProperty(data.value);
-            const color = isCompatible ? '#d4edda' : '#ffeeba';
-            return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-          }
-        }
-      });
-    }
-  }, 0);
 
   return sel;
 };
