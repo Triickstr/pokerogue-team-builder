@@ -237,18 +237,30 @@ const getValidMoves = () => {
   return moves;
 };
 
-// Now define createMoveDropdown after this
 const createMoveDropdown = (pokemon) => {
-  const validMoves = getValidMoves();
   const sel = document.createElement('select');
-  setTimeout(() => new TomSelect(sel, { maxOptions: null }), 0);
+  setTimeout(() => new TomSelect(sel, {
+    maxOptions: null,
+    render: {
+      option: function(data, escape) {
+        const isCompatible = pokemon.hasOwnProperty(data.value);
+        const color = isCompatible ? '#d4edda' : '#ffeeba'; // Green for compatible, yellow for incompatible
+        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+      },
+      item: function(data, escape) {
+        const isCompatible = pokemon.hasOwnProperty(data.value);
+        const color = isCompatible ? '#d4edda' : '#ffeeba';
+        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+      }
+    }
+  }), 0);
 
   sel.className = 'move-select';
   sel.innerHTML = '<option value="">Select a Move</option>' +
-    validMoves.map(m => {
-      const isCompatible = String(m.id) in pokemon;
-      const optClass = isCompatible ? 'move-compatible' : 'move-incompatible';
-      return `<option value="${m.id}" class="${optClass}">${m.name}</option>`;
+    getValidMoves().map(m => {
+      const isCompatible = String(m.id) in pokemon; // Check against full Pokémon data
+      const name = m.name;
+      return `<option value="${m.id}" class="${isCompatible ? 'move-compatible' : 'move-incompatible'}">${name}</option>`;
     }).join('');
 
   return sel;
