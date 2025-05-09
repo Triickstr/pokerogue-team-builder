@@ -282,7 +282,7 @@ const createMoveDropdown = (pokemon) => {
   const typeContainer = document.createElement('div');
     typeContainer.className = 'type-container';
 
-    pokemon.types?.forEach(type => {
+    pokemon.types?.filter(type => type !== undefined && type !== null).forEach(type => {
     const typeName = window.fidToName?.[type] || `Type ${type}`;
     const typeBox = document.createElement('div');
     typeBox.className = 'type-box';
@@ -371,7 +371,7 @@ const renderFusionInfo = (fusionPoke, slot) => {
   // Types
   const typeContainer = document.createElement('div');
   typeContainer.className = 'type-container';
-  [fusionPoke.t1, fusionPoke.t2].filter(Boolean).forEach(type => {
+  [fusionPoke.t1, fusionPoke.t2].filter(type => type !== undefined && type !== null).forEach(type => {
     const typeName = window.fidToName?.[type] || `Type ${type}`;
     const typeBox = document.createElement('div');
     typeBox.className = 'type-box';
