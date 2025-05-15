@@ -80,7 +80,6 @@ const updateTeamSummary = () => {
     const fusionTypes = Array.from(types).slice(2, 4).map(t => t.textContent);  // adjust if more types show
 
     
-
 let resultTypes = [];
 
 if (fusionTypes.length === 0) {
@@ -89,8 +88,9 @@ if (fusionTypes.length === 0) {
   const [primaryFirst] = primaryTypes;
   let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-  if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst && base.t2 === undefined) {
-    fusionPick = null;  //  This means DO NOT DISPLAY a second type
+  //  Check directly using type names
+  if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst && primaryTypes.length === 1) {
+    fusionPick = null;  // Suppress second type
   } else {
     if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
       fusionPick = fusionTypes[0];
@@ -99,10 +99,7 @@ if (fusionTypes.length === 0) {
     }
   }
 
-  //  Correctly handle `null` return to suppress the second type display
-  if (fusionPick === null) {
-    resultTypes = [primaryFirst];
-  } else if (fusionPick === primaryFirst) {
+  if (fusionPick === null || fusionPick === primaryFirst) {
     resultTypes = [primaryFirst];
   } else {
     resultTypes = [primaryFirst, fusionPick];
