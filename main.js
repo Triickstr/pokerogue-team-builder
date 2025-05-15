@@ -114,12 +114,14 @@ if (fusionTypes.length === 0) {
     typeRow.className = 'summary-types';
     typeRow.innerHTML = '';
     resultTypes.forEach(typeName => {
+  if (typeName !== null) {  //  Skip null values explicitly
     const box = document.createElement('div');
     box.className = 'summary-type-box';
     box.style.backgroundColor = window.typeColors?.[typeName] || '#777';
     box.textContent = typeName;
     typeRow.appendChild(box);
-    });
+  }
+});
     summaryBox.appendChild(typeRow);
 
     let statRow = document.createElement('div');
