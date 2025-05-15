@@ -80,32 +80,35 @@ const updateTeamSummary = () => {
     const fusionTypes = Array.from(types).slice(2, 4).map(t => t.textContent);  // adjust if more types show
 
     
-let resultTypes = [];
 
-if (fusionTypes.length === 0) {
-  resultTypes = primaryTypes;
-} else {
-  const [primaryFirst] = primaryTypes;
-  let fusionPick = fusionTypes[1] || fusionTypes[0];
+    let resultTypes = [];
+    if (fusionTypes.length === 0) {
+      resultTypes = primaryTypes;
+    } else {
+      const [primaryFirst] = primaryTypes;
+      let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-  //  Final check: If both Pokémon are mono-type and have the same type, show only one type
-  const baseIsMono = primaryTypes.length === 1;
-  const fusionIsMono = fusionTypes.length === 1;
-  const sameType = fusionTypes[0] === primaryFirst;
+      const baseIsMono = base.t2 === undefined;
+      const fusionIsMono = secondary.t2 === undefined;
+      const sameType = getTypeName(secondary.t1) === primaryFirst;
 
-  if (baseIsMono && fusionIsMono && sameType) {
-    resultTypes = [primaryFirst];
-  } else {
-    if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
-      fusionPick = fusionTypes[0];
-    } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
-      fusionPick = primaryTypes[1] || primaryFirst;
+      if (baseIsMono && fusionIsMono && sameType) {
+        resultTypes = [primaryFirst];
+      } else {
+        if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
+          fusionPick = fusionTypes[0];
+        } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
+          fusionPick = primaryTypes[1] || primaryFirst;
+        }
+
+        if (fusionPick === primaryFirst) {
+          resultTypes = [primaryFirst];
+        } else {
+          resultTypes = [primaryFirst, fusionPick];
+        }
+      }
     }
 
-    if (fusionPick === primaryFirst) {
-      resultTypes = [primaryFirst];
-    } else {
-      resultTypes = [primaryFirst, fusionPick];
     }
   }
 }
