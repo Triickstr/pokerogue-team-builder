@@ -106,9 +106,6 @@ const updateTeamSummary = () => {
       }
     }
 
-    }
-  }
-}
 
 
     const typeRow = document.createElement('div');
