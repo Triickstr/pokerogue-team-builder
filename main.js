@@ -88,9 +88,8 @@ if (fusionTypes.length === 0) {
   const [primaryFirst] = primaryTypes;
   let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-  //  Check directly using type names
   if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst && primaryTypes.length === 1) {
-    fusionPick = null;  // Suppress second type
+    fusionPick = null;
   } else {
     if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
       fusionPick = fusionTypes[0];
@@ -106,13 +105,15 @@ if (fusionTypes.length === 0) {
   }
 }
 
+//  Remove duplicates explicitly before rendering
+resultTypes = [...new Set(resultTypes)];
 
+const typeRow = document.createElement('div');
+typeRow.className = 'summary-types';
+typeRow.innerHTML = '';
 
-    const typeRow = document.createElement('div');
-    typeRow.className = 'summary-types';
-    typeRow.innerHTML = '';
-    resultTypes.forEach(typeName => {
-  if (typeName !== null) {  //  Skip null values explicitly
+resultTypes.forEach(typeName => {
+  if (typeName !== null) {
     const box = document.createElement('div');
     box.className = 'summary-type-box';
     box.style.backgroundColor = window.typeColors?.[typeName] || '#777';
@@ -120,7 +121,7 @@ if (fusionTypes.length === 0) {
     typeRow.appendChild(box);
   }
 });
-    summaryBox.appendChild(typeRow);
+summaryBox.appendChild(typeRow);
 
     let statRow = document.createElement('div');
     statRow.className = 'summary-stats';
