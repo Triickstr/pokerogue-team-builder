@@ -80,7 +80,6 @@ const updateTeamSummary = () => {
     const fusionTypes = Array.from(types).slice(2, 4).map(t => t.textContent);  // adjust if more types show
 
     
-    
     let resultTypes = [];
     if (fusionTypes.length === 0) {
       resultTypes = primaryTypes;
@@ -88,28 +87,17 @@ const updateTeamSummary = () => {
       const [primaryFirst] = primaryTypes;
       let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-      // Check if both are mono-type and the same type
-      const baseIsMono = primaryTypes.length === 1;
-      const fusionIsMono = fusionTypes.length === 1;
-      const sameType = fusionTypes[0] === primaryFirst;
+      if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
+        fusionPick = fusionTypes[0];
+      } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
+        fusionPick = primaryTypes[1] || primaryFirst;
+      }
 
-      if (baseIsMono && fusionIsMono && sameType) {
+      // New check: if both are mono-type and the same type, show only one type
+      if (primaryTypes.length === 1 && fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
         resultTypes = [primaryFirst];
       } else {
-        if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
-          fusionPick = fusionTypes[0];
-        } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
-          fusionPick = primaryTypes[1] || primaryFirst;
-        }
-
-        if (fusionPick === primaryFirst) {
-          resultTypes = [primaryFirst];
-        } else {
-          resultTypes = [primaryFirst, fusionPick];
-        }
-      }
-    }
-
+        resultTypes = [primaryFirst, fusionPick];
       }
     }
 
