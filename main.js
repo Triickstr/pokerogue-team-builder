@@ -94,7 +94,7 @@ const updateTeamSummary = () => {
         fusionPick = primaryTypes[1] || primaryFirst;
       }
 
-      // Final check: if both are mono-type and the same type, show only one type
+      // Final check: if both Pokémon are mono-type and the same type, only show one type
       if (primaryTypes.length === 1 && fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
         resultTypes = [primaryFirst];
       } else if (primaryTypes.length === 1 && fusionTypes.length === 1 && primaryFirst === fusionPick) {
