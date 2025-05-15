@@ -81,30 +81,32 @@ const updateTeamSummary = () => {
 
     
 
-    let resultTypes = [];
-    if (fusionTypes.length === 0) {
-      resultTypes = primaryTypes;
-    } else {
-      const [primaryFirst] = primaryTypes;
-      let fusionPick = fusionTypes[1] || fusionTypes[0];
+let resultTypes = [];
 
-      // FINAL FIX: Compare type IDs directly from base and secondary
-      if (base.t2 === undefined && secondary.t2 === undefined && base.t1 === secondary.t1) {
-        resultTypes = [primaryFirst];  // Only show one type
-      } else {
-        if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
-          fusionPick = fusionTypes[0];
-        } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
-          fusionPick = primaryTypes[1] || primaryFirst;
-        }
+if (fusionTypes.length === 0) {
+  resultTypes = primaryTypes;
+} else {
+  const [primaryFirst] = primaryTypes;
+  let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-        if (fusionPick === primaryFirst) {
-          resultTypes = [primaryFirst];
-        } else {
-          resultTypes = [primaryFirst, fusionPick];
-        }
-      }
+  //  Mimic determineSecondaryType exactly:
+  if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst && base.t2 === undefined) {
+    fusionPick = null;  // Signal that we shouldn't display a second type
+  } else {
+    if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
+      fusionPick = fusionTypes[0];
+    } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
+      fusionPick = primaryTypes[1] || primaryFirst;
     }
+  }
+
+  // Final check: only add second type if fusionPick is not null and not the same as the first type
+  if (fusionPick === null || fusionPick === primaryFirst) {
+    resultTypes = [primaryFirst];
+  } else {
+    resultTypes = [primaryFirst, fusionPick];
+  }
+}
 
 
 
