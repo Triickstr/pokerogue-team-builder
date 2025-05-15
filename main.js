@@ -109,11 +109,6 @@ const updateTeamSummary = () => {
       }
     }
 
-    }
-  }
-}
-
-
     const typeRow = document.createElement('div');
     typeRow.className = 'summary-types';
     typeRow.innerHTML = '';
