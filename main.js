@@ -88,12 +88,9 @@ const updateTeamSummary = () => {
       const [primaryFirst] = primaryTypes;
       let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-      const baseIsMono = base.t2 === undefined;
-      const fusionIsMono = secondary.t2 === undefined;
-      const sameType = getTypeName(secondary.t1) === primaryFirst;
-
-      if (baseIsMono && fusionIsMono && sameType) {
-        resultTypes = [primaryFirst];
+      // FINAL FIX: Compare type IDs directly from base and secondary
+      if (base.t2 === undefined && secondary.t2 === undefined && base.t1 === secondary.t1) {
+        resultTypes = [primaryFirst];  // Only show one type
       } else {
         if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
           fusionPick = fusionTypes[0];
@@ -108,6 +105,11 @@ const updateTeamSummary = () => {
         }
       }
     }
+
+    }
+  }
+}
+
 
     const typeRow = document.createElement('div');
     typeRow.className = 'summary-types';
