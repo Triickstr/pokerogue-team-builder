@@ -145,6 +145,12 @@ summaryBox.appendChild(typeRow);
 
     statRow.textContent = `HP: ${finalStats[0]}, Atk: ${finalStats[1]}, Def: ${finalStats[2]}, SpA: ${finalStats[3]}, SpD: ${finalStats[4]}, Spe: ${finalStats[5]}`;
     }
+    const baseRow = parseInt(slot.dataset.pokemonRow);
+    const fusionRow = parseInt(slot.dataset.fusionRow);
+
+    if (baseRow === 364 || fusionRow === 364) {
+    finalStats[0] = 1; // HP is always the first stat
+    }
     summaryBox.appendChild(statRow);
 
     const moveRow = document.createElement('div');
