@@ -92,10 +92,9 @@ if (fusionTypes.length === 0) {
   if (
     primaryTypes.length === 1 &&
     fusionTypes.length === 1 &&
-    fusionTypes[0] === primaryFirst &&
-    types.length === 1 // This ensures base Pokémon is mono-type (no t2)
+    fusionTypes[0] === primaryFirst
   ) {
-    resultTypes = [primaryFirst];
+    resultTypes = primaryTypes;
   } else {
     if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
       fusionPick = fusionTypes[0];
