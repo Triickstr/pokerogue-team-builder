@@ -83,20 +83,19 @@ const updateTeamSummary = () => {
 let resultTypes = [];
 
 if (fusionTypes.length === 0) {
-  resultTypes = primaryTypes;  // No fusion selected, just show base types
+  resultTypes = primaryTypes;
 } else {
   const [primaryFirst] = primaryTypes;
-  let fusionPick = fusionTypes[1] || fusionTypes[0];  // Default fusion type selection
+  let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-  // NEW: Properly check if both are mono-type and of the same type
+  //  Final check: If both Pokémon are mono-type and have the same type, show only one type
   const baseIsMono = primaryTypes.length === 1;
   const fusionIsMono = fusionTypes.length === 1;
   const sameType = fusionTypes[0] === primaryFirst;
 
   if (baseIsMono && fusionIsMono && sameType) {
-    resultTypes = [primaryFirst];  // Only show one type, they are identical
+    resultTypes = [primaryFirst];
   } else {
-    // Keep the original fusion typing logic if the above condition is not met
     if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
       fusionPick = fusionTypes[0];
     } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
@@ -104,9 +103,9 @@ if (fusionTypes.length === 0) {
     }
 
     if (fusionPick === primaryFirst) {
-      resultTypes = [primaryFirst];  // Avoid showing duplicate typing
+      resultTypes = [primaryFirst];
     } else {
-      resultTypes = [primaryFirst, fusionPick];  // Show both types if different
+      resultTypes = [primaryFirst, fusionPick];
     }
   }
 }
