@@ -97,8 +97,7 @@ const updateTeamSummary = () => {
       // Final check: if both are mono-type and the same type, show only one type
       if (primaryTypes.length === 1 && fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
         resultTypes = [primaryFirst];
-      } else if (primaryTypes.length === 1 && primaryTypes[0] === fusionPick) {
-        // If base and fusion pick are the same, avoid duplicate display
+      } else if (primaryTypes.length === 1 && fusionTypes.length === 1 && primaryFirst === fusionPick) {
         resultTypes = [primaryFirst];
       } else {
         resultTypes = [primaryFirst, fusionPick];
