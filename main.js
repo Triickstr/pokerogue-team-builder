@@ -79,9 +79,8 @@ const updateTeamSummary = () => {
     const primaryTypes = Array.from(types).slice(0, 2).map(t => t.textContent);
     const fusionTypes = Array.from(types).slice(2, 4).map(t => t.textContent);  // adjust if more types show
 
-    
-    
     let resultTypes = [];
+
     if (fusionTypes.length === 0) {
       resultTypes = primaryTypes;
     } else {
@@ -90,11 +89,10 @@ const updateTeamSummary = () => {
 
       if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
         fusionPick = fusionTypes[0];
-      } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
-        fusionPick = primaryTypes[1] || primaryFirst;
-      }
-
-      // Final check: if both Pokémon are mono-type and the same type, only show one type
+    } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
+      fusionPick = primaryTypes[1] || primaryFirst;
+    }
+      
       if (primaryTypes.length === 1 && fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
         resultTypes = [primaryFirst];
       } else if (primaryTypes.length === 1 && fusionTypes.length === 1 && primaryFirst === fusionPick) {
@@ -103,10 +101,6 @@ const updateTeamSummary = () => {
         resultTypes = [primaryFirst, fusionPick];
       }
     }
-
-      }
-    }
-
 
     const typeRow = document.createElement('div');
     typeRow.className = 'summary-types';
