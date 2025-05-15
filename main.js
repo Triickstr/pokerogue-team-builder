@@ -87,10 +87,10 @@ if (fusionTypes.length === 0) {
   const [primaryFirst] = primaryTypes;
   let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-  // Final check: if both Pokémon are mono-type and the same type, only show one type
+  // ✅ Final check: if both Pokémon are mono-type and the same type, show only one type
   if (
-    primaryTypes.length === 1 &&
-    fusionTypes.length === 1 &&
+    primaryTypes.length === 1 && 
+    fusionTypes.length === 1 && 
     fusionTypes[0] === primaryFirst
   ) {
     resultTypes = [primaryFirst];
@@ -100,7 +100,13 @@ if (fusionTypes.length === 0) {
     } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
       fusionPick = primaryTypes[1] || primaryFirst;
     }
-    resultTypes = [primaryFirst, fusionPick];
+
+    // ✅ Avoid duplicate if primary and fusionPick are still the same
+    if (fusionPick === primaryFirst) {
+      resultTypes = [primaryFirst];
+    } else {
+      resultTypes = [primaryFirst, fusionPick];
+    }
   }
 }
 
