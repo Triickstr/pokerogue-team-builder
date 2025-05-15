@@ -80,26 +80,36 @@ const updateTeamSummary = () => {
     const fusionTypes = Array.from(types).slice(2, 4).map(t => t.textContent);  // adjust if more types show
 
     
-    let resultTypes = [];
-    if (fusionTypes.length === 0) {
-      resultTypes = primaryTypes;
-    } else {
-      const [primaryFirst] = primaryTypes;
-      let fusionPick = fusionTypes[1] || fusionTypes[0];
+let resultTypes = [];
 
-      if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
-        fusionPick = fusionTypes[0];
-      } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
-        fusionPick = primaryTypes[1] || primaryFirst;
-      }
+if (fusionTypes.length === 0) {
+  resultTypes = primaryTypes;
+} else {
+  const [primaryFirst] = primaryTypes;
+  let fusionPick = fusionTypes[1] || fusionTypes[0];
 
-      // New check: if both are mono-type and the same type, show only one type
-      if (primaryTypes.length === 1 && fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
-        resultTypes = [primaryFirst];
-      } else {
-        resultTypes = [primaryFirst, fusionPick];
-      }
+  //  If both Pokémon are mono-type and the same type, only show one type
+  if (
+    primaryTypes.length === 1 &&
+    fusionTypes.length === 1 &&
+    fusionTypes[0] === primaryFirst &&
+    types.length === 1 // This ensures base Pokémon is mono-type (no t2)
+  ) {
+    resultTypes = [primaryFirst];
+  } else {
+    if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
+      fusionPick = fusionTypes[0];
+    } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
+      fusionPick = primaryTypes[1] || primaryFirst;
     }
+
+    if (fusionPick === primaryFirst) {
+      resultTypes = [primaryFirst];
+    } else {
+      resultTypes = [primaryFirst, fusionPick];
+    }
+  }
+}
 
 
     const typeRow = document.createElement('div');
