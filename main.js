@@ -225,6 +225,73 @@ summaryBox.appendChild(infoRowTop);
 summaryBox.appendChild(infoRowBottom);
     summaryContainer.appendChild(summaryBox);
   });
+const itemData = teamItemSelections[i];
+if (itemData && Object.values(itemData).some(val => val > 0)) {
+  const itemSections = [
+    { title: "Vitamins", items: ["hp_up", "protein", "iron", "calcium", "zinc", "carbos"] },
+    { title: "Eggs", items: ["lucky_egg", "golden_egg"] },
+    { title: "Special Items", items: ["mega_stone", "max_mushrooms", "reviver_seed"] },
+    { title: "Regular Items", items: [
+      "baton", "eviolite", "focus_band",
+      "flame_orb", "toxic_orb", "soothe_bell",
+      "golden_punch", "grip_claw", "kings_rock",
+      "leftovers", "mini_black_hole", "mystical_rock",
+      "quick_claw", "scope_lens", "shell_bell",
+      "soul_dew", "wide_lens", "zoom_lens"
+    ]}
+  ];
+
+  const itemSectionDiv = document.createElement('div');
+  itemSectionDiv.className = 'summary-items';
+
+  itemSections.forEach(({ title, items }) => {
+    const relevantItems = items.filter(name => itemData[name] > 0);
+    if (relevantItems.length === 0) return;
+
+    const sectionTitle = document.createElement('div');
+    sectionTitle.textContent = title;
+    sectionTitle.style.fontWeight = 'bold';
+    sectionTitle.style.marginTop = '6px';
+    itemSectionDiv.appendChild(sectionTitle);
+
+    const iconRow = document.createElement('div');
+    iconRow.style.display = 'flex';
+    iconRow.style.flexWrap = 'wrap';
+    iconRow.style.gap = '8px';
+    iconRow.style.marginTop = '4px';
+    iconRow.style.alignItems = 'center';
+
+    relevantItems.forEach(name => {
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.gap = '4px';
+
+      const icon = document.createElement('img');
+      icon.src = `items/${name}.png`;
+      icon.alt = name;
+      icon.title = name.replace(/_/g, ' ');
+      icon.style.width = '28px';
+      icon.style.height = '28px';
+      icon.style.imageRendering = 'pixelated';
+
+      const quantity = document.createElement('span');
+      quantity.textContent = `x${itemData[name]}`;
+      quantity.style.fontSize = '14px';
+      quantity.style.fontWeight = 'normal';
+
+      wrapper.appendChild(icon);
+      wrapper.appendChild(quantity);
+      iconRow.appendChild(wrapper);
+    });
+
+    itemSectionDiv.appendChild(iconRow);
+  });
+
+  summaryBox.appendChild(itemSectionDiv);
+}
+
+  
 };
 
 const observeChanges = (element) => {
