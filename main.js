@@ -201,8 +201,8 @@ infoRowBottom.className = 'summary-info-row';
 
 [
   { label: "Ability", value: ability, targetRow: infoRowTop },
-  { label: "Passive", value: passiveText, targetRow: infoRowTop },
-  { label: "Nature", value: nature, targetRow: infoRowBottom },
+  { label: "Passive", value: passiveText, targetRow: infoRowBottom },
+  { label: "Nature", value: nature, targetRow: infoRowTop },
   { label: "Tera", value: teraType, targetRow: infoRowBottom }
 ].forEach(({ label, value, targetRow }) => {
   const div = document.createElement('div');
