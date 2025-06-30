@@ -793,7 +793,9 @@ function updateMoveDropdownColors(slot) {
 
   slot.querySelectorAll('.move-select').forEach(select => {
     const ts = select.tomselect;
+    if (!ts) return;
 
+    // Update all option colors
     for (const option of select.options) {
       if (!option.value) continue;
       const moveId = parseInt(option.value);
@@ -807,12 +809,16 @@ function updateMoveDropdownColors(slot) {
 
       option.dataset.color = color;
 
-      // Update rendered dropdown if already open
+      // Update visible dropdowns too
       const optEl = ts.getOption(option.value);
       const itemEl = ts.getItem(option.value);
       if (optEl) optEl.style.backgroundColor = color;
       if (itemEl) itemEl.style.backgroundColor = color;
     }
+
+    // 🟦 Key fix: force refresh the list of options to re-render the dropdown UI
+    ts.refreshOptions(false);
   });
 }
+
 
