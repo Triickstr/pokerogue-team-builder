@@ -159,13 +159,38 @@ summaryBox.appendChild(typeRow);
     summaryBox.appendChild(statRow);
 
     const moveRow = document.createElement('div');
-    moveRow.className = 'summary-moves';
-    moveNames.forEach(m => {
-      const div = document.createElement('div');
-      div.textContent = m;
-      moveRow.appendChild(div);
-    });
-    summaryBox.appendChild(moveRow);
+moveRow.className = 'summary-moves';
+
+const baseRow = parseInt(slot.dataset.pokemonRow);
+const fusionRow = parseInt(slot.dataset.fusionRow || -1);
+const basePoke = pokemonData.find(p => p.row === baseRow);
+const fusionPoke = pokemonData.find(p => p.row === fusionRow);
+
+slot.querySelectorAll('.move-select').forEach(select => {
+  const ts = select.tomselect;
+  const value = ts?.getValue?.();
+  const name = ts?.options?.[value]?.text;
+  const moveId = parseInt(value);
+
+  if (name && !isNaN(moveId)) {
+    let color = '#ffeeba'; // default orange
+    if (basePoke?.hasOwnProperty(moveId)) color = '#d4edda'; // green
+    else if (fusionPoke?.hasOwnProperty(moveId)) color = '#cce5ff'; // blue
+
+    const div = document.createElement('div');
+    div.textContent = name;
+    div.style.backgroundColor = color;
+    div.style.color = '#000'; // Dark text
+    div.style.fontWeight = '600';
+    div.style.padding = '2px 5px';
+    div.style.margin = '2px 0';
+    div.style.borderRadius = '4px';
+    moveRow.appendChild(div);
+  }
+});
+
+summaryBox.appendChild(moveRow);
+
 
     const infoRow = document.createElement('div');
     infoRow.className = 'summary-info';
