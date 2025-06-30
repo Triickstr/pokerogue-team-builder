@@ -193,14 +193,18 @@ slot.querySelectorAll('.move-select').forEach(select => {
 summaryBox.appendChild(moveRow);
 
 
-    const infoRow = document.createElement('div');
-    infoRow.className = 'summary-info';
-    [
-  { label: "Ability", value: ability },
-  { label: "Passive", value: passiveText },
-  { label: "Nature", value: nature },
-  { label: "Tera", value: teraType }
-].forEach(({ label, value }) => {
+const infoRowTop = document.createElement('div');
+infoRowTop.className = 'summary-info-row';
+
+const infoRowBottom = document.createElement('div');
+infoRowBottom.className = 'summary-info-row';
+
+[
+  { label: "Ability", value: ability, targetRow: infoRowTop },
+  { label: "Passive", value: passiveText, targetRow: infoRowTop },
+  { label: "Nature", value: nature, targetRow: infoRowBottom },
+  { label: "Tera", value: teraType, targetRow: infoRowBottom }
+].forEach(({ label, value, targetRow }) => {
   const div = document.createElement('div');
 
   if (label === "Tera" && value && value !== "—") {
@@ -213,9 +217,11 @@ summaryBox.appendChild(moveRow);
   }
 
   div.textContent = `${label}: ${value}`;
-  infoRow.appendChild(div);
+  targetRow.appendChild(div);
 });
-    summaryBox.appendChild(infoRow);
+
+summaryBox.appendChild(infoRowTop);
+summaryBox.appendChild(infoRowBottom);
     summaryContainer.appendChild(summaryBox);
   });
 };
