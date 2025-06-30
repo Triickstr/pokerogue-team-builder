@@ -223,8 +223,7 @@ infoRowBottom.className = 'summary-info-row';
 
 summaryBox.appendChild(infoRowTop);
 summaryBox.appendChild(infoRowBottom);
-    summaryContainer.appendChild(summaryBox);
-  });
+
 const itemData = teamItemSelections[i];
 if (itemData && Object.values(itemData).some(val => val > 0)) {
   const itemSections = [
@@ -290,6 +289,10 @@ if (itemData && Object.values(itemData).some(val => val > 0)) {
 
   summaryBox.appendChild(itemSectionDiv);
 }
+
+    summaryContainer.appendChild(summaryBox);
+  });
+
 
   
 };
