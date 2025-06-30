@@ -206,3 +206,6 @@ select {
   margin-bottom: 24px;
 }
 
+.move-compatible { background-color: #d4edda; }       /* green */
+.move-fusion-compatible { background-color: #cce5ff; } /* blue */
+.move-incompatible { background-color: #ffeeba; }      /* orange */
