@@ -438,6 +438,36 @@ const renderFusionInfo = (fusionPoke, slot) => {
   img.onerror = () => img.style.display = 'none';
   img.onclick = () => {
     renderFusionSelector(slot);
+    slot.querySelectorAll('.move-select').forEach(select => {
+  const ts = select.tomselect;
+  if (!ts) return;
+
+  const currentValue = ts.getValue();
+
+  const newOptions = Array.from(select.options).map(opt => {
+    const moveId = parseInt(opt.value);
+    if (!moveId) return null;
+
+    const isBase = basePoke?.hasOwnProperty(moveId);
+    const isFusion = fusionPoke?.hasOwnProperty(moveId);
+
+    let color = '#ffeeba';
+    if (isBase) color = '#d4edda';
+    else if (isFusion) color = '#cce5ff';
+
+    return {
+      value: String(moveId),
+      text: window.fidToName?.[moveId] || `Move ${moveId}`,
+      $order: 1,
+      dataset: { color },
+    };
+  }).filter(Boolean);
+
+  ts.clearOptions();
+  ts.addOptions(newOptions);
+  ts.refreshOptions(false);
+  ts.setValue(currentValue);
+});
     setTimeout(updateTeamSummary, 10);
   };
   fusionContainer.appendChild(img);
