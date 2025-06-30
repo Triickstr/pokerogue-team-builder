@@ -20,6 +20,7 @@ async function waitForTomSelect(selectElement, timeout = 1000) {
 
 
 let pokemonData = [];
+let teamItemSelections = [{}, {}, {}, {}, {}, {}];
 window.typeColors = {
   Normal: '#A8A77A',
   Fire: '#EE8130',
@@ -892,16 +893,20 @@ async function openItemPopup(slot) {
   overlay.appendChild(popup);
   document.body.appendChild(overlay);
 
-  // Load item data (once globally to avoid multiple fetches)
+  // Load item data once
   if (!window.itemData) {
     const response = await fetch('item_max.json');
     window.itemData = await response.json();
   }
 
-  renderItemSections(popup, window.itemData);
+  // Get which slot this is
+  const slotIndex = Array.from(document.querySelectorAll('.team-slot')).indexOf(slot);
+
+  // Pass the index to track selections
+  renderItemSections(popup, window.itemData, slotIndex);
 }
 
-function renderItemSections(container, itemData) {
+function renderItemSections(container, itemData, slotIndex) {
   const sections = [
     { title: "Vitamins", layout: [3, 2], items: ["hp_up", "protein", "iron", "calcium", "zinc", "carbos"] },
     { title: "Eggs", layout: [2, 1], items: ["lucky_egg", "golden_egg"] },
@@ -929,29 +934,38 @@ function renderItemSections(container, itemData) {
     grid.style.gridTemplateColumns = `repeat(${layout[0]}, 1fr)`;
 
     items.forEach(name => {
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'item-entry';
+  const itemDiv = document.createElement('div');
+  itemDiv.className = 'item-entry';
 
-      const img = document.createElement('img');
-      img.src = `items/${name}.png`;
-      img.alt = name;
-      img.title = name;
-      img.className = 'item-img';
+  const img = document.createElement('img');
+  img.src = `items/${name}.png`;
+  img.alt = name;
+  img.title = name;
+  img.className = 'item-img';
 
-      const select = document.createElement('select');
-      select.className = 'item-dropdown';
-      const max = parseInt(itemData[name]?.Max || 1);
-      for (let i = 0; i <= max; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = i;
-        select.appendChild(option);
-      }
+  const select = document.createElement('select');
+  select.className = 'item-dropdown';
 
-      itemDiv.appendChild(img);
-      itemDiv.appendChild(select);
-      grid.appendChild(itemDiv);
-    });
+  const max = parseInt(itemData[name]?.Max || 1);
+  for (let i = 0; i <= max; i++) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = i;
+    select.appendChild(option);
+  }
+
+  // ⬇️ Apply saved value and handle change
+  const savedValue = teamItemSelections[slotIndex]?.[name] ?? 0;
+  select.value = savedValue;
+
+  select.addEventListener('change', () => {
+    teamItemSelections[slotIndex][name] = parseInt(select.value);
+  });
+
+  itemDiv.appendChild(img);
+  itemDiv.appendChild(select);
+  grid.appendChild(itemDiv);
+});
 
     section.appendChild(grid);
     container.appendChild(section);
