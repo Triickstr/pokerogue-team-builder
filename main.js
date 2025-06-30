@@ -38,7 +38,8 @@ window.typeColors = {
   Dragon: '#6F35FC',
   Dark: '#705746',
   Steel: '#B7B7CE',
-  Fairy: '#D685AD'
+  Fairy: '#D685AD',
+  Stellar: '#40B5A5'
 };
 const updateTeamSummary = () => {
   const summaryContainer = document.getElementById('teamSummary');
@@ -422,6 +423,41 @@ const createMoveDropdown = (basePokemon) => {
     slot.appendChild(natureWrapper);
 
     setTimeout(() => new TomSelect(natureSelect, { maxOptions: null }), 0);
+
+    
+    // Add Tera Type Dropdown
+    const teraWrapper = document.createElement('div');
+    teraWrapper.className = 'tera-wrapper';
+
+    const teraSelect = document.createElement('select');
+    teraSelect.className = 'tera-select';
+
+    teraSelect.innerHTML = `<option value="">Select Tera</option>` + 
+      Object.entries(window.typeColors)
+        .map(([type, color]) => 
+          `<option value="${type}" data-color="${color}">${type}</option>`
+        ).join('');
+
+    teraWrapper.appendChild(teraSelect);
+    slot.appendChild(teraWrapper);
+
+    setTimeout(() => {
+      new TomSelect(teraSelect, {
+        maxOptions: null,
+        render: {
+          option: function (data, escape) {
+            const color = data.$option?.dataset.color || '#fff';
+            return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+          },
+          item: function (data, escape) {
+            const color = data.$option?.dataset.color || '#fff';
+            return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+          }
+        }
+      });
+    }, 0);
+
+    teraSelect.addEventListener('change', updateTeamSummary);
 
     // Fusion Pokémon container
 const fusionContainer = document.createElement('div');
