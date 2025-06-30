@@ -195,11 +195,26 @@ summaryBox.appendChild(moveRow);
 
     const infoRow = document.createElement('div');
     infoRow.className = 'summary-info';
-    [ability, passiveText, nature, `Tera: ${teraType}`].forEach(val => {
-      const div = document.createElement('div');
-      div.textContent = val;
-      infoRow.appendChild(div);
-    });
+    [
+  { label: "Ability", value: ability },
+  { label: "Passive", value: passiveText },
+  { label: "Nature", value: nature },
+  { label: "Tera", value: teraType }
+].forEach(({ label, value }) => {
+  const div = document.createElement('div');
+
+  if (label === "Tera" && value && value !== "—") {
+    const color = window.typeColors?.[value] || '#ccc';
+    div.style.backgroundColor = color;
+    div.style.color = '#000';
+    div.style.padding = '2px 6px';
+    div.style.borderRadius = '4px';
+    div.style.fontWeight = 'bold';
+  }
+
+  div.textContent = `${label}: ${value}`;
+  infoRow.appendChild(div);
+});
     summaryBox.appendChild(infoRow);
     summaryContainer.appendChild(summaryBox);
   });
