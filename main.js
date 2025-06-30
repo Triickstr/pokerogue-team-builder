@@ -522,15 +522,14 @@ const renderFusionSelector = (slot) => {
   if (selected) {
     renderFusionInfo(selected, slot);
   } else {
-    //  Clear fusion state completely
     delete slot.dataset.fusionRow;
 
-    //  Clear fusion container content
     const fusionContainer = slot.querySelector('.fusion-container');
     if (fusionContainer) fusionContainer.innerHTML = '';
-
-    updateMoveDropdownColors(slot);  // 🔄 Reset colors properly
   }
+
+  // 🔁 Re-apply coloring to all move dropdowns in this slot
+  updateMoveDropdownColors(slot);
 
   setTimeout(updateTeamSummary, 10);
 };
@@ -792,31 +791,31 @@ function updateMoveDropdownColors(slot) {
 
   slot.querySelectorAll('.move-select').forEach(select => {
     const ts = select.tomselect;
+    if (!ts) return;
 
-    for (const option of Array.from(select.options)) {
-      if (!option.value) continue;
+    Array.from(select.options).forEach(option => {
       const moveId = parseInt(option.value);
+      if (isNaN(moveId)) return;
 
-      const isBase = basePoke?.hasOwnProperty(moveId);
-      const isFusion = fusionPoke?.hasOwnProperty(moveId);
-
-      let color = '#ffeeba'; // orange
-      if (isBase && isFusion) color = '#d4edda'; // prefer green
-      else if (isBase) color = '#d4edda';
-      else if (isFusion) color = '#cce5ff';
+      let color = '#ffeeba';
+      if (basePoke?.hasOwnProperty(moveId)) color = '#d4edda';
+      else if (fusionPoke?.hasOwnProperty(moveId)) color = '#cce5ff';
 
       option.dataset.color = color;
+    });
 
-      // Directly style existing TomSelect elements
-      const optEl = ts.getOption(option.value);
-      const itemEl = ts.getItem(option.value);
-      if (optEl) optEl.style.backgroundColor = color;
-      if (itemEl) itemEl.style.backgroundColor = color;
+    ts.settings.render.option = function (data, escape) {
+      const option = select.querySelector(`option[value="${data.value}"]`);
+      const color = option?.dataset.color || '#fff';
+      return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+    };
 
-      console.log(`Refreshing move ID ${moveId}: isBase=${isBase}, isFusion=${isFusion}, color=${color}`);
-    }
+    ts.settings.render.item = function (data, escape) {
+      const option = select.querySelector(`option[value="${data.value}"]`);
+      const color = option?.dataset.color || '#fff';
+      return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+    };
 
-    // Refresh rendering
     ts.refreshOptions(false);
   });
 }
