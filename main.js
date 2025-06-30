@@ -373,23 +373,53 @@ const createMoveDropdown = (basePokemon) => {
     slot.appendChild(stats);
 
     for (let i = 0; i < 4; i++) {
-      const moveWrapper = document.createElement('div');
-      moveWrapper.className = 'move-wrapper';
+  const moveWrapper = document.createElement('div');
+  moveWrapper.className = 'move-wrapper';
 
-      const moveDropdown = createMoveDropdown(pokemon);
-      ['mousedown', 'focus'].forEach(event =>
-        moveDropdown.addEventListener(event, () => updateMoveDropdownColors(slot))
-      );
-      setTimeout(() => updateMoveDropdownColors(slot), 10);
-      observeChanges(moveDropdown);
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'move-checkbox';
+  const moveDropdown = document.createElement('select');
+  moveDropdown.className = 'move-select';
 
-      moveWrapper.appendChild(moveDropdown);
-      moveWrapper.appendChild(checkbox);
-      slot.appendChild(moveWrapper);
-    }
+  moveDropdown.innerHTML = '<option value="">Select a Move</option>' + getValidMoves().map(m => {
+    return `<option value="${m.id}" data-color="#ffeeba">${m.name}</option>`; // default to orange
+  }).join('');
+
+  // Use TomSelect with dynamic coloring logic on open
+  setTimeout(() => {
+    new TomSelect(moveDropdown, {
+      maxOptions: null,
+      render: {
+        option: function (data, escape) {
+          const option = moveDropdown.querySelector(`option[value="${data.value}"]`);
+          const color = option?.dataset.color || '#fff';
+          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+        },
+        item: function (data, escape) {
+          const option = moveDropdown.querySelector(`option[value="${data.value}"]`);
+          const color = option?.dataset.color || '#fff';
+          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+        }
+      }
+    });
+
+    // Apply color update dynamically
+    ['mousedown', 'focus'].forEach(event =>
+      moveDropdown.addEventListener(event, () => updateMoveDropdownColors(slot))
+    );
+
+    updateMoveDropdownColors(slot); // Also trigger at load
+  }, 0);
+
+  observeChanges(moveDropdown);
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.className = 'move-checkbox';
+
+  moveWrapper.appendChild(moveDropdown);
+  moveWrapper.appendChild(checkbox);
+  slot.appendChild(moveWrapper);
+}
+
 
     const abilityDropdown = createAbilityDropdown(pokemon);
     observeChanges(abilityDropdown);
