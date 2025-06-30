@@ -210,15 +210,3 @@ select {
 .move-fusion-compatible { background-color: #cce5ff; } /* blue */
 .move-incompatible { background-color: #ffeeba; }      /* orange */
 
-.summary-stats {
-  display: flex;
-  justify-content: space-between;
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.summary-stats-col {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
