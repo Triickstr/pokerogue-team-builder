@@ -175,7 +175,7 @@ slot.querySelectorAll('.move-select').forEach(select => {
   if (name && !isNaN(moveId)) {
     let color = '#ffeeba'; // default orange
     if (basePoke?.hasOwnProperty(moveId)) color = '#d4edda'; // green
-    else if (fusionPoke?.hasOwnProperty(moveId)) color = '#c9a0dc'; // blue
+    else if (fusionPoke?.hasOwnProperty(moveId)) color = '#fae6fa'; // blue
 
     const div = document.createElement('div');
     div.textContent = name;
@@ -321,7 +321,7 @@ const createMoveDropdown = (basePokemon) => {
 
     let color = '#ffeeba'; // orange by default
     if (isBaseCompatible) color = '#d4edda'; // green
-    else if (isFusionCompatible) color = '#c9a0dc'; // blue
+    else if (isFusionCompatible) color = '#fae6fa'; // blue
 
     return `<option value="${m.id}" data-color="${color}">${m.name}</option>`;
   }).join('');
@@ -788,7 +788,7 @@ function updateMoveDropdownColors(slot) {
 
       let color = '#ffeeba'; // default orange
       if (isBase) color = '#d4edda'; // green
-      else if (isFusion) color = '#c9a0dc'; // blue
+      else if (isFusion) color = '#fae6fa'; // blue
 
       option.dataset.color = color;
 
