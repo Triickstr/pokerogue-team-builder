@@ -287,7 +287,7 @@ const getValidMoves = () => {
   return moves;
 };
 
-const createMoveDropdown = (basePokemon) => {
+const createMoveDropdown = (basePokemon, slot) => {
   const sel = document.createElement('select');
   sel.className = 'move-select';
 
@@ -314,7 +314,7 @@ const createMoveDropdown = (basePokemon) => {
   sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
     const isBaseCompatible = basePokemon.hasOwnProperty(m.id);
     const baseRow = basePokemon.row;
-    const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
+    //const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
     const fusionRow = parseInt(slot?.dataset.fusionRow || -1);
     const fusionPoke = isNaN(fusionRow) ? null : pokemonData.find(p => p.row === fusionRow);
     const isFusionCompatible = fusionPoke?.hasOwnProperty(m.id);
@@ -372,43 +372,14 @@ const createMoveDropdown = (basePokemon) => {
     stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
     slot.appendChild(stats);
 
-    for (let i = 0; i < 4; i++) {
+for (let i = 0; i < 4; i++) {
   const moveWrapper = document.createElement('div');
   moveWrapper.className = 'move-wrapper';
 
-  const moveDropdown = document.createElement('select');
-  moveDropdown.className = 'move-select';
-
-  moveDropdown.innerHTML = '<option value="">Select a Move</option>' + getValidMoves().map(m => {
-    return `<option value="${m.id}" data-color="#ffeeba">${m.name}</option>`; // default to orange
-  }).join('');
-
-  // Use TomSelect with dynamic coloring logic on open
-  setTimeout(() => {
-    new TomSelect(moveDropdown, {
-      maxOptions: null,
-      render: {
-        option: function (data, escape) {
-          const option = moveDropdown.querySelector(`option[value="${data.value}"]`);
-          const color = option?.dataset.color || '#fff';
-          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-        },
-        item: function (data, escape) {
-          const option = moveDropdown.querySelector(`option[value="${data.value}"]`);
-          const color = option?.dataset.color || '#fff';
-          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-        }
-      }
-    });
-
-    // Apply color update dynamically
-    ['mousedown', 'focus'].forEach(event =>
-      moveDropdown.addEventListener(event, () => updateMoveDropdownColors(slot))
-    );
-
-    updateMoveDropdownColors(slot); // Also trigger at load
-  }, 0);
-
+  const moveDropdown = createMoveDropdown(pokemon, slot);
+  ['mousedown', 'focus'].forEach(event =>
+    moveDropdown.addEventListener(event, () => updateMoveDropdownColors(slot))
+  );
   observeChanges(moveDropdown);
 
   const checkbox = document.createElement('input');
@@ -419,6 +390,10 @@ const createMoveDropdown = (basePokemon) => {
   moveWrapper.appendChild(checkbox);
   slot.appendChild(moveWrapper);
 }
+
+// Add this AFTER the for loop
+setTimeout(() => updateMoveDropdownColors(slot), 10);
+
 
 
     const abilityDropdown = createAbilityDropdown(pokemon);
