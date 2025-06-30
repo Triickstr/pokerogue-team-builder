@@ -445,42 +445,7 @@ const renderFusionInfo = (fusionPoke, slot) => {
     renderFusionSelector(slot);
 
     // ✅ Recompute dropdown colors without fusion
-    const baseRow = parseInt(slot.dataset.pokemonRow);
-    const basePoke = pokemonData.find(p => p.row === baseRow);
-
-    slot.querySelectorAll('.move-select').forEach(select => {
-      const ts = select.tomselect;
-      if (!ts) return;
-
-      const currentValue = ts.getValue();
-
-      // Update each <option>'s dataset.color
-      Array.from(select.options).forEach(option => {
-        const moveId = parseInt(option.value);
-        if (!moveId) return;
-
-        const isBase = basePoke?.hasOwnProperty(moveId);
-        let color = '#ffeeba'; // default orange
-        if (isBase) color = '#d4edda'; // green
-
-        option.dataset.color = color;
-      });
-
-      // Re-render TomSelect
-      ts.settings.render.option = function (data, escape) {
-        const option = select.querySelector(`option[value="${data.value}"]`);
-        const color = option?.dataset.color || '#fff';
-        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-      };
-
-      ts.settings.render.item = function (data, escape) {
-        const option = select.querySelector(`option[value="${data.value}"]`);
-        const color = option?.dataset.color || '#fff';
-        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-      };
-
-      ts.refreshOptions(false);
-    });
+    updateMoveDropdownColors(slot);
 
     // ✅ Immediately update the summary visuals
     updateTeamSummary();
