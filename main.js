@@ -51,12 +51,14 @@ const updateTeamSummary = () => {
     const images = slot.querySelectorAll('img');
     const types = slot.querySelectorAll('.type-box');
     const statText = slot.querySelector('.stats')?.innerText || '';
-    const moveNames = Array.from(slot.querySelectorAll('.move-select')).map(s => {
-      const ts = s.tomselect;
-      const value = ts?.getValue?.();
-      const option = ts?.options[value];
-      return option?.text || '—';
-    });
+    const moveNames = Array.from(slot.querySelectorAll('.move-select'))
+      .map(s => {
+        const ts = s.tomselect;
+        const value = ts?.getValue?.();
+        return ts?.options?.[value]?.text || null;
+    })
+    .filter(Boolean); // Remove nulls
+
     let ability = '—';
 
     const fusionAbilitySelect = slot.querySelector('.fusion-ability-select');
