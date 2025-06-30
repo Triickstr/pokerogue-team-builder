@@ -1056,3 +1056,24 @@ function renderItemSections(container, itemData, slotIndex) {
     container.appendChild(section);
   });
 }
+
+function downloadTeamSummaryImage() {
+  const summary = document.getElementById('teamSummary');
+  if (!summary) {
+    alert("Team Summary not found.");
+    return;
+  }
+
+  html2canvas(summary, {
+    backgroundColor: null,
+    useCORS: true,
+    scale: 2 // Better quality
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'team-summary.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  }).catch(err => {
+    console.error("Failed to capture image:", err);
+  });
+}
