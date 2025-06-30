@@ -405,6 +405,7 @@ fusionContainer.className = 'fusion-container';
 
 const renderFusionInfo = (fusionPoke, slot) => {
   slot.dataset.fusionRow = fusionPoke.row;
+  updateMoveDropdownColors(slot);
   fusionContainer.innerHTML = ''; // Clear before rendering
 
   // Image
@@ -722,3 +723,37 @@ document.getElementById('importFile').addEventListener('change', async (event) =
   //  Reset checkboxes after everything is imported
   clearAllCheckboxes();
 });
+
+
+function updateMoveDropdownColors(slot) {
+  const baseRow = parseInt(slot.dataset.pokemonRow);
+  const fusionRow = parseInt(slot.dataset.fusionRow || -1);
+
+  const basePoke = pokemonData.find(p => p.row === baseRow);
+  const fusionPoke = pokemonData.find(p => p.row === fusionRow);
+
+  slot.querySelectorAll('.move-select').forEach(select => {
+    const ts = select.tomselect;
+
+    for (const option of select.options) {
+      if (!option.value) continue;
+      const moveId = parseInt(option.value);
+
+      const isBase = basePoke?.hasOwnProperty(moveId);
+      const isFusion = fusionPoke?.hasOwnProperty(moveId);
+
+      let color = '#ffeeba'; // default orange
+      if (isBase) color = '#d4edda'; // green
+      else if (isFusion) color = '#cce5ff'; // blue
+
+      option.dataset.color = color;
+
+      // Update rendered dropdown if already open
+      const optEl = ts.getOption(option.value);
+      const itemEl = ts.getItem(option.value);
+      if (optEl) optEl.style.backgroundColor = color;
+      if (itemEl) itemEl.style.backgroundColor = color;
+    }
+  });
+}
+
