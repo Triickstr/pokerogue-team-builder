@@ -1037,7 +1037,14 @@ function renderItemSections(container, itemData, slotIndex) {
     option.textContent = i;
     select.appendChild(option);
   }
-
+  select.addEventListener('change', (e) => {
+  const value = parseInt(e.target.value);
+  if (!isNaN(value)) {
+    if (!teamItemSelections[slotIndex]) teamItemSelections[slotIndex] = {};
+    teamItemSelections[slotIndex][name] = value;
+    updateTeamSummary();
+  }
+});
   // ⬇️ Apply saved value and handle change
   const savedValue = teamItemSelections[slotIndex]?.[name] ?? 0;
   select.value = savedValue;
