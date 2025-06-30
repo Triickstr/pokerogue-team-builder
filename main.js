@@ -353,6 +353,9 @@ const createMoveDropdown = (basePokemon) => {
       moveWrapper.className = 'move-wrapper';
 
       const moveDropdown = createMoveDropdown(pokemon);
+      ['mousedown', 'focus'].forEach(event =>
+        moveDropdown.addEventListener(event, () => updateMoveDropdownColors(slot))
+      );
       observeChanges(moveDropdown);
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
