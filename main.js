@@ -293,8 +293,12 @@ const createMoveDropdown = (basePokemon, slot) => {
 
   const moves = getValidMoves();
 
+  sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
+    return `<option value="${m.id}">${m.name}</option>`;
+  }).join('');
+
   setTimeout(() => {
-    new TomSelect(sel, {
+    const ts = new TomSelect(sel, {
       maxOptions: null,
       render: {
         option: function (data, escape) {
@@ -309,22 +313,11 @@ const createMoveDropdown = (basePokemon, slot) => {
         }
       }
     });
+
+    // TomSelect exists, refresh the dropdown colors
+    updateMoveDropdownColors(slot);  // this must happen after init
+    ts.refreshOptions(false);       // this triggers the re-render
   }, 0);
-
-  sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
-    const isBaseCompatible = basePokemon.hasOwnProperty(m.id);
-    const baseRow = basePokemon.row;
-    //const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
-    const fusionRow = parseInt(slot?.dataset.fusionRow || -1);
-    const fusionPoke = isNaN(fusionRow) ? null : pokemonData.find(p => p.row === fusionRow);
-    const isFusionCompatible = fusionPoke?.hasOwnProperty(m.id);
-
-    let color = '#ffeeba'; // orange by default
-    if (isBaseCompatible) color = '#d4edda'; // green
-    else if (isFusionCompatible) color = '#cce5ff'; // blue
-
-    return `<option value="${m.id}">${m.name}</option>`;
-  }).join('');
 
   return sel;
 };
