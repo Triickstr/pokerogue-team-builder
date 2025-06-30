@@ -127,36 +127,27 @@ resultTypes.forEach(typeName => {
 summaryBox.appendChild(typeRow);
 
     let statRow = document.createElement('div');
-    statRow.className = 'summary-stats';
+statRow.className = 'summary-stats';
 
-    const statRegex = /HP: (\d+), Atk: (\d+), Def: (\d+), SpA: (\d+), SpD: (\d+), Spe: (\d+)/;
-    const statMatch = statText.match(statRegex);
+const leftCol = document.createElement('div');
+leftCol.className = 'summary-stats-col';
+leftCol.innerHTML = `
+  <div>HP: ${finalStats[0]}</div>
+  <div>Atk: ${finalStats[1]}</div>
+  <div>Def: ${finalStats[2]}</div>
+`;
 
-    let fusionStatText = '';
-    const fusionStatNode = slot.querySelector('.fusion-container .stats');
-    if (fusionStatNode) fusionStatText = fusionStatNode.textContent;
+const rightCol = document.createElement('div');
+rightCol.className = 'summary-stats-col';
+rightCol.innerHTML = `
+  <div>SpA: ${finalStats[3]}</div>
+  <div>SpD: ${finalStats[4]}</div>
+  <div>Spe: ${finalStats[5]}</div>
+`;
 
-    const fusionMatch = fusionStatText.match(statRegex);
-
-    if (statMatch) {
-    const baseStats = statMatch.slice(1).map(Number);
-    const fusionStats = fusionMatch ? fusionMatch.slice(1).map(Number) : null;
-
-    const finalStats = fusionStats
-      ? baseStats.map((val, i) => Math.floor((val + fusionStats[i]) / 2))
-      : baseStats;
-    
-    const baseRow = parseInt(slot.dataset.pokemonRow);
-    const fusionRow = parseInt(slot.dataset.fusionRow);
-
-    if (baseRow === 364 || fusionRow === 364) {
-    finalStats[0] = 1; // HP is always the first stat
-    }
-
-    statRow.textContent = `HP: ${finalStats[0]}, Atk: ${finalStats[1]}, Def: ${finalStats[2]}, SpA: ${finalStats[3]}, SpD: ${finalStats[4]}, Spe: ${finalStats[5]}`;
-    }
-
-    summaryBox.appendChild(statRow);
+statRow.appendChild(leftCol);
+statRow.appendChild(rightCol);
+summaryBox.appendChild(statRow);
 
     const moveRow = document.createElement('div');
 moveRow.className = 'summary-moves';
