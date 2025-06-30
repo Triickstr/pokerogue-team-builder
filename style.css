@@ -186,3 +186,20 @@ select {
   text-align: center;
 }
 
+.team-slot-red {
+  border: 2px dashed #CD5C5C;
+}
+
+.team-slot-blue {
+  border: 2px dashed #9EB9D4;
+}
+
+.summary-box-red {
+  border-color: #CD5C5C;
+}
+
+.summary-box-blue {
+  border-color: #9EB9D4;
+}
+
+
