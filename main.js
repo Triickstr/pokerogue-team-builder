@@ -73,6 +73,7 @@ const updateTeamSummary = () => {
       }
     const passiveText = Array.from(slot.childNodes).find(el => el?.innerText?.startsWith('Passive Ability:'))?.innerText.replace('Passive Ability: ', '') || '—';
     const nature = slot.querySelector('.nature-select')?.selectedOptions[0]?.textContent || '—';
+    const teraType = slot.querySelector('.tera-select')?.selectedOptions[0]?.textContent || '—';
 
     const imageRow = document.createElement('div');
     imageRow.className = 'summary-images';
@@ -194,7 +195,7 @@ summaryBox.appendChild(moveRow);
 
     const infoRow = document.createElement('div');
     infoRow.className = 'summary-info';
-    [ability, passiveText, nature].forEach(val => {
+    [ability, passiveText, nature, `Tera: ${teraType}`].forEach(val => {
       const div = document.createElement('div');
       div.textContent = val;
       infoRow.appendChild(div);
@@ -600,6 +601,7 @@ const exportTeamToJson = () => {
     const baseAbilityParsed = baseAbility ? parseInt(baseAbility) : null;
 
     const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
+    const tera = slot.querySelector('.tera-select')?.tomselect?.getValue() || null;
 
     // Bulbasaur fallback logic
     const hasAnyMoves = moves.some(m => m !== null && !isNaN(m));
@@ -629,7 +631,8 @@ const exportTeamToJson = () => {
       moves: moves,
       ability: baseAbilityParsed,
       fusionAbility: fusionAbilityParsed,
-      nature
+      nature,
+      tera
     });
   });
 
@@ -770,6 +773,11 @@ await Promise.all(
       natureCheckbox.checked = true;
       natureSelect.setValue(entry.nature);
       console.log("Set nature to:", entry.nature);
+    }
+    const teraSelect = slot.querySelector('.tera-select')?.tomselect;
+      if (teraSelect && entry.tera) {
+      teraSelect.setValue(entry.tera);
+      console.log("Set Tera to:", entry.tera);
     }
 
 
