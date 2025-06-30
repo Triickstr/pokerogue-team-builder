@@ -472,10 +472,21 @@ const renderFusionSelector = (slot) => {
     }).join('');
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
   select.onchange = () => {
-    const selected = pokemonData[select.value];
-    renderFusionInfo(selected, slot);  // <-- pass slot here too
+  const index = parseInt(select.value);
+  if (!isNaN(index)) {
+    const selected = pokemonData[index];
+    if (selected) {
+      renderFusionInfo(selected, slot);
+      setTimeout(updateTeamSummary, 10);
+    }
+  } else {
+    slot.dataset.fusionRow = '';
+    const fusionContainer = slot.querySelector('.fusion-container');
+    if (fusionContainer) fusionContainer.innerHTML = ''; // Clear fusion display
+    updateMoveDropdownColors(slot);
     setTimeout(updateTeamSummary, 10);
-  };
+  }
+};
   fusionContainer.appendChild(select);
 };
 
