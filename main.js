@@ -46,7 +46,7 @@ const updateTeamSummary = () => {
 
   document.querySelectorAll('.team-slot').forEach((slot, i) => {
     const summaryBox = document.createElement('div');
-    summaryBox.className = 'summary-box';
+    summaryBox.className = 'summary-box ' + (i % 2 === 0 ? 'summary-box-red' : 'summary-box-blue');
 
     const images = slot.querySelectorAll('img');
     const types = slot.querySelectorAll('.type-box');
@@ -468,7 +468,7 @@ setTimeout(updateTeamSummary, 10);
 
   const createTeamSlot = () => {
     const slot = document.createElement('div');
-    slot.className = 'team-slot';
+    slot.className = 'team-slot ' + (teamGrid.children.length % 2 === 0 ? 'team-slot-red' : 'team-slot-blue');
     slot.appendChild(createPokemonSelector((idx) => {
       const pokemon = {
       ...pokemonData[idx],
