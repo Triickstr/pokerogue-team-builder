@@ -9,15 +9,18 @@
 }
 
 .item-popup {
-  background: white;
+  background: rgba(255, 255, 255, 0.15); /* transparent white */
+  backdrop-filter: blur(16px);           /* frosted glass blur */
+  -webkit-backdrop-filter: blur(16px);   /* Safari support */
+  border-radius: 12px;
   max-width: 800px;
   margin: 5% auto;
   padding: 20px;
-  border-radius: 12px;
   overflow-y: auto;
   max-height: 90%;
   position: relative;
   z-index: 9999;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); /* optional: nice soft shadow */
 }
 
 .item-popup-close {
