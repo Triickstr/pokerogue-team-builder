@@ -786,37 +786,26 @@ document.getElementById('importFile').addEventListener('change', async (event) =
 function updateMoveDropdownColors(slot) {
   const baseRow = parseInt(slot.dataset.pokemonRow);
   const fusionRow = parseInt(slot.dataset.fusionRow || -1);
-
   const basePoke = pokemonData.find(p => p.row === baseRow);
   const fusionPoke = pokemonData.find(p => p.row === fusionRow);
 
   slot.querySelectorAll('.move-select').forEach(select => {
     const ts = select.tomselect;
+    if (!ts) return;
 
-    for (const option of Array.from(select.options)) {
-      if (!option.value) continue;
+    const selectElement = select;
+    selectElement.querySelectorAll('option').forEach(option => {
       const moveId = parseInt(option.value);
+      if (isNaN(moveId)) return;
 
-      const isBase = basePoke?.hasOwnProperty(moveId);
-      const isFusion = fusionPoke?.hasOwnProperty(moveId);
-
-      let color = '#ffeeba'; // orange
-      if (isBase && isFusion) color = '#d4edda'; // prefer green
-      else if (isBase) color = '#d4edda';
-      else if (isFusion) color = '#cce5ff';
+      let color = '#ffeeba'; // orange by default
+      if (basePoke?.hasOwnProperty(moveId)) color = '#d4edda'; // green
+      else if (fusionPoke?.hasOwnProperty(moveId)) color = '#cce5ff'; // blue
 
       option.dataset.color = color;
+    });
 
-      // Directly style existing TomSelect elements
-      const optEl = ts.getOption(option.value);
-      const itemEl = ts.getItem(option.value);
-      if (optEl) optEl.style.backgroundColor = color;
-      if (itemEl) itemEl.style.backgroundColor = color;
-
-      console.log(`Refreshing move ID ${moveId}: isBase=${isBase}, isFusion=${isFusion}, color=${color}`);
-    }
-
-    // Refresh rendering
+    // Force visual refresh of options
     ts.refreshOptions(false);
   });
 }
