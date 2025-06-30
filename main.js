@@ -480,10 +480,16 @@ const renderFusionSelector = (slot) => {
   const selected = pokemonData[select.value];
 
   if (selected) {
-    renderFusionInfo(selected, slot);  // Re-render fusion block
+    renderFusionInfo(selected, slot);
   } else {
-    delete slot.dataset.fusionRow;     // Remove fusionRow when cleared
-    updateMoveDropdownColors(slot);    // Reset move colors back to base-only
+    //  Clear fusion state completely
+    delete slot.dataset.fusionRow;
+
+    //  Clear fusion container content
+    const fusionContainer = slot.querySelector('.fusion-container');
+    if (fusionContainer) fusionContainer.innerHTML = '';
+
+    updateMoveDropdownColors(slot);  // 🔄 Reset colors properly
   }
 
   setTimeout(updateTeamSummary, 10);
