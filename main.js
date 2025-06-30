@@ -56,25 +56,22 @@ const updateTeamSummary = () => {
         const ts = s.tomselect;
         const value = ts?.getValue?.();
         return ts?.options?.[value]?.text || null;
-    }).filter(Boolean);
+    })
+    .filter(Boolean); // Remove nulls
 
     let ability = '—';
-    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select');
-    if (fusionAbilitySelect?.tomselect) {
-      const ts = fusionAbilitySelect.tomselect;
-      ability = ts.getItem(ts.getValue())?.textContent || '—';
-    } else {
-      const baseAbilitySelect = slot.querySelector('.ability-select');
-      const ts = baseAbilitySelect?.tomselect;
-      ability = ts?.getItem(ts.getValue())?.textContent || '—';
-    }
 
+    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select');
+      if (fusionAbilitySelect?.tomselect) {
+        const ts = fusionAbilitySelect.tomselect;
+        ability = ts.getItem(ts.getValue())?.textContent || '—';
+      } else {
+          const baseAbilitySelect = slot.querySelector('.ability-select');
+          const ts = baseAbilitySelect?.tomselect;
+          ability = ts?.getItem(ts.getValue())?.textContent || '—';
+      }
     const passiveText = Array.from(slot.childNodes).find(el => el?.innerText?.startsWith('Passive Ability:'))?.innerText.replace('Passive Ability: ', '') || '—';
     const nature = slot.querySelector('.nature-select')?.selectedOptions[0]?.textContent || '—';
-
-    // 🔹 NEW: Get selected Tera Type
-    const teraSelect = slot.querySelector('.tera-select')?.tomselect;
-    const teraType = teraSelect?.getValue?.() || null;
 
     const imageRow = document.createElement('div');
     imageRow.className = 'summary-images';
@@ -83,89 +80,116 @@ const updateTeamSummary = () => {
     summaryBox.appendChild(imageRow);
 
     const primaryTypes = Array.from(types).slice(0, 2).map(t => t.textContent);
-    const fusionTypes = Array.from(types).slice(2, 4).map(t => t.textContent);
+    const fusionTypes = Array.from(types).slice(2, 4).map(t => t.textContent);  // adjust if more types show
 
-    let resultTypes = [];
-    const [primaryFirst] = primaryTypes;
-    let fusionPick = fusionTypes[1] || fusionTypes[0];
+    
+let resultTypes = [];
 
-    if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst && primaryTypes.length === 1) {
-      fusionPick = null;
-    } else {
-      if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
-        fusionPick = fusionTypes[0];
-      } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
-        fusionPick = primaryTypes[1] || primaryFirst;
-      }
+if (fusionTypes.length === 0) {
+  resultTypes = primaryTypes;
+} else {
+  const [primaryFirst] = primaryTypes;
+  let fusionPick = fusionTypes[1] || fusionTypes[0];
+
+  if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst && primaryTypes.length === 1) {
+    fusionPick = null;
+  } else {
+    if (fusionTypes.length === 2 && fusionTypes[1] === primaryFirst) {
+      fusionPick = fusionTypes[0];
+    } else if (fusionTypes.length === 1 && fusionTypes[0] === primaryFirst) {
+      fusionPick = primaryTypes[1] || primaryFirst;
     }
+  }
 
-    if (fusionPick === null || fusionPick === primaryFirst) {
-      resultTypes = [primaryFirst];
-    } else {
-      resultTypes = [primaryFirst, fusionPick];
-    }
+  if (fusionPick === null || fusionPick === primaryFirst) {
+    resultTypes = [primaryFirst];
+  } else {
+    resultTypes = [primaryFirst, fusionPick];
+  }
+}
 
-    resultTypes = [...new Set(resultTypes)];
-    const typeRow = document.createElement('div');
-    typeRow.className = 'summary-types';
-    resultTypes.forEach(typeName => {
-      if (typeName !== null) {
-        const box = document.createElement('div');
-        box.className = 'summary-type-box';
-        box.style.backgroundColor = window.typeColors?.[typeName] || '#777';
-        box.textContent = typeName;
-        typeRow.appendChild(box);
-      }
-    });
-    summaryBox.appendChild(typeRow);
+//  Remove duplicates explicitly before rendering
+resultTypes = [...new Set(resultTypes)];
 
-    const statRow = document.createElement('div');
+const typeRow = document.createElement('div');
+typeRow.className = 'summary-types';
+typeRow.innerHTML = '';
+
+resultTypes.forEach(typeName => {
+  if (typeName !== null) {
+    const box = document.createElement('div');
+    box.className = 'summary-type-box';
+    box.style.backgroundColor = window.typeColors?.[typeName] || '#777';
+    box.textContent = typeName;
+    typeRow.appendChild(box);
+  }
+});
+summaryBox.appendChild(typeRow);
+
+    let statRow = document.createElement('div');
     statRow.className = 'summary-stats';
+
     const statRegex = /HP: (\d+), Atk: (\d+), Def: (\d+), SpA: (\d+), SpD: (\d+), Spe: (\d+)/;
     const statMatch = statText.match(statRegex);
+
     let fusionStatText = '';
     const fusionStatNode = slot.querySelector('.fusion-container .stats');
     if (fusionStatNode) fusionStatText = fusionStatNode.textContent;
+
     const fusionMatch = fusionStatText.match(statRegex);
+
     if (statMatch) {
-      const baseStats = statMatch.slice(1).map(Number);
-      const fusionStats = fusionMatch ? fusionMatch.slice(1).map(Number) : null;
-      const finalStats = fusionStats
-        ? baseStats.map((val, i) => Math.floor((val + fusionStats[i]) / 2))
-        : baseStats;
-      const baseRow = parseInt(slot.dataset.pokemonRow);
-      const fusionRow = parseInt(slot.dataset.fusionRow);
-      if (baseRow === 364 || fusionRow === 364) {
-        finalStats[0] = 1;
-      }
-      statRow.textContent = `HP: ${finalStats[0]}, Atk: ${finalStats[1]}, Def: ${finalStats[2]}, SpA: ${finalStats[3]}, SpD: ${finalStats[4]}, Spe: ${finalStats[5]}`;
+    const baseStats = statMatch.slice(1).map(Number);
+    const fusionStats = fusionMatch ? fusionMatch.slice(1).map(Number) : null;
+
+    const finalStats = fusionStats
+      ? baseStats.map((val, i) => Math.floor((val + fusionStats[i]) / 2))
+      : baseStats;
+    
+    const baseRow = parseInt(slot.dataset.pokemonRow);
+    const fusionRow = parseInt(slot.dataset.fusionRow);
+
+    if (baseRow === 364 || fusionRow === 364) {
+    finalStats[0] = 1; // HP is always the first stat
     }
+
+    statRow.textContent = `HP: ${finalStats[0]}, Atk: ${finalStats[1]}, Def: ${finalStats[2]}, SpA: ${finalStats[3]}, SpD: ${finalStats[4]}, Spe: ${finalStats[5]}`;
+    }
+
     summaryBox.appendChild(statRow);
 
     const moveRow = document.createElement('div');
-    moveRow.className = 'summary-moves';
-    slot.querySelectorAll('.move-select').forEach(select => {
-      const ts = select.tomselect;
-      const value = ts?.getValue?.();
-      const name = ts?.options?.[value]?.text;
-      const moveId = parseInt(value);
-      if (name && !isNaN(moveId)) {
-        let color = '#ffeeba';
-        if (pokemonData.find(p => p.row === parseInt(slot.dataset.pokemonRow))?.hasOwnProperty(moveId))
-          color = '#d4edda';
-        else if (pokemonData.find(p => p.row === parseInt(slot.dataset.fusionRow))?.hasOwnProperty(moveId))
-          color = '#fae6fa';
-        const div = document.createElement('div');
-        div.textContent = name;
-        div.style.backgroundColor = color;
-        div.style.color = '#000';
-        div.style.padding = '2px 5px';
-        div.style.margin = '2px 0';
-        div.style.borderRadius = '4px';
-        moveRow.appendChild(div);
-      }
-    });
-    summaryBox.appendChild(moveRow);
+moveRow.className = 'summary-moves';
+
+const baseRow = parseInt(slot.dataset.pokemonRow);
+const fusionRow = parseInt(slot.dataset.fusionRow || -1);
+const basePoke = pokemonData.find(p => p.row === baseRow);
+const fusionPoke = pokemonData.find(p => p.row === fusionRow);
+
+slot.querySelectorAll('.move-select').forEach(select => {
+  const ts = select.tomselect;
+  const value = ts?.getValue?.();
+  const name = ts?.options?.[value]?.text;
+  const moveId = parseInt(value);
+
+  if (name && !isNaN(moveId)) {
+    let color = '#ffeeba'; // default orange
+    if (basePoke?.hasOwnProperty(moveId)) color = '#d4edda'; // green
+    else if (fusionPoke?.hasOwnProperty(moveId)) color = '#fae6fa'; // blue
+
+    const div = document.createElement('div');
+    div.textContent = name;
+    div.style.backgroundColor = color;
+    div.style.color = '#000';
+    div.style.padding = '2px 5px';
+    div.style.margin = '2px 0';
+    div.style.borderRadius = '4px';
+    moveRow.appendChild(div);
+  }
+});
+
+summaryBox.appendChild(moveRow);
+
 
     const infoRow = document.createElement('div');
     infoRow.className = 'summary-info';
@@ -174,21 +198,10 @@ const updateTeamSummary = () => {
       div.textContent = val;
       infoRow.appendChild(div);
     });
-
-    // 🔹 Add Tera Type as styled box
-    if (teraType) {
-      const teraBox = document.createElement('div');
-      teraBox.className = 'summary-type-box';
-      teraBox.textContent = `Tera: ${teraType}`;
-      teraBox.style.backgroundColor = window.typeColors?.[teraType] || (teraType === 'Stellar' ? '#40B5A5' : '#777');
-      infoRow.appendChild(teraBox);
-    }
-
     summaryBox.appendChild(infoRow);
     summaryContainer.appendChild(summaryBox);
   });
 };
-
 
 const observeChanges = (element) => {
   if (!element) return;
@@ -409,38 +422,6 @@ const createMoveDropdown = (basePokemon) => {
     slot.appendChild(natureWrapper);
 
     setTimeout(() => new TomSelect(natureSelect, { maxOptions: null }), 0);
-    // Add Tera Type Dropdown
-const teraWrapper = document.createElement('div');
-teraWrapper.className = 'tera-wrapper';
-
-const teraSelect = document.createElement('select');
-teraSelect.className = 'tera-select';
-
-teraSelect.innerHTML = `<option value="">Select Tera</option>` + 
-  Object.entries({ ...window.typeColors, Stellar: '#40B5A5' })
-    .map(([type, color]) => 
-      `<option value="${type}" data-color="${color}">${type}</option>`
-    ).join('');
-
-setTimeout(() => {
-  new TomSelect(teraSelect, {
-    maxOptions: null,
-    render: {
-      option: function (data, escape) {
-        const color = data.$option?.dataset.color || '#fff';
-        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-      },
-      item: function (data, escape) {
-        const color = data.$option?.dataset.color || '#fff';
-        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-      }
-    }
-  });
-}, 0);
-
-teraWrapper.appendChild(teraSelect);
-slot.appendChild(teraWrapper);
-        setTimeout(() => new TomSelect(teraSelect, { maxOptions: null }), 0);
 
     // Fusion Pokémon container
 const fusionContainer = document.createElement('div');
