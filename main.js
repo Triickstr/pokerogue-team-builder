@@ -180,6 +180,7 @@ slot.querySelectorAll('.move-select').forEach(select => {
     const div = document.createElement('div');
     div.textContent = name;
     div.style.backgroundColor = color;
+    div.style.color = '#222';
     div.style.padding = '2px 5px';
     div.style.margin = '2px 0';
     div.style.borderRadius = '4px';
@@ -379,6 +380,7 @@ const createMoveDropdown = (basePokemon) => {
       ['mousedown', 'focus'].forEach(event =>
         moveDropdown.addEventListener(event, () => updateMoveDropdownColors(slot))
       );
+      setTimeout(() => updateMoveDropdownColors(slot), 10);
       observeChanges(moveDropdown);
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
