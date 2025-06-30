@@ -263,34 +263,48 @@ const getValidMoves = () => {
   return moves;
 };
 
-const createMoveDropdown = (pokemon) => {
+const createMoveDropdown = (basePokemon) => {
   const sel = document.createElement('select');
-  setTimeout(() => new TomSelect(sel, {
-    maxOptions: null,
-    render: {
-      option: function(data, escape) {
-        const isCompatible = pokemon.hasOwnProperty(data.value);
-        const color = isCompatible ? '#d4edda' : '#ffeeba'; // Green for compatible, yellow for incompatible
-        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-      },
-      item: function(data, escape) {
-        const isCompatible = pokemon.hasOwnProperty(data.value);
-        const color = isCompatible ? '#d4edda' : '#ffeeba';
-        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-      }
-    }
-  }), 0);
-
   sel.className = 'move-select';
-  sel.innerHTML = '<option value="">Select a Move</option>' +
-    getValidMoves().map(m => {
-      const isCompatible = String(m.id) in pokemon; // Check against full Pokémon data
-      const name = m.name;
-      return `<option value="${m.id}" class="${isCompatible ? 'move-compatible' : 'move-incompatible'}">${name}</option>`;
-    }).join('');
+
+  const moves = getValidMoves();
+
+  setTimeout(() => {
+    new TomSelect(sel, {
+      maxOptions: null,
+      render: {
+        option: function (data, escape) {
+          const option = sel.querySelector(`option[value="${data.value}"]`);
+          const color = option?.dataset.color || '#fff';
+          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+        },
+        item: function (data, escape) {
+          const option = sel.querySelector(`option[value="${data.value}"]`);
+          const color = option?.dataset.color || '#fff';
+          return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+        }
+      }
+    });
+  }, 0);
+
+  sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
+    const isBaseCompatible = basePokemon.hasOwnProperty(m.id);
+    const baseRow = basePokemon.row;
+    const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
+    const fusionRow = parseInt(slot?.dataset.fusionRow || -1);
+    const fusionPoke = isNaN(fusionRow) ? null : pokemonData.find(p => p.row === fusionRow);
+    const isFusionCompatible = fusionPoke?.hasOwnProperty(m.id);
+
+    let color = '#ffeeba'; // orange by default
+    if (isBaseCompatible) color = '#d4edda'; // green
+    else if (isFusionCompatible) color = '#cce5ff'; // blue
+
+    return `<option value="${m.id}" data-color="${color}">${m.name}</option>`;
+  }).join('');
 
   return sel;
 };
+
 
   const createAbilityDropdown = (pokemon) => {
     const abilities = [pokemon.a1, pokemon.a2, pokemon.ha].filter(type => type != null);
