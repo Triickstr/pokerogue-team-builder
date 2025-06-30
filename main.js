@@ -481,6 +481,13 @@ const createMoveDropdown = (basePokemon) => {
 
     teraSelect.addEventListener('change', updateTeamSummary);
 
+// Items Pop Up Button
+const itemBtn = document.createElement('button');
+itemBtn.textContent = 'Show Items';
+itemBtn.className = 'show-items-btn';
+itemBtn.onclick = () => openItemPopup(slot);
+slot.appendChild(itemBtn);
+
     // Fusion Pokémon container
 const fusionContainer = document.createElement('div');
 fusionContainer.className = 'fusion-container';
@@ -869,4 +876,84 @@ function updateMoveDropdownColors(slot) {
   });
 }
 
+async function openItemPopup(slot) {
+  const popup = document.createElement('div');
+  popup.className = 'item-popup';
 
+  const overlay = document.createElement('div');
+  overlay.className = 'item-overlay';
+
+  const closeBtn = document.createElement('span');
+  closeBtn.className = 'item-popup-close';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.onclick = () => document.body.removeChild(overlay);
+
+  popup.appendChild(closeBtn);
+  overlay.appendChild(popup);
+  document.body.appendChild(overlay);
+
+  // Load item data (once globally to avoid multiple fetches)
+  if (!window.itemData) {
+    const response = await fetch('item_max.json');
+    window.itemData = await response.json();
+  }
+
+  renderItemSections(popup, window.itemData);
+}
+
+function renderItemSections(container, itemData) {
+  const sections = [
+    { title: "Vitamins", layout: [3, 2], items: ["hp_up", "protein", "iron", "calcium", "zinc", "carbos"] },
+    { title: "Eggs", layout: [2, 1], items: ["lucky_egg", "golden_egg"] },
+    { title: "Special Items", layout: [3, 1], items: ["mega_stone", "max_mushrooms", "reviver_seed"] },
+    { title: "Regular Items", layout: [3, 6], items: [
+      "baton", "eviolite", "focus_band",
+      "flame_orb", "toxic_orb", "soothe_bell",
+      "golden_punch", "grip_claw", "kings_rock",
+      "leftovers", "mini_black_hole", "mystical_rock",
+      "quick_claw", "scope_lens", "shell_bell",
+      "soul_dew", "wide_lens", "zoom_lens"
+    ]}
+  ];
+
+  sections.forEach(({ title, layout, items }) => {
+    const section = document.createElement('div');
+    section.className = 'item-section';
+
+    const header = document.createElement('h3');
+    header.textContent = title;
+    section.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'item-grid';
+    grid.style.gridTemplateColumns = `repeat(${layout[0]}, 1fr)`;
+
+    items.forEach(name => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'item-entry';
+
+      const img = document.createElement('img');
+      img.src = `items/${name}.png`;
+      img.alt = name;
+      img.title = name;
+      img.className = 'item-img';
+
+      const select = document.createElement('select');
+      select.className = 'item-dropdown';
+      const max = parseInt(itemData[name]?.Max || 1);
+      for (let i = 0; i <= max; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        select.appendChild(option);
+      }
+
+      itemDiv.appendChild(img);
+      itemDiv.appendChild(select);
+      grid.appendChild(itemDiv);
+    });
+
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
