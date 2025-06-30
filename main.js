@@ -287,16 +287,29 @@ const getValidMoves = () => {
   return moves;
 };
 
-const createMoveDropdown = (basePokemon, slot) => {
+const createMoveDropdown = (basePokemon) => {
   const sel = document.createElement('select');
   sel.className = 'move-select';
 
   const moves = getValidMoves();
+  const baseRow = basePokemon.row;
 
+  // Prepare HTML first with data-color BEFORE TomSelect is initialized
   sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
-    return `<option value="${m.id}">${m.name}</option>`;
+    const isBaseCompatible = basePokemon.hasOwnProperty(m.id);
+    const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
+    const fusionRow = parseInt(slot?.dataset.fusionRow || -1);
+    const fusionPoke = isNaN(fusionRow) ? null : pokemonData.find(p => p.row === fusionRow);
+    const isFusionCompatible = fusionPoke?.hasOwnProperty(m.id);
+
+    let color = '#ffeeba'; // orange by default
+    if (isBaseCompatible) color = '#d4edda'; // green
+    else if (isFusionCompatible) color = '#cce5ff'; // blue
+
+    return `<option value="${m.id}" data-color="${color}">${m.name}</option>`;
   }).join('');
 
+  // Initialize TomSelect AFTER setting options
   setTimeout(() => {
     const ts = new TomSelect(sel, {
       maxOptions: null,
@@ -314,13 +327,13 @@ const createMoveDropdown = (basePokemon, slot) => {
       }
     });
 
-    // TomSelect exists, refresh the dropdown colors
-    updateMoveDropdownColors(slot);  // this must happen after init
-    ts.refreshOptions(false);       // this triggers the re-render
+    // Force dropdowns to re-apply their colors
+    updateMoveDropdownColors(sel.closest('.team-slot'));
   }, 0);
 
   return sel;
 };
+
 
 
   const createAbilityDropdown = (pokemon) => {
