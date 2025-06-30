@@ -327,8 +327,12 @@ const createMoveDropdown = (basePokemon, slot) => {
       }
     });
 
-    // Force dropdowns to re-apply their colors
-    updateMoveDropdownColors(sel.closest('.team-slot'));
+          },
+      onInitialize: () => {
+        // Only update once TomSelect has been initialized
+        updateMoveDropdownColors(sel.closest('.team-slot'));
+      }
+    });
   }, 0);
 
   return sel;
