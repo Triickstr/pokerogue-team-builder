@@ -794,7 +794,6 @@ function updateMoveDropdownColors(slot) {
     const ts = select.tomselect;
 
     for (const option of Array.from(select.options)) {
-      console.log(`Refreshing move ID ${moveId}: isBase=${isBase}, isFusion=${isFusion}, color=${color}`);
       if (!option.value) continue;
       const moveId = parseInt(option.value);
 
@@ -813,6 +812,8 @@ function updateMoveDropdownColors(slot) {
       const itemEl = ts.getItem(option.value);
       if (optEl) optEl.style.backgroundColor = color;
       if (itemEl) itemEl.style.backgroundColor = color;
+
+      console.log(`Refreshing move ID ${moveId}: isBase=${isBase}, isFusion=${isFusion}, color=${color}`);
     }
 
     // Refresh rendering
