@@ -405,7 +405,6 @@ fusionContainer.className = 'fusion-container';
 
 const renderFusionInfo = (fusionPoke, slot) => {
   slot.dataset.fusionRow = fusionPoke.row;
-  updateMoveDropdownColors(slot);
   fusionContainer.innerHTML = ''; // Clear before rendering
 
   // Image
@@ -415,7 +414,7 @@ const renderFusionInfo = (fusionPoke, slot) => {
   img.onerror = () => img.style.display = 'none';
   img.onclick = () => {
     renderFusionSelector(slot);
-    setTimeout(updateTeamSummary, 10);  // force re-check
+    setTimeout(updateTeamSummary, 10);
   };
   fusionContainer.appendChild(img);
 
@@ -459,8 +458,14 @@ const renderFusionInfo = (fusionPoke, slot) => {
   fusionAbilityWrapper.appendChild(fusionAbilityCheckbox);
   fusionContainer.appendChild(fusionAbilityWrapper);
 
-  setTimeout(() => new TomSelect(fusionAbilitySelect, { maxOptions: null }), 0);
+  slot.appendChild(fusionContainer);
+
+  setTimeout(() => {
+    new TomSelect(fusionAbilitySelect, { maxOptions: null });
+    updateMoveDropdownColors(slot); // Now safe to call after dropdown is attached
+  }, 0);
 };
+
 
 const renderFusionSelector = (slot) => {
   fusionContainer.innerHTML = '';
@@ -472,21 +477,10 @@ const renderFusionSelector = (slot) => {
     }).join('');
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
   select.onchange = () => {
-  const index = parseInt(select.value);
-  if (!isNaN(index)) {
-    const selected = pokemonData[index];
-    if (selected) {
-      renderFusionInfo(selected, slot);
-      setTimeout(updateTeamSummary, 10);
-    }
-  } else {
-    slot.dataset.fusionRow = '';
-    const fusionContainer = slot.querySelector('.fusion-container');
-    if (fusionContainer) fusionContainer.innerHTML = ''; // Clear fusion display
-    updateMoveDropdownColors(slot);
+    const selected = pokemonData[select.value];
+    renderFusionInfo(selected, slot);  // <-- pass slot here too
     setTimeout(updateTeamSummary, 10);
-  }
-};
+  };
   fusionContainer.appendChild(select);
 };
 
