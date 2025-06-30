@@ -54,7 +54,8 @@ const updateTeamSummary = () => {
     const moveNames = Array.from(slot.querySelectorAll('.move-select')).map(s => {
       const ts = s.tomselect;
       const value = ts?.getValue?.();
-      return ts?.getItem?.(value)?.textContent || '—';
+      const option = ts?.options[value];
+      return option?.text || '—';
     });
     let ability = '—';
 
