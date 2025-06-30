@@ -477,10 +477,17 @@ const renderFusionSelector = (slot) => {
     }).join('');
   setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
   select.onchange = () => {
-    const selected = pokemonData[select.value];
-    renderFusionInfo(selected, slot);  // <-- pass slot here too
-    setTimeout(updateTeamSummary, 10);
-  };
+  const selected = pokemonData[select.value];
+
+  if (selected) {
+    renderFusionInfo(selected, slot);  // Re-render fusion block
+  } else {
+    delete slot.dataset.fusionRow;     // Remove fusionRow when cleared
+    updateMoveDropdownColors(slot);    // Reset move colors back to base-only
+  }
+
+  setTimeout(updateTeamSummary, 10);
+};
   fusionContainer.appendChild(select);
 };
 
