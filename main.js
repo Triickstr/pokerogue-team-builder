@@ -515,25 +515,32 @@ const renderFusionSelector = (slot) => {
       const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
       return `<option value="${i}">${name}</option>`;
     }).join('');
-  setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
-  select.onchange = () => {
-  const selected = pokemonData[select.value];
 
-  if (selected) {
-    renderFusionInfo(selected, slot);
-  } else {
-    delete slot.dataset.fusionRow;
-
-    const fusionContainer = slot.querySelector('.fusion-container');
-    if (fusionContainer) fusionContainer.innerHTML = '';
-  }
-
-  // 🔁 Re-apply coloring to all move dropdowns in this slot
-  updateMoveDropdownColors(slot);
-
-  setTimeout(updateTeamSummary, 10);
-};
   fusionContainer.appendChild(select);
+
+  setTimeout(() => {
+    new TomSelect(select, { maxOptions: null });
+  }, 0);
+
+  select.addEventListener('change', () => {
+    const selected = pokemonData[select.value];
+
+    if (selected) {
+      renderFusionInfo(selected, slot);
+      setTimeout(() => {
+        updateMoveDropdownColors(slot); // ✅ Recolor all dropdowns
+        updateTeamSummary();
+      }, 100);
+    } else {
+      delete slot.dataset.fusionRow;
+
+      const fusionContainer = slot.querySelector('.fusion-container');
+      if (fusionContainer) fusionContainer.innerHTML = '';
+
+      updateMoveDropdownColors(slot);
+      updateTeamSummary();
+    }
+  });
 };
 
 renderFusionSelector(slot);
