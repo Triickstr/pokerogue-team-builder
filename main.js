@@ -323,7 +323,7 @@ const createMoveDropdown = (basePokemon, slot) => {
     if (isBaseCompatible) color = '#d4edda'; // green
     else if (isFusionCompatible) color = '#cce5ff'; // blue
 
-    return `<option value="${m.id}" data-color="${color}">${m.name}</option>`;
+    return `<option value="${m.id}">${m.name}</option>`;
   }).join('');
 
   return sel;
@@ -793,18 +793,21 @@ function updateMoveDropdownColors(slot) {
       const isBase = basePoke?.hasOwnProperty(moveId);
       const isFusion = fusionPoke?.hasOwnProperty(moveId);
 
-      let color = '#ffeeba'; // default orange
-      if (isBase) color = '#d4edda'; // green
-      else if (isFusion) color = '#cce5ff'; // blue
+      let color;
+      if (isBase && isFusion) color = '#d4edda'; // still prioritize green
+      else if (isBase) color = '#d4edda';        // green
+      else if (isFusion) color = '#cce5ff';      // blue
+      else color = '#ffeeba';                    // default orange
 
       option.dataset.color = color;
 
       // Update rendered dropdown if already open
-      const optEl = ts.getOption(option.value);
-      const itemEl = ts.getItem(option.value);
-      if (optEl) optEl.style.backgroundColor = color;
-      if (itemEl) itemEl.style.backgroundColor = color;
+    const optEl = ts.getOption(option.value);
+    const itemEl = ts.getItem(option.value);
+    if (optEl) optEl.style.backgroundColor = color;
+    if (itemEl) itemEl.style.backgroundColor = color;
     }
+    ts.refreshOptions(false);
   });
 }
 
