@@ -792,7 +792,8 @@ function updateMoveDropdownColors(slot) {
   slot.querySelectorAll('.move-select').forEach(select => {
     const ts = select.tomselect;
 
-    for (const option of select.options) {
+    for (const option of Array.from(select.options)) {
+      console.log(`Refreshing move ID ${moveId}: isBase=${isBase}, isFusion=${isFusion}, color=${color}`);
       if (!option.value) continue;
       const moveId = parseInt(option.value);
 
