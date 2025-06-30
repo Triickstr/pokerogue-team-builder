@@ -126,23 +126,23 @@ resultTypes.forEach(typeName => {
 });
 summaryBox.appendChild(typeRow);
 
-    let statRow = document.createElement('div');
+let statRow = document.createElement('div');
 statRow.className = 'summary-stats';
 
 const leftCol = document.createElement('div');
 leftCol.className = 'summary-stats-col';
 leftCol.innerHTML = `
-  <div>HP: ${finalStats[0]}</div>
-  <div>Atk: ${finalStats[1]}</div>
-  <div>Def: ${finalStats[2]}</div>
+  <div><strong>HP:</strong> ${finalStats[0]}</div>
+  <div><strong>Atk:</strong> ${finalStats[1]}</div>
+  <div><strong>Def:</strong> ${finalStats[2]}</div>
 `;
 
 const rightCol = document.createElement('div');
 rightCol.className = 'summary-stats-col';
 rightCol.innerHTML = `
-  <div>SpA: ${finalStats[3]}</div>
-  <div>SpD: ${finalStats[4]}</div>
-  <div>Spe: ${finalStats[5]}</div>
+  <div><strong>SpA:</strong> ${finalStats[3]}</div>
+  <div><strong>SpD:</strong> ${finalStats[4]}</div>
+  <div><strong>Spe:</strong> ${finalStats[5]}</div>
 `;
 
 statRow.appendChild(leftCol);
