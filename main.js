@@ -287,7 +287,7 @@ const getValidMoves = () => {
   return moves;
 };
 
-const createMoveDropdown = (basePokemon) => {
+const createMoveDropdown = (basePokemon, slot) => {
   const sel = document.createElement('select');
   sel.className = 'move-select';
 
@@ -297,7 +297,7 @@ const createMoveDropdown = (basePokemon) => {
   // Prepare HTML first with data-color BEFORE TomSelect is initialized
   sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
     const isBaseCompatible = basePokemon.hasOwnProperty(m.id);
-    const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
+    //const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
     const fusionRow = parseInt(slot?.dataset.fusionRow || -1);
     const fusionPoke = isNaN(fusionRow) ? null : pokemonData.find(p => p.row === fusionRow);
     const isFusionCompatible = fusionPoke?.hasOwnProperty(m.id);
@@ -799,21 +799,23 @@ function updateMoveDropdownColors(slot) {
       const isBase = basePoke?.hasOwnProperty(moveId);
       const isFusion = fusionPoke?.hasOwnProperty(moveId);
 
-      let color;
-      if (isBase && isFusion) color = '#d4edda'; // still prioritize green
-      else if (isBase) color = '#d4edda';        // green
-      else if (isFusion) color = '#cce5ff';      // blue
-      else color = '#ffeeba';                    // default orange
+      let color = '#ffeeba'; // orange
+      if (isBase && isFusion) color = '#d4edda'; // prefer green
+      else if (isBase) color = '#d4edda';
+      else if (isFusion) color = '#cce5ff';
 
       option.dataset.color = color;
 
-      // Update rendered dropdown if already open
-    const optEl = ts.getOption(option.value);
-    const itemEl = ts.getItem(option.value);
-    if (optEl) optEl.style.backgroundColor = color;
-    if (itemEl) itemEl.style.backgroundColor = color;
+      // Directly style existing TomSelect elements
+      const optEl = ts.getOption(option.value);
+      const itemEl = ts.getItem(option.value);
+      if (optEl) optEl.style.backgroundColor = color;
+      if (itemEl) itemEl.style.backgroundColor = color;
     }
+
+    // Refresh rendering
     ts.refreshOptions(false);
   });
 }
+
 
