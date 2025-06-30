@@ -1037,6 +1037,11 @@ function renderItemSections(container, itemData, slotIndex) {
     option.textContent = i;
     select.appendChild(option);
   }
+
+  // ⬇️ Apply saved value and handle change
+  const savedValue = teamItemSelections[slotIndex]?.[name] ?? 0;
+  select.value = savedValue;
+
   select.addEventListener('change', (e) => {
   const value = parseInt(e.target.value);
   if (!isNaN(value)) {
@@ -1045,13 +1050,6 @@ function renderItemSections(container, itemData, slotIndex) {
     updateTeamSummary();
   }
 });
-  // ⬇️ Apply saved value and handle change
-  const savedValue = teamItemSelections[slotIndex]?.[name] ?? 0;
-  select.value = savedValue;
-
-  select.addEventListener('change', () => {
-    teamItemSelections[slotIndex][name] = parseInt(select.value);
-  });
 
   itemDiv.appendChild(img);
   itemDiv.appendChild(select);
