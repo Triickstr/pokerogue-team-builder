@@ -436,46 +436,62 @@ const renderFusionInfo = (fusionPoke, slot) => {
   img.src = `images/${fusionPoke.img}_0.png`;
   img.className = 'pokemon-img';
   img.onerror = () => img.style.display = 'none';
+
   img.onclick = () => {
+    // ✅ Remove fusion reference
+    delete slot.dataset.fusionRow;
+
+    // ✅ Reset the selector
     renderFusionSelector(slot);
+
+    // ✅ Recompute dropdown colors without fusion
+    const baseRow = parseInt(slot.dataset.pokemonRow);
+    const basePoke = pokemonData.find(p => p.row === baseRow);
+
     slot.querySelectorAll('.move-select').forEach(select => {
-  const ts = select.tomselect;
-  if (!ts) return;
+      const ts = select.tomselect;
+      if (!ts) return;
 
-  const currentValue = ts.getValue();
+      const currentValue = ts.getValue();
 
-  const newOptions = Array.from(select.options).map(opt => {
-    const moveId = parseInt(opt.value);
-    if (!moveId) return null;
+      // Update each <option>'s dataset.color
+      Array.from(select.options).forEach(option => {
+        const moveId = parseInt(option.value);
+        if (!moveId) return;
 
-    const isBase = basePoke?.hasOwnProperty(moveId);
-    const isFusion = fusionPoke?.hasOwnProperty(moveId);
+        const isBase = basePoke?.hasOwnProperty(moveId);
+        let color = '#ffeeba'; // default orange
+        if (isBase) color = '#d4edda'; // green
 
-    let color = '#ffeeba';
-    if (isBase) color = '#d4edda';
-    else if (isFusion) color = '#cce5ff';
+        option.dataset.color = color;
+      });
 
-    return {
-      value: String(moveId),
-      text: window.fidToName?.[moveId] || `Move ${moveId}`,
-      $order: 1,
-      dataset: { color },
-    };
-  }).filter(Boolean);
+      // Re-render TomSelect
+      ts.settings.render.option = function (data, escape) {
+        const option = select.querySelector(`option[value="${data.value}"]`);
+        const color = option?.dataset.color || '#fff';
+        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+      };
 
-  ts.clearOptions();
-  ts.addOptions(newOptions);
-  ts.refreshOptions(false);
-  ts.setValue(currentValue);
-});
-    setTimeout(updateTeamSummary, 10);
+      ts.settings.render.item = function (data, escape) {
+        const option = select.querySelector(`option[value="${data.value}"]`);
+        const color = option?.dataset.color || '#fff';
+        return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
+      };
+
+      ts.refreshOptions(false);
+    });
+
+    // ✅ Immediately update the summary visuals
+    updateTeamSummary();
   };
+
   fusionContainer.appendChild(img);
 
   // Types
   const typeContainer = document.createElement('div');
   typeContainer.className = 'type-container';
-  [fusionPoke.t1, fusionPoke.t2].filter(type => type != null).forEach(type => {
+  [fusionPoke.t1, fusionPoke.t2].filter(t => t != null).forEach(type => {
     const typeName = window.fidToName?.[type] || `Type ${type}`;
     const typeBox = document.createElement('div');
     typeBox.className = 'type-box';
@@ -491,14 +507,15 @@ const renderFusionInfo = (fusionPoke, slot) => {
   stats.innerText = `HP: ${fusionPoke.hp}, Atk: ${fusionPoke.atk}, Def: ${fusionPoke.def}, SpA: ${fusionPoke.spa}, SpD: ${fusionPoke.spd}, Spe: ${fusionPoke.spe}`;
   fusionContainer.appendChild(stats);
 
-  // Fusion Ability wrapper
+  // Fusion Ability
   const fusionAbilityWrapper = document.createElement('div');
   fusionAbilityWrapper.className = 'fusion-ability-wrapper';
 
   const fusionAbilitySelect = document.createElement('select');
   observeChanges(fusionAbilitySelect);
   fusionAbilitySelect.className = 'fusion-ability-select';
-  const abilities = [fusionPoke.a1, fusionPoke.a2, fusionPoke.ha].filter(type => type != null);
+
+  const abilities = [fusionPoke.a1, fusionPoke.a2, fusionPoke.ha].filter(a => a != null);
   fusionAbilitySelect.innerHTML = abilities.map(a => {
     const name = window.fidToName?.[a] || `Ability ${a}`;
     return `<option value="${a}">${name}</option>`;
@@ -516,9 +533,10 @@ const renderFusionInfo = (fusionPoke, slot) => {
 
   setTimeout(() => {
     new TomSelect(fusionAbilitySelect, { maxOptions: null });
-    updateMoveDropdownColors(slot); // Now safe to call after dropdown is attached
+    updateMoveDropdownColors(slot); // ✅ Update colors now that dropdowns are rendered
   }, 0);
 };
+
 
 
 const renderFusionSelector = (slot) => {
