@@ -297,12 +297,11 @@ const createMoveDropdown = (basePokemon, slot) => {
   // Prepare HTML first with data-color BEFORE TomSelect is initialized
   sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
     const isBaseCompatible = basePokemon.hasOwnProperty(m.id);
-    //const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
     const fusionRow = parseInt(slot?.dataset.fusionRow || -1);
     const fusionPoke = isNaN(fusionRow) ? null : pokemonData.find(p => p.row === fusionRow);
     const isFusionCompatible = fusionPoke?.hasOwnProperty(m.id);
 
-    let color = '#ffeeba'; // orange by default
+    let color = '#ffeeba'; // default orange
     if (isBaseCompatible) color = '#d4edda'; // green
     else if (isFusionCompatible) color = '#cce5ff'; // blue
 
@@ -311,7 +310,7 @@ const createMoveDropdown = (basePokemon, slot) => {
 
   // Initialize TomSelect AFTER setting options
   setTimeout(() => {
-    const ts = new TomSelect(sel, {
+    new TomSelect(sel, {
       maxOptions: null,
       render: {
         option: function (data, escape) {
@@ -324,12 +323,9 @@ const createMoveDropdown = (basePokemon, slot) => {
           const color = option?.dataset.color || '#fff';
           return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
         }
-      }
-    });
-
-          },
+      },
       onInitialize: () => {
-        // Only update once TomSelect has been initialized
+        // Trigger color update only after all dropdowns are ready
         updateMoveDropdownColors(sel.closest('.team-slot'));
       }
     });
@@ -337,6 +333,7 @@ const createMoveDropdown = (basePokemon, slot) => {
 
   return sel;
 };
+
 
 
 
