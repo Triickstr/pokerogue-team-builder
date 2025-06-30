@@ -158,38 +158,14 @@ summaryBox.appendChild(typeRow);
 
     summaryBox.appendChild(statRow);
 
-const moveRow = document.createElement('div');
-moveRow.className = 'summary-moves';
-
-const baseRow = parseInt(slot.dataset.pokemonRow);
-const fusionRow = parseInt(slot.dataset.fusionRow || -1);
-const basePoke = pokemonData.find(p => p.row === baseRow);
-const fusionPoke = pokemonData.find(p => p.row === fusionRow);
-
-slot.querySelectorAll('.move-select').forEach(select => {
-  const ts = select.tomselect;
-  const value = ts?.getValue?.();
-  const name = ts?.options?.[value]?.text;
-  const moveId = parseInt(value);
-
-  if (name && !isNaN(moveId)) {
-    let color = '#ffeeba'; // default orange
-    if (basePoke?.hasOwnProperty(moveId)) color = '#d4edda'; // green
-    else if (fusionPoke?.hasOwnProperty(moveId)) color = '#cce5ff'; // blue
-
-    const div = document.createElement('div');
-    div.textContent = name;
-    div.style.backgroundColor = color;
-    div.style.color = '#222';
-    div.style.padding = '2px 5px';
-    div.style.margin = '2px 0';
-    div.style.borderRadius = '4px';
-    moveRow.appendChild(div);
-  }
-});
-
-summaryBox.appendChild(moveRow);
-
+    const moveRow = document.createElement('div');
+    moveRow.className = 'summary-moves';
+    moveNames.forEach(m => {
+      const div = document.createElement('div');
+      div.textContent = m;
+      moveRow.appendChild(div);
+    });
+    summaryBox.appendChild(moveRow);
 
     const infoRow = document.createElement('div');
     infoRow.className = 'summary-info';
@@ -287,28 +263,12 @@ const getValidMoves = () => {
   return moves;
 };
 
-const createMoveDropdown = (basePokemon, slot) => {
+const createMoveDropdown = (basePokemon) => {
   const sel = document.createElement('select');
   sel.className = 'move-select';
 
   const moves = getValidMoves();
-  const baseRow = basePokemon.row;
 
-  // Prepare HTML first with data-color BEFORE TomSelect is initialized
-  sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
-    const isBaseCompatible = basePokemon.hasOwnProperty(m.id);
-    const fusionRow = parseInt(slot?.dataset.fusionRow || -1);
-    const fusionPoke = isNaN(fusionRow) ? null : pokemonData.find(p => p.row === fusionRow);
-    const isFusionCompatible = fusionPoke?.hasOwnProperty(m.id);
-
-    let color = '#ffeeba'; // default orange
-    if (isBaseCompatible) color = '#d4edda'; // green
-    else if (isFusionCompatible) color = '#cce5ff'; // blue
-
-    return `<option value="${m.id}" data-color="${color}">${m.name}</option>`;
-  }).join('');
-
-  // Initialize TomSelect AFTER setting options
   setTimeout(() => {
     new TomSelect(sel, {
       maxOptions: null,
@@ -323,18 +283,27 @@ const createMoveDropdown = (basePokemon, slot) => {
           const color = option?.dataset.color || '#fff';
           return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
         }
-      },
-      onInitialize: () => {
-        // Trigger color update only after all dropdowns are ready
-        updateMoveDropdownColors(sel.closest('.team-slot'));
       }
     });
   }, 0);
 
+  sel.innerHTML = '<option value="">Select a Move</option>' + moves.map(m => {
+    const isBaseCompatible = basePokemon.hasOwnProperty(m.id);
+    const baseRow = basePokemon.row;
+    const slot = document.querySelector(`.team-slot[data-pokemon-row="${baseRow}"]`);
+    const fusionRow = parseInt(slot?.dataset.fusionRow || -1);
+    const fusionPoke = isNaN(fusionRow) ? null : pokemonData.find(p => p.row === fusionRow);
+    const isFusionCompatible = fusionPoke?.hasOwnProperty(m.id);
+
+    let color = '#ffeeba'; // orange by default
+    if (isBaseCompatible) color = '#d4edda'; // green
+    else if (isFusionCompatible) color = '#cce5ff'; // blue
+
+    return `<option value="${m.id}" data-color="${color}">${m.name}</option>`;
+  }).join('');
+
   return sel;
 };
-
-
 
 
   const createAbilityDropdown = (pokemon) => {
@@ -379,29 +348,20 @@ const createMoveDropdown = (basePokemon, slot) => {
     stats.innerText = `HP: ${pokemon.hp}, Atk: ${pokemon.atk}, Def: ${pokemon.def}, SpA: ${pokemon.spa}, SpD: ${pokemon.spd}, Spe: ${pokemon.spe}`;
     slot.appendChild(stats);
 
-for (let i = 0; i < 4; i++) {
-  const moveWrapper = document.createElement('div');
-  moveWrapper.className = 'move-wrapper';
+    for (let i = 0; i < 4; i++) {
+      const moveWrapper = document.createElement('div');
+      moveWrapper.className = 'move-wrapper';
 
-  const moveDropdown = createMoveDropdown(pokemon, slot);
-  ['mousedown', 'focus'].forEach(event =>
-    moveDropdown.addEventListener(event, () => updateMoveDropdownColors(slot))
-  );
-  observeChanges(moveDropdown);
+      const moveDropdown = createMoveDropdown(pokemon);
+      observeChanges(moveDropdown);
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'move-checkbox';
 
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.className = 'move-checkbox';
-
-  moveWrapper.appendChild(moveDropdown);
-  moveWrapper.appendChild(checkbox);
-  slot.appendChild(moveWrapper);
-}
-
-// Add this AFTER the for loop
-setTimeout(() => updateMoveDropdownColors(slot), 10);
-
-
+      moveWrapper.appendChild(moveDropdown);
+      moveWrapper.appendChild(checkbox);
+      slot.appendChild(moveWrapper);
+    }
 
     const abilityDropdown = createAbilityDropdown(pokemon);
     observeChanges(abilityDropdown);
@@ -515,32 +475,13 @@ const renderFusionSelector = (slot) => {
       const name = window.speciesNames?.[p.row] || `#${p.row} - ${p.img}`;
       return `<option value="${i}">${name}</option>`;
     }).join('');
-
-  fusionContainer.appendChild(select);
-
-  setTimeout(() => {
-    new TomSelect(select, { maxOptions: null });
-  }, 0);
-
-  select.addEventListener('change', () => {
+  setTimeout(() => new TomSelect(select, { maxOptions: null }), 0);
+  select.onchange = () => {
     const selected = pokemonData[select.value];
-
-    if (selected) {
-      renderFusionInfo(selected, slot);
-      setTimeout(() => {
-        updateMoveDropdownColors(slot); // ✅ Recolor all dropdowns
-        updateTeamSummary();
-      }, 100);
-    } else {
-      delete slot.dataset.fusionRow;
-
-      const fusionContainer = slot.querySelector('.fusion-container');
-      if (fusionContainer) fusionContainer.innerHTML = '';
-
-      updateMoveDropdownColors(slot);
-      updateTeamSummary();
-    }
-  });
+    renderFusionInfo(selected, slot);  // <-- pass slot here too
+    setTimeout(updateTeamSummary, 10);
+  };
+  fusionContainer.appendChild(select);
 };
 
 renderFusionSelector(slot);
@@ -798,33 +739,26 @@ function updateMoveDropdownColors(slot) {
 
   slot.querySelectorAll('.move-select').forEach(select => {
     const ts = select.tomselect;
-    if (!ts) return;
 
-    Array.from(select.options).forEach(option => {
+    for (const option of select.options) {
+      if (!option.value) continue;
       const moveId = parseInt(option.value);
-      if (isNaN(moveId)) return;
 
-      let color = '#ffeeba';
-      if (basePoke?.hasOwnProperty(moveId)) color = '#d4edda';
-      else if (fusionPoke?.hasOwnProperty(moveId)) color = '#cce5ff';
+      const isBase = basePoke?.hasOwnProperty(moveId);
+      const isFusion = fusionPoke?.hasOwnProperty(moveId);
+
+      let color = '#ffeeba'; // default orange
+      if (isBase) color = '#d4edda'; // green
+      else if (isFusion) color = '#cce5ff'; // blue
 
       option.dataset.color = color;
-    });
 
-    ts.settings.render.option = function (data, escape) {
-      const option = select.querySelector(`option[value="${data.value}"]`);
-      const color = option?.dataset.color || '#fff';
-      return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-    };
-
-    ts.settings.render.item = function (data, escape) {
-      const option = select.querySelector(`option[value="${data.value}"]`);
-      const color = option?.dataset.color || '#fff';
-      return `<div style="background-color:${color}; padding:5px;">${escape(data.text)}</div>`;
-    };
-
-    ts.refreshOptions(false);
+      // Update rendered dropdown if already open
+      const optEl = ts.getOption(option.value);
+      const itemEl = ts.getItem(option.value);
+      if (optEl) optEl.style.backgroundColor = color;
+      if (itemEl) itemEl.style.backgroundColor = color;
+    }
   });
 }
-
 
