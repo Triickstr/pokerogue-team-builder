@@ -654,6 +654,8 @@ const exportTeamToJson = () => {
       fusionRow = 0;
     }
 
+    const itemData = { ...teamItemSelections[teamData.length] };
+
     teamData.push({
       pokemon: pokemonRow,
       fusion: fusionRow,
@@ -661,7 +663,8 @@ const exportTeamToJson = () => {
       ability: baseAbilityParsed,
       fusionAbility: fusionAbilityParsed,
       nature,
-      tera
+      tera,
+      items: itemData
     });
   });
 
@@ -701,7 +704,7 @@ async function waitForTomSelect(select, timeout = 1000) {
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
   console.log("Starting import of team data:", data);
-
+  teamItemSelections = [{}, {}, {}, {}, {}, {}];
   for (let i = 0; i < data.length; i++) {
     const entry = data[i];
     const slot = slots[i];
@@ -808,7 +811,18 @@ await Promise.all(
       teraSelect.setValue(entry.tera);
       console.log("Set Tera to:", entry.tera);
     }
+    // Restore item selections for this slot if available
+if (entry.items) {
+  teamItemSelections[i] = { ...entry.items };
 
+  // If popup is open, update dropdowns (optional)
+  const isPopupOpen = document.querySelector('.item-popup');
+  if (isPopupOpen) {
+    const popup = isPopupOpen.querySelector('.item-popup');
+    popup.innerHTML = '';
+    renderItemSections(popup, window.itemData, i);
+  }
+}
 
     updateTeamSummary();
     await new Promise(res => setTimeout(res, 150));
