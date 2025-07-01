@@ -218,7 +218,7 @@ infoRowBottom.className = 'summary-info-row';
     div.style.fontWeight = 'bold';
   }
 
-  // 👇 Add passive strikethrough check
+  // Add passive strikethrough check
   if (isPassive && passiveAbilityDisabled[i]) {
     div.innerHTML = `<s>${label}: ${value}</s>`;
   } else {
@@ -639,16 +639,16 @@ const renderFusionInfo = (fusionPoke, slot) => {
   img.onerror = () => img.style.display = 'none';
 
   img.onclick = () => {
-    // ✅ Remove fusion reference
+    // Remove fusion reference
     delete slot.dataset.fusionRow;
 
-    // ✅ Reset the selector
+    // Reset the selector
     renderFusionSelector(slot);
 
-    // ✅ Recompute dropdown colors without fusion
+    // Recompute dropdown colors without fusion
     updateMoveDropdownColors(slot);
 
-    // ✅ Immediately update the summary visuals
+    // Immediately update the summary visuals
     updateTeamSummary();
   };
 
@@ -699,7 +699,7 @@ const renderFusionInfo = (fusionPoke, slot) => {
 
   setTimeout(() => {
     new TomSelect(fusionAbilitySelect, { maxOptions: null });
-    updateMoveDropdownColors(slot); // ✅ Update colors now that dropdowns are rendered
+    updateMoveDropdownColors(slot); // Update colors now that dropdowns are rendered
   }, 0);
 };
 
@@ -957,14 +957,14 @@ async function importTeamData(data) {
   passiveCheckbox.dispatchEvent(new Event('change'));
 }
 
-    // ✅ Handle optional Tera value (may be missing)
+    // Handle optional Tera value (may be missing)
     const teraSelect = slot.querySelector('.tera-select')?.tomselect;
     if (teraSelect && entry.tera) {
       teraSelect.setValue(entry.tera);
       console.log("Set Tera to:", entry.tera);
     }
 
-    // ✅ Handle optional items (may be missing)
+    // Handle optional items (may be missing)
     if (entry.items) {
       teamItemSelections[i] = { ...entry.items };
 
@@ -1069,7 +1069,7 @@ function updateMoveDropdownColors(slot) {
       if (itemEl) itemEl.style.backgroundColor = color;
     }
 
-    // 🟦 Key fix: force refresh the list of options to re-render the dropdown UI
+    // Key fix: force refresh the list of options to re-render the dropdown UI
     ts.refreshOptions(false);
   });
 }
@@ -1151,7 +1151,7 @@ function renderItemSections(container, itemData, slotIndex) {
     select.appendChild(option);
   }
 
-  // ⬇️ Apply saved value and handle change
+  // Apply saved value and handle change
   const savedValue = teamItemSelections[slotIndex]?.[name] ?? 0;
   select.value = savedValue;
 
