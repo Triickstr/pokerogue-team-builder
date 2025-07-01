@@ -788,6 +788,84 @@ function clearAllCheckboxes() {
   });
 }
 
+function renderEmptyPokemonBox(slot) {
+  slot.innerHTML = `
+    <div class="pokemon-box"></div>
+    <div class="selectors">
+      <label>Base Pokémon:</label>
+      <select class="base-select"></select>
+
+      <div class="fusion-container">
+        <label>Fusion:</label>
+        <select class="fusion-select"></select>
+      </div>
+
+      <label>Base Ability:</label>
+      <select class="ability-select"></select>
+
+      <label>Fusion Ability:</label>
+      <select class="fusion-ability-select"></select>
+
+      <label>Moves:</label>
+      <div class="moves">
+        ${[0, 1, 2, 3].map(() => `
+          <label>
+            <input type="checkbox" class="move-checkbox">
+            <select class="move-select"></select>
+          </label>
+        `).join('')}
+      </div>
+
+      <label>
+        <input type="checkbox" class="nature-checkbox">
+        Nature:
+      </label>
+      <select class="nature-select"></select>
+
+      <label>Tera Type:</label>
+      <select class="tera-select"></select>
+    </div>
+  `;
+
+  new TomSelect(slot.querySelector('.base-select'), {
+    options: pokemonData.map((p, i) => ({ value: i, text: speciesNames[p.row] })),
+    placeholder: "Select Pokémon"
+  });
+
+  new TomSelect(slot.querySelector('.fusion-select'), {
+    options: pokemonData.map((p, i) => ({ value: i, text: speciesNames[p.row] })),
+    placeholder: "Select Fusion"
+  });
+
+  new TomSelect(slot.querySelector('.ability-select'), {
+    options: abilityData.map((a, i) => ({ value: i, text: a })),
+    placeholder: "Select Ability"
+  });
+
+  new TomSelect(slot.querySelector('.fusion-ability-select'), {
+    options: abilityData.map((a, i) => ({ value: i, text: a })),
+    placeholder: "Select Fusion Ability"
+  });
+
+  slot.querySelectorAll('.move-select').forEach(select => {
+    new TomSelect(select, {
+      options: moveData.map((m, i) => ({ value: i, text: m.n })),
+      placeholder: "Select Move"
+    });
+  });
+
+  new TomSelect(slot.querySelector('.nature-select'), {
+    options: natureData.map(n => ({ value: n.name, text: n.name })),
+    placeholder: "Select Nature"
+  });
+
+  new TomSelect(slot.querySelector('.tera-select'), {
+    options: Object.entries(typeData).map(([i, t]) => ({ value: t, text: t })),
+    placeholder: "Select Tera Type"
+  });
+}
+
+
 
 //  Basic import logic using .row field matching
 async function waitForTomSelect(select, timeout = 1000) {
@@ -810,80 +888,56 @@ async function waitForTomSelect(select, timeout = 1000) {
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
   console.log("Starting import of team data:", data);
-  teamItemSelections = [{}, {}, {}, {}, {}, {}];
 
-  // ⚠️ First: CLEAR all slots regardless of incoming data
+  // Step 1: Clear all slots visually and from item memory
   slots.forEach((slot, i) => {
-    const baseSelect = slot.querySelector('select');
-    const fusionSelect = slot.querySelector('.fusion-container select');
-    const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
-    const natureSelect = slot.querySelector('.nature-select')?.tomselect;
-    const teraSelect = slot.querySelector('.tera-select')?.tomselect;
-    const natureCheckbox = slot.querySelector('.nature-checkbox');
-    const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
-    const moveDropdowns = slot.querySelectorAll('.move-select');
-
-    baseSelect.value = "";
-    fusionSelect.value = "";
-    if (abilitySelect) abilitySelect.clear();
-    if (fusionAbilitySelect) fusionAbilitySelect.clear();
-    if (natureSelect) natureSelect.clear();
-    if (teraSelect) teraSelect.clear();
-    if (natureCheckbox) natureCheckbox.checked = false;
-    moveCheckboxes.forEach(cb => cb.checked = false);
-    moveDropdowns.forEach(dropdown => {
-      const ts = dropdown?.tomselect;
-      if (ts) ts.clear();
-    });
-
-    // Optional: remove image and text content
-    slot.querySelector('.pokemon-box')?.classList.remove('active');
-    slot.querySelector('.pokemon-box')?.remove();
+    slot.innerHTML = '';
+    teamItemSelections[i] = {};
   });
 
-  // ✅ Then: Populate slots with incoming team data
-  for (let i = 0; i < data.length; i++) {
+  // Step 2: Re-render all 6 empty slots
+  for (let i = 0; i < 6; i++) {
+    const slot = document.querySelectorAll('.team-slot')[i];
+    renderEmptyPokemonBox(slot);
+  }
+
+  // Step 3: Wait for DOM to stabilize (ensures TomSelects are attached)
+  await new Promise(res => setTimeout(res, 100));
+
+  // Step 4: Fill imported team data
+  for (let i = 0; i < 6; i++) {
     const entry = data[i];
-    const slot = slots[i];
-    console.log(`\n--- Processing slot ${i + 1} ---`);
-    console.log("Entry:", entry);
+    const slot = document.querySelectorAll('.team-slot')[i];
+    if (!entry || !slot || entry.pokemon == null) continue;
 
-    if (!slot || !entry || entry.pokemon == null) {
-      console.warn(`Slot ${i} has no base Pokémon. Skipping.`);
-      continue;
-    }
-
+    // Base Pokémon
     const baseIndex = pokemonData.findIndex(p => p.row === entry.pokemon);
-    console.log("Base Pokémon Row:", entry.pokemon, " -> Index:", baseIndex);
-
     if (baseIndex !== -1) {
-      const baseSelect = slot.querySelector('select');
+      const baseSelect = slot.querySelector('.base-select');
       baseSelect.value = baseIndex;
 
       const selectedPokemon = {
         ...pokemonData[baseIndex],
-        types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(t => t != null)
+        types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(Boolean)
       };
 
       renderPokemonBox(slot, selectedPokemon);
-      console.log("Rendered base Pokémon:", selectedPokemon);
       await new Promise(res => setTimeout(res, 300));
     }
 
-    // Fusion
+    // Fusion Pokémon
     if (entry.fusion != null) {
       const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
       if (fusionIndex !== -1) {
-        const fusionSelect = slot.querySelector('.fusion-container select');
+        const fusionSelect = slot.querySelector('.fusion-select');
         fusionSelect.value = fusionIndex;
         fusionSelect.dispatchEvent(new Event('change'));
         await new Promise(res => setTimeout(res, 300));
       }
 
-      const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
-      if (fusionAbilitySelect && entry.fusionAbility != null) {
-        fusionAbilitySelect.setValue(String(entry.fusionAbility));
+      const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect;
+      if (fusionAbility && entry.fusionAbility != null) {
+        fusionAbility.setValue(String(entry.fusionAbility));
       }
     }
 
@@ -896,7 +950,7 @@ async function importTeamData(data) {
       (entry.moves || []).map(async (moveId, idx) => {
         const dropdown = moveDropdowns[idx];
         const checkbox = moveCheckboxes[idx];
-        if (dropdown && moveId !== null) {
+        if (dropdown && moveId != null) {
           const ts = await waitForTomSelect(dropdown);
           if (ts) {
             ts.setValue(String(moveId));
@@ -908,14 +962,14 @@ async function importTeamData(data) {
 
     // Ability
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    if (abilitySelect && entry.ability != null) {
+    if (entry.ability != null && abilitySelect) {
       abilitySelect.setValue(String(entry.ability));
     }
 
     // Nature
-    const natureSelect = slot.querySelector('.nature-select')?.tomselect;
     const natureCheckbox = slot.querySelector('.nature-checkbox');
-    if (natureSelect && natureCheckbox && entry.nature) {
+    const natureSelect = slot.querySelector('.nature-select')?.tomselect;
+    if (natureCheckbox && natureSelect && entry.nature) {
       natureCheckbox.checked = true;
       natureSelect.setValue(entry.nature);
     }
@@ -929,19 +983,12 @@ async function importTeamData(data) {
     // Items
     if (entry.items) {
       teamItemSelections[i] = { ...entry.items };
-      const isPopupOpen = document.querySelector('.item-popup');
-      if (isPopupOpen) {
-        const popup = isPopupOpen.querySelector('.item-popup');
-        popup.innerHTML = '';
-        renderItemSections(popup, window.itemData, i);
-      }
     }
   }
 
   updateTeamSummary();
   console.log("Import finished.");
 }
-
 
 
 
