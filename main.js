@@ -302,6 +302,38 @@ const observeChanges = (element) => {
   element.addEventListener('change', updateTeamSummary);
 };
 
+async function loadPreMadeTeamList() {
+  try {
+    const response = await fetch('Teams/teams.json');
+    const teams = await response.json();
+
+    const dropdown = document.getElementById('preMadeTeamDropdown');
+    teams.forEach(team => {
+      const option = document.createElement('option');
+      option.value = team.file;
+      option.textContent = team.name;
+      dropdown.appendChild(option);
+    });
+
+    dropdown.addEventListener('change', async (e) => {
+      const selectedFile = e.target.value;
+      if (!selectedFile) return;
+
+      try {
+        const teamResponse = await fetch(`Teams/${selectedFile}`);
+        const teamData = await teamResponse.json();
+        await importTeamData(teamData);
+      } catch (err) {
+        console.error("Failed to load selected team:", err);
+        alert("Could not load selected team.");
+      }
+    });
+  } catch (err) {
+    console.error("Failed to load teams.json:", err);
+  }
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const teamGrid = document.getElementById("teamGrid");
   teamGrid.innerHTML = '';
@@ -337,6 +369,8 @@ window.allMoves = (() => {
   for (let i = 0; i < 6; i++) {
     teamGrid.appendChild(createTeamSlot());
   }
+
+  loadPreMadeTeamList();
 });
 
 
