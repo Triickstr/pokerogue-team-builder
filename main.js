@@ -338,7 +338,7 @@ const observeChanges = (element) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadPreMadeTeamList();
+  DOMContentLoaded();
   const teamGrid = document.getElementById("teamGrid");
   teamGrid.innerHTML = '';
 
