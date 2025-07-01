@@ -787,7 +787,6 @@ async function waitForTomSelect(select, timeout = 1000) {
 }
 
 async function importTeamData(data) {
-  resetTeamBuilder();
   const slots = document.querySelectorAll('.team-slot');
   console.log("Starting import of team data:", data);
   teamItemSelections = [{}, {}, {}, {}, {}, {}];
@@ -929,9 +928,16 @@ document.getElementById('importFile').addEventListener('change', async (event) =
     return;
   }
 
+  // Reset everything before importing
+  resetTeamBuilder();
+
+  // Wait for DOM reset to fully apply
+  await new Promise(res => setTimeout(res, 100));
+
+  // Proceed with importing
   await importTeamData(data);
 
-  //  Reset checkboxes after everything is imported
+  // Uncheck all optional checkboxes
   clearAllCheckboxes();
 });
 
