@@ -302,6 +302,23 @@ const observeChanges = (element) => {
   element.addEventListener('change', updateTeamSummary);
 };
 
+async function loadPreMadeTeams() {
+  try {
+    const response = await fetch('Teams/teams.json');
+    const teams = await response.json();
+    const dropdown = document.getElementById('preMadeTeamDropdown');
+
+    teams.forEach(team => {
+      const option = document.createElement('option');
+      option.value = team.file;
+      option.textContent = team.name;
+      dropdown.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Failed to load teams.json", err);
+  }
+}
+
 function resetTeamBuilder() {
   const teamGrid = document.getElementById("teamGrid");
   const summaryContainer = document.getElementById("teamSummary");
@@ -352,6 +369,8 @@ window.allMoves = (() => {
   for (let i = 0; i < 6; i++) {
     teamGrid.appendChild(createTeamSlot());
   }
+
+  loadPreMadeTeams();
 });
 
 
@@ -941,6 +960,31 @@ document.getElementById('importFile').addEventListener('change', async (event) =
   clearAllCheckboxes();
 });
 
+document.getElementById('preMadeTeamDropdown').addEventListener('change', async (event) => {
+  const fileName = event.target.value;
+  if (!fileName) return;
+
+  try {
+    // Step 1: Clear builder
+    resetTeamBuilder();
+
+    // Optional wait to ensure DOM is ready
+    await new Promise(res => setTimeout(res, 100));
+
+    //  Step 2: Fetch and parse the team file
+    const response = await fetch(`Teams/${fileName}`);
+    const teamData = await response.json();
+
+    // Step 3: Import into builder
+    await importTeamData(teamData);
+
+    //  Step 4: Clear checkboxes
+    clearAllCheckboxes();
+  } catch (err) {
+    console.error("Failed to load or import team:", err);
+    alert("Failed to load team. Please try again.");
+  }
+});
 
 function updateMoveDropdownColors(slot) {
   const baseRow = parseInt(slot.dataset.pokemonRow);
