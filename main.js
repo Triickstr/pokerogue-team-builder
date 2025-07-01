@@ -302,6 +302,21 @@ const observeChanges = (element) => {
   element.addEventListener('change', updateTeamSummary);
 };
 
+function resetTeamBuilder() {
+  const teamGrid = document.getElementById("teamGrid");
+  const summaryContainer = document.getElementById("teamSummary");
+
+  // Clear item selections and visual areas
+  teamItemSelections = [{}, {}, {}, {}, {}, {}];
+  teamGrid.innerHTML = '';
+  summaryContainer.innerHTML = '';
+
+  // Rebuild 6 fresh team slots
+  for (let i = 0; i < 6; i++) {
+    teamGrid.appendChild(createTeamSlot());
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const teamGrid = document.getElementById("teamGrid");
   teamGrid.innerHTML = '';
