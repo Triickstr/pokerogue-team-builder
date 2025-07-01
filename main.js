@@ -787,6 +787,7 @@ async function waitForTomSelect(select, timeout = 1000) {
 }
 
 async function importTeamData(data) {
+  resetTeamBuilder();
   const slots = document.querySelectorAll('.team-slot');
   console.log("Starting import of team data:", data);
   teamItemSelections = [{}, {}, {}, {}, {}, {}];
