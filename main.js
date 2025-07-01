@@ -297,6 +297,41 @@ if (itemData && Object.values(itemData).some(val => val > 0)) {
   
 };
 
+async function loadTeamDropdown() {
+  try {
+    const response = await fetch('teams/teams.json');
+    const teams = await response.json();
+    const selector = document.getElementById('teamSelector');
+
+    teams.forEach(t => {
+      const option = document.createElement('option');
+      if (typeof t === 'string') {
+        option.value = t;
+        option.textContent = t.replace('.json', '');
+      } else {
+        option.value = t.file;
+        option.textContent = t.name;
+      }
+      selector.appendChild(option);
+    });
+
+    selector.addEventListener('change', async (e) => {
+      const file = e.target.value;
+      if (!file) return;
+
+      try {
+        const res = await fetch(`teams/${file}`);
+        const teamData = await res.json();
+        await importTeamData(teamData);
+      } catch (err) {
+        console.error("Failed to load selected team:", err);
+      }
+    });
+  } catch (err) {
+    console.error("Failed to load team list:", err);
+  }
+}
+
 const observeChanges = (element) => {
   if (!element) return;
   element.addEventListener('change', updateTeamSummary);
@@ -1078,41 +1113,3 @@ function downloadTeamSummaryImage() {
     console.error("Failed to capture image:", err);
   });
 }
-
-async function loadPreMadeTeamList() {
-  try {
-    const res = await fetch('Teams/teams.json');
-    const fileList = await res.json();
-
-    const dropdown = document.getElementById('preMadeTeamDropdown');
-    fileList.forEach(filename => {
-      const option = document.createElement('option');
-      option.value = filename;
-      option.textContent = filename.replace('.json', '');
-      dropdown.appendChild(option);
-    });
-  } catch (err) {
-    console.error("Failed to load pre-made teams list:", err);
-  }
-}
-
-document.getElementById('preMadeTeamDropdown').addEventListener('change', async function () {
-  const selectedFile = this.value;
-  if (!selectedFile) return;
-
-  try {
-    const res = await fetch(`Teams/${selectedFile}`);
-    const teamData = await res.json();
-
-    // Clear previous selections
-    document.querySelectorAll('.team-slot').forEach(slot => {
-      slot.innerHTML = '';
-    });
-    document.getElementById('teamSummary').innerHTML = '';
-    teamItemSelections = [{}, {}, {}, {}, {}, {}];
-
-    await importTeamData(teamData);
-  } catch (err) {
-    console.error("Failed to load selected team:", err);
-  }
-});
