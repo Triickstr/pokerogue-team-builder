@@ -21,6 +21,7 @@ async function waitForTomSelect(selectElement, timeout = 1000) {
 
 let pokemonData = [];
 let teamItemSelections = [{}, {}, {}, {}, {}, {}];
+let passiveAbilityDisabled = [false, false, false, false, false, false];
 window.typeColors = {
   Normal: '#A8A77A',
   Fire: '#EE8130',
@@ -202,10 +203,10 @@ infoRowBottom.className = 'summary-info-row';
 
 [
   { label: "Ability", value: ability, targetRow: infoRowTop },
-  { label: "Passive", value: passiveText, targetRow: infoRowBottom },
+  { label: "Passive", value: passiveText, targetRow: infoRowBottom, isPassive: true },
   { label: "Nature", value: nature, targetRow: infoRowTop },
   { label: "Tera", value: teraType, targetRow: infoRowBottom }
-].forEach(({ label, value, targetRow }) => {
+].forEach(({ label, value, targetRow, isPassive }) => {
   const div = document.createElement('div');
 
   if (label === "Tera" && value && value !== "—") {
@@ -217,7 +218,13 @@ infoRowBottom.className = 'summary-info-row';
     div.style.fontWeight = 'bold';
   }
 
-  div.textContent = `${label}: ${value}`;
+  // 👇 Add passive strikethrough check
+  if (isPassive && passiveAbilityDisabled[i]) {
+    div.innerHTML = `<s>${label}: ${value}</s>`;
+  } else {
+    div.textContent = `${label}: ${value}`;
+  }
+
   targetRow.appendChild(div);
 });
 
@@ -520,10 +527,34 @@ const createMoveDropdown = (basePokemon) => {
     slot.appendChild(abilityDropdown);
 
 
-    const passive = document.createElement('div');
-    const passiveName = window.fidToName?.[pokemon.pa] || `Passive ${pokemon.pa}`;
-    passive.innerText = `Passive Ability: ${passiveName}`;
-    slot.appendChild(passive);
+    const passiveWrapper = document.createElement('div');
+passiveWrapper.style.display = 'flex';
+passiveWrapper.style.alignItems = 'center';
+passiveWrapper.style.gap = '6px';
+
+const passiveName = window.fidToName?.[pokemon.pa] || `Passive ${pokemon.pa}`;
+const passiveText = document.createElement('div');
+passiveText.innerText = `Passive Ability: ${passiveName}`;
+passiveWrapper.appendChild(passiveText);
+
+const disableCheckbox = document.createElement('input');
+disableCheckbox.type = 'checkbox';
+disableCheckbox.className = 'disable-passive-checkbox';
+disableCheckbox.title = 'Disable Passive Ability';
+disableCheckbox.dataset.slotIndex = slot.dataset.slotIndex || Array.from(document.querySelectorAll('.team-slot')).indexOf(slot);
+
+// Track slot index
+const index = parseInt(disableCheckbox.dataset.slotIndex);
+disableCheckbox.checked = passiveAbilityDisabled[index] || false;
+
+// Update state on change
+disableCheckbox.addEventListener('change', () => {
+  passiveAbilityDisabled[index] = disableCheckbox.checked;
+  updateTeamSummary();
+});
+
+passiveWrapper.appendChild(disableCheckbox);
+slot.appendChild(passiveWrapper);
 
       const natureWrapper = document.createElement('div');
     natureWrapper.className = 'nature-wrapper';
@@ -759,7 +790,7 @@ const exportTeamToJson = () => {
     }
 
     const itemData = { ...teamItemSelections[teamData.length] };
-
+    const disabledPassive = passiveCheckbox?.checked || false;
     teamData.push({
       pokemon: pokemonRow,
       fusion: fusionRow,
@@ -768,7 +799,8 @@ const exportTeamToJson = () => {
       fusionAbility: fusionAbilityParsed,
       nature,
       tera,
-      items: itemData
+      items: itemData,
+      disabledPassive
     });
   });
 
@@ -784,6 +816,11 @@ const exportTeamToJson = () => {
 function clearAllCheckboxes() {
   document.querySelectorAll('.move-checkbox, .nature-checkbox, .fusion-ability-checkbox').forEach(cb => {
     cb.checked = false;
+  });
+
+  // Restore disabled passive state from passiveAbilityDisabled array
+  document.querySelectorAll('.disable-passive-checkbox').forEach((cb, i) => {
+    cb.checked = passiveAbilityDisabled[i] || false;
   });
 }
 
@@ -905,6 +942,20 @@ async function importTeamData(data) {
       natureSelect.setValue(entry.nature);
       console.log("Set nature to:", entry.nature);
     }
+
+    const passiveCheckbox = slot.querySelector('.disable-passive-checkbox');
+    if (passiveCheckbox) {
+      if ('disabledPassive' in entry) {
+    passiveCheckbox.checked = !!entry.disabledPassive;
+    console.log("Set disable passive to:", passiveCheckbox.checked);
+  } else {
+    passiveCheckbox.checked = false; // fallback for older exports
+    console.log("Old file: disable passive defaulted to false");
+  }
+
+  // Trigger summary update to reflect strike-through
+  passiveCheckbox.dispatchEvent(new Event('change'));
+}
 
     // ✅ Handle optional Tera value (may be missing)
     const teraSelect = slot.querySelector('.tera-select')?.tomselect;
