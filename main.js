@@ -805,51 +805,51 @@ async function waitForTomSelect(select, timeout = 1000) {
   });
 }
 
+
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
 
+  // ✅ Reset all fields properly without destroying DOM elements
   slots.forEach((slot, i) => {
-  slot.querySelector('.pokemon-box')?.remove();
-  slot.dataset.pokemonRow = '';
-  slot.dataset.fusionRow = '';
-  teamItemSelections[i] = {}; // Reset items for each slot
+    const baseSelect = slot.querySelector('select');
+    if (baseSelect) baseSelect.value = '';
+
+    const fusionSelect = slot.querySelector('.fusion-container select');
+    if (fusionSelect) {
+      fusionSelect.value = '';
+      fusionSelect.dispatchEvent(new Event('change'));
+    }
+
+    const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
+    if (abilitySelect) abilitySelect.clear();
+
+    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+    if (fusionAbilitySelect) fusionAbilitySelect.clear();
+
+    const moveSelects = slot.querySelectorAll('.move-select');
+    moveSelects.forEach(ms => ms.tomselect?.clear());
+
+    const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
+    moveCheckboxes.forEach(cb => cb.checked = false);
+
+    const natureCheckbox = slot.querySelector('.nature-checkbox');
+    if (natureCheckbox) natureCheckbox.checked = false;
+
+    const natureSelect = slot.querySelector('.nature-select')?.tomselect;
+    if (natureSelect) natureSelect.clear();
+
+    const teraSelect = slot.querySelector('.tera-select')?.tomselect;
+    if (teraSelect) teraSelect.clear();
+
+    // Remove Pokémon box display
+    slot.querySelector('.pokemon-box')?.remove();
+
+    slot.dataset.pokemonRow = '';
+    slot.dataset.fusionRow = '';
+    teamItemSelections[i] = {};
   });
+
   document.getElementById('teamSummary').innerHTML = ''; // Clear summary
-
-  slots.forEach(slot => {
-  const baseSelect = slot.querySelector('select');
-  const fusionSelect = slot.querySelector('.fusion-container select');
-  const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-  const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
-  const moveSelects = slot.querySelectorAll('.move-select');
-  const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
-  const natureCheckbox = slot.querySelector('.nature-checkbox');
-  const natureSelect = slot.querySelector('.nature-select')?.tomselect;
-  const teraSelect = slot.querySelector('.tera-select')?.tomselect;
-
-  // Reset base & fusion Pokémon selectors
-  if (baseSelect) baseSelect.value = '';
-  if (fusionSelect) {
-    fusionSelect.value = '';
-    fusionSelect.dispatchEvent(new Event('change'));
-  }
-
-  // Reset abilities
-  if (abilitySelect) abilitySelect.clear();
-  if (fusionAbilitySelect) fusionAbilitySelect.clear();
-
-  // Reset moves & checkboxes
-  moveSelects.forEach(ms => ms.tomselect?.clear());
-  moveCheckboxes.forEach(cb => cb.checked = false);
-
-  // Reset nature and tera
-  if (natureCheckbox) natureCheckbox.checked = false;
-  if (natureSelect) natureSelect.clear();
-  if (teraSelect) teraSelect.clear();
-
-  // Clear the rendered Pokémon box
-  slot.querySelector('.pokemon-box')?.remove();
-});
 
   console.log("Starting import of team data:", data);
 
@@ -875,7 +875,7 @@ async function importTeamData(data) {
 
     if (baseIndex !== -1) {
       const baseSelect = slot.querySelector('select');
-      baseSelect.value = baseIndex;
+      if (baseSelect) baseSelect.value = baseIndex;
 
       const selectedPokemon = {
         ...pokemonData[baseIndex],
@@ -896,10 +896,12 @@ async function importTeamData(data) {
 
       if (fusionIndex !== -1) {
         const fusionSelect = slot.querySelector('.fusion-container select');
-        fusionSelect.value = fusionIndex;
-        fusionSelect.dispatchEvent(new Event('change'));
-        await new Promise(res => setTimeout(res, 300));
-        console.log("Fusion Pokémon selected:", pokemonData[fusionIndex]);
+        if (fusionSelect) {
+          fusionSelect.value = fusionIndex;
+          fusionSelect.dispatchEvent(new Event('change'));
+          await new Promise(res => setTimeout(res, 300));
+          console.log("Fusion Pokémon selected:", pokemonData[fusionIndex]);
+        }
       } else {
         console.warn("Fusion Pokémon not found.");
       }
