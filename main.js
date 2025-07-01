@@ -807,8 +807,45 @@ async function waitForTomSelect(select, timeout = 1000) {
 
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
-  console.log("Starting import of team data:", data);
+
+  slots.forEach(slot => {
+  const baseSelect = slot.querySelector('select');
+  const fusionSelect = slot.querySelector('.fusion-container select');
+  const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
+  const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+  const moveSelects = slot.querySelectorAll('.move-select');
+  const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
+  const natureCheckbox = slot.querySelector('.nature-checkbox');
+  const natureSelect = slot.querySelector('.nature-select')?.tomselect;
+  const teraSelect = slot.querySelector('.tera-select')?.tomselect;
+
+  // Reset base & fusion Pokémon selectors
+  if (baseSelect) baseSelect.value = '';
+  if (fusionSelect) {
+    fusionSelect.value = '';
+    fusionSelect.dispatchEvent(new Event('change'));
+  }
+
+  // Reset abilities
+  if (abilitySelect) abilitySelect.clear();
+  if (fusionAbilitySelect) fusionAbilitySelect.clear();
+
+  // Reset moves & checkboxes
+  moveSelects.forEach(ms => ms.tomselect?.clear());
+  moveCheckboxes.forEach(cb => cb.checked = false);
+
+  // Reset nature and tera
+  if (natureCheckbox) natureCheckbox.checked = false;
+  if (natureSelect) natureSelect.clear();
+  if (teraSelect) teraSelect.clear();
+
+  // Clear the rendered Pokémon box
+  slot.querySelector('.pokemon-box')?.remove();
+});
+
+// Also reset items
   teamItemSelections = [{}, {}, {}, {}, {}, {}];
+  console.log("Starting import of team data:", data);
 
   for (let i = 0; i < data.length; i++) {
     const entry = data[i] || {};
