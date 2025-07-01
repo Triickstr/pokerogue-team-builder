@@ -809,7 +809,7 @@ async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
 
   slots.forEach((slot, i) => {
-  slot.innerHTML = ''; // Clear the visual contents
+  slot.querySelector('.pokemon-box')?.remove();
   slot.dataset.pokemonRow = '';
   slot.dataset.fusionRow = '';
   teamItemSelections[i] = {}; // Reset items for each slot
