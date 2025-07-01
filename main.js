@@ -839,7 +839,7 @@ async function importTeamData(data) {
 
     // Optional: remove image and text content
     slot.querySelector('.pokemon-box')?.classList.remove('active');
-    slot.querySelector('.pokemon-box')?.innerHTML = '';
+    slot.querySelector('.pokemon-box')?.remove();
   });
 
   // ✅ Then: Populate slots with incoming team data
