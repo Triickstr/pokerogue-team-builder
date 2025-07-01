@@ -302,39 +302,6 @@ const observeChanges = (element) => {
   element.addEventListener('change', updateTeamSummary);
 };
 
-async function loadPreMadeTeamList() {
-  try {
-    const response = await fetch('Teams/teams.json');
-    const teams = await response.json();
-
-    const dropdown = document.getElementById('preMadeTeamDropdown');
-    teams.forEach(team => {
-      const option = document.createElement('option');
-      option.value = team.file;
-      option.textContent = team.name;
-      dropdown.appendChild(option);
-    });
-
-    dropdown.addEventListener('change', async (e) => {
-  const selectedFile = e.target.value;
-  if (!selectedFile) return;
-
-  try {
-    const teamResponse = await fetch(`Teams/${selectedFile}`);
-    const teamData = await teamResponse.json();
-    await importTeamData(teamData);
-    updateTeamSummary();  // added
-  } catch (err) {
-    console.error("Failed to load selected team:", err);
-    alert("Could not load selected team.");
-  }
-});
-  } catch (err) {
-    console.error("Failed to load teams.json:", err);
-  }
-}
-
-
 document.addEventListener("DOMContentLoaded", () => {
   const teamGrid = document.getElementById("teamGrid");
   teamGrid.innerHTML = '';
@@ -370,8 +337,6 @@ window.allMoves = (() => {
   for (let i = 0; i < 6; i++) {
     teamGrid.appendChild(createTeamSlot());
   }
-
-  loadPreMadeTeamList();
 });
 
 
@@ -788,84 +753,6 @@ function clearAllCheckboxes() {
   });
 }
 
-function renderEmptyPokemonBox(slot) {
-  slot.innerHTML = `
-    <div class="pokemon-box"></div>
-    <div class="selectors">
-      <label>Base Pokémon:</label>
-      <select class="base-select"></select>
-
-      <div class="fusion-container">
-        <label>Fusion:</label>
-        <select class="fusion-select"></select>
-      </div>
-
-      <label>Base Ability:</label>
-      <select class="ability-select"></select>
-
-      <label>Fusion Ability:</label>
-      <select class="fusion-ability-select"></select>
-
-      <label>Moves:</label>
-      <div class="moves">
-        ${[0, 1, 2, 3].map(() => `
-          <label>
-            <input type="checkbox" class="move-checkbox">
-            <select class="move-select"></select>
-          </label>
-        `).join('')}
-      </div>
-
-      <label>
-        <input type="checkbox" class="nature-checkbox">
-        Nature:
-      </label>
-      <select class="nature-select"></select>
-
-      <label>Tera Type:</label>
-      <select class="tera-select"></select>
-    </div>
-  `;
-
-  new TomSelect(slot.querySelector('.base-select'), {
-    options: pokemonData.map((p, i) => ({ value: i, text: speciesNames[p.row] })),
-    placeholder: "Select Pokémon"
-  });
-
-  new TomSelect(slot.querySelector('.fusion-select'), {
-    options: pokemonData.map((p, i) => ({ value: i, text: speciesNames[p.row] })),
-    placeholder: "Select Fusion"
-  });
-
-  new TomSelect(slot.querySelector('.ability-select'), {
-    options: abilityData.map((a, i) => ({ value: i, text: a })),
-    placeholder: "Select Ability"
-  });
-
-  new TomSelect(slot.querySelector('.fusion-ability-select'), {
-    options: abilityData.map((a, i) => ({ value: i, text: a })),
-    placeholder: "Select Fusion Ability"
-  });
-
-  slot.querySelectorAll('.move-select').forEach(select => {
-    new TomSelect(select, {
-      options: moveData.map((m, i) => ({ value: i, text: m.n })),
-      placeholder: "Select Move"
-    });
-  });
-
-  new TomSelect(slot.querySelector('.nature-select'), {
-    options: natureData.map(n => ({ value: n.name, text: n.name })),
-    placeholder: "Select Nature"
-  });
-
-  new TomSelect(slot.querySelector('.tera-select'), {
-    options: Object.entries(typeData).map(([i, t]) => ({ value: t, text: t })),
-    placeholder: "Select Tera Type"
-  });
-}
-
-
 
 //  Basic import logic using .row field matching
 async function waitForTomSelect(select, timeout = 1000) {
@@ -884,64 +771,70 @@ async function waitForTomSelect(select, timeout = 1000) {
   });
 }
 
-
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
   console.log("Starting import of team data:", data);
+  teamItemSelections = [{}, {}, {}, {}, {}, {}];
 
-  // Step 1: Clear all slots visually and from item memory
-  slots.forEach((slot, i) => {
-    slot.innerHTML = '';
-    teamItemSelections[i] = {};
-  });
+  for (let i = 0; i < data.length; i++) {
+    const entry = data[i] || {};
+    const slot = slots[i];
+    console.log(`\n--- Processing slot ${i + 1} ---`);
+    console.log("Entry:", entry);
 
-  // Step 2: Re-render all 6 empty slots
-  for (let i = 0; i < 6; i++) {
-    const slot = document.querySelectorAll('.team-slot')[i];
-    renderEmptyPokemonBox(slot);
-  }
+    if (!slot) {
+      console.warn(`Slot ${i} does not exist. Skipping.`);
+      continue;
+    }
 
-  // Step 3: Wait for DOM to stabilize (ensures TomSelects are attached)
-  await new Promise(res => setTimeout(res, 100));
+    if (entry.pokemon === undefined || entry.pokemon === null) {
+      console.warn(`Slot ${i} has no base Pokémon. Skipping.`);
+      continue;
+    }
 
-  // Step 4: Fill imported team data
-  for (let i = 0; i < 6; i++) {
-    const entry = data[i];
-    const slot = document.querySelectorAll('.team-slot')[i];
-    if (!entry || !slot || entry.pokemon == null) continue;
-
-    // Base Pokémon
+    // Step 1: Set base Pokémon
     const baseIndex = pokemonData.findIndex(p => p.row === entry.pokemon);
+    console.log("Base Pokémon Row:", entry.pokemon, " -> Index:", baseIndex);
+
     if (baseIndex !== -1) {
-      const baseSelect = slot.querySelector('.base-select');
+      const baseSelect = slot.querySelector('select');
       baseSelect.value = baseIndex;
 
       const selectedPokemon = {
         ...pokemonData[baseIndex],
-        types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(Boolean)
+        types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(type => type != null)
       };
 
       renderPokemonBox(slot, selectedPokemon);
+      console.log("Rendered base Pokémon:", selectedPokemon);
       await new Promise(res => setTimeout(res, 300));
+    } else {
+      console.warn("Base Pokémon not found in data.");
     }
 
-    // Fusion Pokémon
-    if (entry.fusion != null) {
+    // Step 2: Set fusion Pokémon
+    if (entry.fusion !== null && entry.fusion !== undefined) {
       const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
+      console.log("Fusion Pokémon Row:", entry.fusion, " -> Index:", fusionIndex);
+
       if (fusionIndex !== -1) {
-        const fusionSelect = slot.querySelector('.fusion-select');
+        const fusionSelect = slot.querySelector('.fusion-container select');
         fusionSelect.value = fusionIndex;
         fusionSelect.dispatchEvent(new Event('change'));
         await new Promise(res => setTimeout(res, 300));
+        console.log("Fusion Pokémon selected:", pokemonData[fusionIndex]);
+      } else {
+        console.warn("Fusion Pokémon not found.");
       }
 
-      const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect;
-      if (fusionAbility && entry.fusionAbility != null) {
-        fusionAbility.setValue(String(entry.fusionAbility));
+      const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+      if (fusionAbilitySelect && entry.fusionAbility !== null) {
+        fusionAbilitySelect.setValue(String(entry.fusionAbility));
+        console.log("Set fusion ability to:", entry.fusionAbility);
       }
     }
 
-    // Moves
+    // Step 3: Set moves (with checkboxes)
     const moveDropdowns = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
     moveCheckboxes.forEach(cb => cb.checked = false);
@@ -950,46 +843,60 @@ async function importTeamData(data) {
       (entry.moves || []).map(async (moveId, idx) => {
         const dropdown = moveDropdowns[idx];
         const checkbox = moveCheckboxes[idx];
-        if (dropdown && moveId != null) {
+        if (dropdown && moveId !== null) {
           const ts = await waitForTomSelect(dropdown);
           if (ts) {
             ts.setValue(String(moveId));
             if (checkbox) checkbox.checked = true;
+            console.log(`Set move ${idx + 1} to ID ${moveId}`);
           }
         }
       })
     );
 
-    // Ability
+    // Step 4: Set ability
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    if (entry.ability != null && abilitySelect) {
+    if (entry.ability !== undefined && entry.ability !== null && abilitySelect) {
       abilitySelect.setValue(String(entry.ability));
+      console.log("Set base ability to:", entry.ability);
     }
 
-    // Nature
-    const natureCheckbox = slot.querySelector('.nature-checkbox');
+    // Step 5: Set nature
     const natureSelect = slot.querySelector('.nature-select')?.tomselect;
-    if (natureCheckbox && natureSelect && entry.nature) {
+    const natureCheckbox = slot.querySelector('.nature-checkbox');
+    if (natureCheckbox) natureCheckbox.checked = false;
+
+    if (entry.nature && natureSelect && natureCheckbox) {
       natureCheckbox.checked = true;
       natureSelect.setValue(entry.nature);
+      console.log("Set nature to:", entry.nature);
     }
 
-    // Tera
+    // ✅ Handle optional Tera value (may be missing)
     const teraSelect = slot.querySelector('.tera-select')?.tomselect;
     if (teraSelect && entry.tera) {
       teraSelect.setValue(entry.tera);
+      console.log("Set Tera to:", entry.tera);
     }
 
-    // Items
+    // ✅ Handle optional items (may be missing)
     if (entry.items) {
       teamItemSelections[i] = { ...entry.items };
+
+      const isPopupOpen = document.querySelector('.item-popup');
+      if (isPopupOpen) {
+        const popup = isPopupOpen.querySelector('.item-popup');
+        popup.innerHTML = '';
+        renderItemSections(popup, window.itemData, i);
+      }
     }
+
+    updateTeamSummary();
+    await new Promise(res => setTimeout(res, 150));
   }
 
-  updateTeamSummary();
   console.log("Import finished.");
 }
-
 
 
 
