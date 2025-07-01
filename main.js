@@ -320,9 +320,17 @@ async function loadPreMadeTeamList() {
       if (!selectedFile) return;
 
       try {
+        // First clear all slots before loading a new team
+        await importTeamData([]);  // Clear everything first
+
+        // Now load the new team
         const teamResponse = await fetch(`Teams/${selectedFile}`);
         const teamData = await teamResponse.json();
         await importTeamData(teamData);
+
+        // Update team summary after full load
+        updateTeamSummary();
+
       } catch (err) {
         console.error("Failed to load selected team:", err);
         alert("Could not load selected team.");
@@ -808,15 +816,17 @@ async function waitForTomSelect(select, timeout = 1000) {
 
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
+  console.log("Starting import of team data:", data);
 
-  // Step 1: Full Reset of all 6 slots
+  // ✅ Step 1: Clear all 6 slots completely
+  teamItemSelections = [{}, {}, {}, {}, {}, {}];
+  document.getElementById('teamSummary').innerHTML = '';
+
   slots.forEach((slot, i) => {
-    slot.querySelector('.pokemon-box')?.remove();
     slot.dataset.pokemonRow = '';
     slot.dataset.fusionRow = '';
-    teamItemSelections[i] = {}; // Clear item selection
+    slot.querySelector('.pokemon-box')?.remove();
 
-    // Reset selectors
     const baseSelect = slot.querySelector('select');
     const fusionSelect = slot.querySelector('.fusion-container select');
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
@@ -832,7 +842,6 @@ async function importTeamData(data) {
       fusionSelect.value = '';
       fusionSelect.dispatchEvent(new Event('change'));
     }
-
     if (abilitySelect) abilitySelect.clear();
     if (fusionAbilitySelect) fusionAbilitySelect.clear();
     moveSelects.forEach(ms => ms.tomselect?.clear());
@@ -842,104 +851,110 @@ async function importTeamData(data) {
     if (teraSelect) teraSelect.clear();
   });
 
-  document.getElementById('teamSummary').innerHTML = ''; // Clear team summary
-  console.log("Starting import of team data:", data);
-
-  // Step 2: Apply Import Data
+  // ✅ Step 2: Fill in each slot with the new data (if provided)
   for (let i = 0; i < slots.length; i++) {
-    const entry = data[i] || {};
+    const entry = data[i];
     const slot = slots[i];
+
     console.log(`\n--- Processing slot ${i + 1} ---`);
     console.log("Entry:", entry);
 
-    if (!slot) continue;
-
-    if (entry.pokemon === undefined || entry.pokemon === null) {
-      console.warn(`Slot ${i} has no base Pokémon. Skipping.`);
+    if (!entry || entry.pokemon === undefined || entry.pokemon === null) {
+      console.warn(`Slot ${i + 1} has no base Pokémon. Skipping.`);
       continue;
     }
 
-    // Set base Pokémon
+    // Base Pokémon
     const baseIndex = pokemonData.findIndex(p => p.row === entry.pokemon);
     console.log("Base Pokémon Row:", entry.pokemon, " -> Index:", baseIndex);
     if (baseIndex !== -1) {
       const baseSelect = slot.querySelector('select');
       baseSelect.value = baseIndex;
+
       const selectedPokemon = {
         ...pokemonData[baseIndex],
-        types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(t => t != null)
+        types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(type => type != null)
       };
+
       renderPokemonBox(slot, selectedPokemon);
+      console.log("Rendered base Pokémon:", selectedPokemon);
       await new Promise(res => setTimeout(res, 300));
     }
 
-    // Set fusion Pokémon
+    // Fusion Pokémon
     if (entry.fusion !== null && entry.fusion !== undefined) {
       const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
+      console.log("Fusion Pokémon Row:", entry.fusion, " -> Index:", fusionIndex);
       if (fusionIndex !== -1) {
         const fusionSelect = slot.querySelector('.fusion-container select');
         fusionSelect.value = fusionIndex;
         fusionSelect.dispatchEvent(new Event('change'));
         await new Promise(res => setTimeout(res, 300));
       }
+
       const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
       if (fusionAbilitySelect && entry.fusionAbility !== null) {
         fusionAbilitySelect.setValue(String(entry.fusionAbility));
       }
     }
 
-    // Set moves
+    // Moves
     const moveDropdowns = slot.querySelectorAll('.move-select');
     const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
     moveCheckboxes.forEach(cb => cb.checked = false);
-    await Promise.all((entry.moves || []).map(async (moveId, idx) => {
-      const dropdown = moveDropdowns[idx];
-      const checkbox = moveCheckboxes[idx];
-      if (dropdown && moveId !== null) {
-        const ts = await waitForTomSelect(dropdown);
-        if (ts) {
-          ts.setValue(String(moveId));
-          if (checkbox) checkbox.checked = true;
-        }
-      }
-    }));
 
-    // Set base ability
+    await Promise.all(
+      (entry.moves || []).map(async (moveId, idx) => {
+        const dropdown = moveDropdowns[idx];
+        const checkbox = moveCheckboxes[idx];
+        if (dropdown && moveId !== null) {
+          const ts = await waitForTomSelect(dropdown);
+          if (ts) {
+            ts.setValue(String(moveId));
+            if (checkbox) checkbox.checked = true;
+          }
+        }
+      })
+    );
+
+    // Base ability
     const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
-    if (entry.ability !== undefined && entry.ability !== null && abilitySelect) {
+    if (entry.ability !== undefined && abilitySelect) {
       abilitySelect.setValue(String(entry.ability));
     }
 
-    // Set nature
+    // Nature
     const natureSelect = slot.querySelector('.nature-select')?.tomselect;
     const natureCheckbox = slot.querySelector('.nature-checkbox');
+    if (natureCheckbox) natureCheckbox.checked = false;
     if (entry.nature && natureSelect && natureCheckbox) {
       natureCheckbox.checked = true;
       natureSelect.setValue(entry.nature);
     }
 
-    // Set Tera type
+    // Tera
     const teraSelect = slot.querySelector('.tera-select')?.tomselect;
     if (teraSelect && entry.tera) {
       teraSelect.setValue(entry.tera);
     }
 
-    // Set items
+    // Items
     if (entry.items) {
       teamItemSelections[i] = { ...entry.items };
-      const popup = document.querySelector('.item-popup');
-      if (popup) {
+      const isPopupOpen = document.querySelector('.item-popup');
+      if (isPopupOpen) {
+        const popup = isPopupOpen.querySelector('.item-popup');
         popup.innerHTML = '';
         renderItemSections(popup, window.itemData, i);
       }
     }
-
-    updateTeamSummary();
-    await new Promise(res => setTimeout(res, 150));
   }
 
+  // ✅ Step 3: Summary update after everything
+  updateTeamSummary();
   console.log("Import finished.");
 }
+
 
 
 
