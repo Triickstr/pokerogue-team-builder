@@ -790,7 +790,7 @@ const exportTeamToJson = () => {
     }
 
     const itemData = { ...teamItemSelections[teamData.length] };
-    const disabledPassive = passiveCheckbox?.checked || false;
+    const passiveCheckbox = slot.querySelector('.disable-passive-checkbox');
     teamData.push({
       pokemon: pokemonRow,
       fusion: fusionRow,
@@ -800,7 +800,7 @@ const exportTeamToJson = () => {
       nature,
       tera,
       items: itemData,
-      disabledPassive
+      disabledPassive: passiveCheckbox?.checked || false
     });
   });
 
