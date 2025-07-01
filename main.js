@@ -485,7 +485,11 @@ const createMoveDropdown = (basePokemon) => {
     img.src = `images/${pokemon.img}_0.png`;
     img.className = 'pokemon-img';
     img.onerror = () => img.style.display = 'none';
-    img.onclick = () => slot.replaceWith(createTeamSlot());
+    img.onclick = () => {
+  const newSlot = createTeamSlot();
+  slot.replaceWith(newSlot);
+  updateTeamSummary();
+};
     slot.appendChild(img);
 
   const typeContainer = document.createElement('div');
