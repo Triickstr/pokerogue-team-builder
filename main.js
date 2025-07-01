@@ -808,6 +808,14 @@ async function waitForTomSelect(select, timeout = 1000) {
 async function importTeamData(data) {
   const slots = document.querySelectorAll('.team-slot');
 
+  slots.forEach((slot, i) => {
+  slot.innerHTML = ''; // Clear the visual contents
+  slot.dataset.pokemonRow = '';
+  slot.dataset.fusionRow = '';
+  teamItemSelections[i] = {}; // Reset items for each slot
+  });
+  document.getElementById('teamSummary').innerHTML = ''; // Clear summary
+
   slots.forEach(slot => {
   const baseSelect = slot.querySelector('select');
   const fusionSelect = slot.querySelector('.fusion-container select');
@@ -843,8 +851,6 @@ async function importTeamData(data) {
   slot.querySelector('.pokemon-box')?.remove();
 });
 
-// Also reset items
-  teamItemSelections = [{}, {}, {}, {}, {}, {}];
   console.log("Starting import of team data:", data);
 
   for (let i = 0; i < data.length; i++) {
