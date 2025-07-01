@@ -303,6 +303,7 @@ const observeChanges = (element) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  loadPreMadeTeamList();
   const teamGrid = document.getElementById("teamGrid");
   teamGrid.innerHTML = '';
 
@@ -1077,3 +1078,41 @@ function downloadTeamSummaryImage() {
     console.error("Failed to capture image:", err);
   });
 }
+
+async function loadPreMadeTeamList() {
+  try {
+    const res = await fetch('Teams/teams.json');
+    const fileList = await res.json();
+
+    const dropdown = document.getElementById('preMadeTeamDropdown');
+    fileList.forEach(filename => {
+      const option = document.createElement('option');
+      option.value = filename;
+      option.textContent = filename.replace('.json', '');
+      dropdown.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Failed to load pre-made teams list:", err);
+  }
+}
+
+document.getElementById('preMadeTeamDropdown').addEventListener('change', async function () {
+  const selectedFile = this.value;
+  if (!selectedFile) return;
+
+  try {
+    const res = await fetch(`Teams/${selectedFile}`);
+    const teamData = await res.json();
+
+    // Clear previous selections
+    document.querySelectorAll('.team-slot').forEach(slot => {
+      slot.innerHTML = '';
+    });
+    document.getElementById('teamSummary').innerHTML = '';
+    teamItemSelections = [{}, {}, {}, {}, {}, {}];
+
+    await importTeamData(teamData);
+  } catch (err) {
+    console.error("Failed to load selected team:", err);
+  }
+});
