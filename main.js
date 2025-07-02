@@ -341,42 +341,6 @@ function resetTeamBuilder() {
   }
 }
 
-async function loadPreMadePokemon() {
-  const slotIndex = parseInt(document.getElementById('SlotSelector').value) - 1;
-  const fileName = document.getElementById('preMadePokemonDropdown').value;
-
-  if (isNaN(slotIndex) || slotIndex < 0 || slotIndex > 5) {
-    alert("Please select a valid slot first.");
-    return;
-  }
-
-  if (!fileName) {
-    alert("Please select a pre-made Pokémon.");
-    return;
-  }
-
-  try {
-    // Step 1: Reset slot
-    resetSingleSlot(slotIndex);
-
-    // Step 2: Wait for DOM update
-    await new Promise(res => setTimeout(res, 100));
-
-    // Step 3: Load file
-    const response = await fetch(`Pokemons/${fileName}`);
-    const pokemonData = await response.json();
-
-    // Step 4: Import Pokémon
-    await importPokemonToSlot(slotIndex, pokemonData[0]);
-
-    // Step 5 (optional): Clear selection
-    document.getElementById('preMadePokemonDropdown').value = "";
-  } catch (err) {
-    console.error(err);
-    alert("Error loading Pokémon.");
-  }
-}
-
 function resetSingleSlot(slotIndex) {
   const slots = document.querySelectorAll('.team-slot');
   const slot = slots[slotIndex];
@@ -1344,3 +1308,142 @@ document.getElementById('exportPkm').addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
+async function importPokemonToSlot(slotIndex, entry) {
+  const slots = document.querySelectorAll('.team-slot');
+  const slot = slots[slotIndex];
+  if (!slot) return;
+
+  if (entry.pokemon === undefined || entry.pokemon === null) return;
+
+  // Set base Pokémon
+  const baseIndex = pokemonData.findIndex(p => p.row === entry.pokemon);
+  if (baseIndex !== -1) {
+    const baseSelect = slot.querySelector('select');
+    baseSelect.value = baseIndex;
+
+    const selectedPokemon = {
+      ...pokemonData[baseIndex],
+      types: [pokemonData[baseIndex].t1, pokemonData[baseIndex].t2].filter(type => type != null)
+    };
+
+    renderPokemonBox(slot, selectedPokemon);
+    await new Promise(res => setTimeout(res, 300));
+  }
+
+  // Fusion
+  if (entry.fusion !== null && entry.fusion !== undefined) {
+    const fusionIndex = pokemonData.findIndex(p => p.row === entry.fusion);
+    if (fusionIndex !== -1) {
+      const fusionSelect = slot.querySelector('.fusion-container select');
+      fusionSelect.value = fusionIndex;
+      fusionSelect.dispatchEvent(new Event('change'));
+      await new Promise(res => setTimeout(res, 300));
+    }
+
+    const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+    if (fusionAbilitySelect && entry.fusionAbility !== null) {
+      fusionAbilitySelect.setValue(String(entry.fusionAbility));
+    }
+  }
+
+  // Moves
+  const moveDropdowns = slot.querySelectorAll('.move-select');
+  const moveCheckboxes = slot.querySelectorAll('.move-checkbox');
+  moveCheckboxes.forEach(cb => cb.checked = false);
+
+  await Promise.all(
+    (entry.moves || []).map(async (moveId, idx) => {
+      const dropdown = moveDropdowns[idx];
+      const checkbox = moveCheckboxes[idx];
+      if (dropdown && moveId !== null) {
+        const ts = await waitForTomSelect(dropdown);
+        if (ts) {
+          ts.setValue(String(moveId));
+          if (checkbox) checkbox.checked = true;
+        }
+      }
+    })
+  );
+
+  // Base Ability
+  const abilitySelect = slot.querySelector('.ability-select')?.tomselect;
+  if (entry.ability !== undefined && entry.ability !== null && abilitySelect) {
+    abilitySelect.setValue(String(entry.ability));
+  }
+
+  // Nature
+  const natureSelect = slot.querySelector('.nature-select')?.tomselect;
+  const natureCheckbox = slot.querySelector('.nature-checkbox');
+  if (natureCheckbox) natureCheckbox.checked = false;
+
+  if (entry.nature && natureSelect && natureCheckbox) {
+    natureCheckbox.checked = true;
+    natureSelect.setValue(entry.nature);
+  }
+
+  // Passive Ability Checkbox
+  const passiveCheckbox = slot.querySelector('.disable-passive-checkbox');
+  if (passiveCheckbox) {
+    passiveCheckbox.checked = !!entry.disabledPassive;
+    passiveCheckbox.dispatchEvent(new Event('change'));
+  }
+
+  // Tera
+  const teraSelect = slot.querySelector('.tera-select')?.tomselect;
+  if (teraSelect && entry.tera) {
+    teraSelect.setValue(entry.tera);
+  }
+
+  // Items
+  if (entry.items) {
+    teamItemSelections[slotIndex] = { ...entry.items };
+
+    const isPopupOpen = document.querySelector('.item-popup');
+    if (isPopupOpen) {
+      const popup = isPopupOpen.querySelector('.item-popup');
+      popup.innerHTML = '';
+      renderItemSections(popup, window.itemData, slotIndex);
+    }
+  }
+
+  updateTeamSummary();
+}
+
+
+
+async function loadPreMadePokemon() {
+  const slotIndex = parseInt(document.getElementById('SlotSelector').value) - 1;
+  const fileName = document.getElementById('preMadePokemonDropdown').value;
+
+  if (isNaN(slotIndex) || slotIndex < 0 || slotIndex > 5) {
+    alert("Please select a valid slot first.");
+    return;
+  }
+
+  if (!fileName) {
+    alert("Please select a pre-made Pokémon.");
+    return;
+  }
+
+  try {
+    // Step 1: Reset slot
+    resetSingleSlot(slotIndex);
+
+    // Step 2: Wait for DOM update
+    await new Promise(res => setTimeout(res, 100));
+
+    // Step 3: Load file
+    const response = await fetch(`Pokemons/${fileName}`);
+    const pokemonData = await response.json();
+
+    // Step 4: Import Pokémon
+    await importPokemonToSlot(slotIndex, pokemonData[0]);
+
+    // Step 5 (optional): Clear selection
+    document.getElementById('preMadePokemonDropdown').value = "";
+  } catch (err) {
+    console.error(err);
+    alert("Error loading Pokémon.");
+  }
+}
+document.getElementById('preMadePokemonDropdown').addEventListener('change', loadPreMadePokemon);
