@@ -341,6 +341,38 @@ function resetTeamBuilder() {
   }
 }
 
+async function loadPreMadePokemon() {
+  const slotIndex = parseInt(document.getElementById('SlotSelector').value) - 1;
+  const fileName = document.getElementById('preMadePokemonDropdown').value;
+
+  if (isNaN(slotIndex) || slotIndex < 0 || slotIndex > 5) {
+    alert("Please select a valid slot first.");
+    return;
+  }
+
+  if (!fileName) {
+    alert("Please select a pre-made Pokémon.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`Pokemons/${fileName}`);
+    if (!response.ok) throw new Error("Failed to load Pokémon file.");
+    const pokemonData = await response.json();
+
+    if (!Array.isArray(pokemonData) || !pokemonData[0]) {
+      alert("Invalid Pokémon data format.");
+      return;
+    }
+
+    resetSingleSlot(slotIndex);
+    await importPokemonToSlot(slotIndex, pokemonData[0]);
+  } catch (err) {
+    console.error(err);
+    alert("Error loading Pokémon.");
+  }
+}
+
 function resetSingleSlot(slotIndex) {
   const slots = document.querySelectorAll('.team-slot');
   const slot = slots[slotIndex];
@@ -356,6 +388,23 @@ function resetSingleSlot(slotIndex) {
 
   // Update summary after change
   updateTeamSummary();
+}
+
+async function populatePreMadePokemonDropdown() {
+  const dropdown = document.getElementById('preMadePokemonDropdown');
+  try {
+    const response = await fetch('Pokemons/pokemons.json');
+    const list = await response.json();
+
+    list.forEach(entry => {
+      const option = document.createElement('option');
+      option.value = entry.file;
+      option.textContent = entry.name;
+      dropdown.appendChild(option);
+    });
+  } catch (e) {
+    console.error("Failed to load pre-made Pokémon list:", e);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -395,6 +444,17 @@ window.allMoves = (() => {
   }
 
   loadPreMadeTeams();
+
+  populatePreMadePokemonDropdown();
+
+  // If you haven’t already:
+  const slotDropdown = document.getElementById('SlotSelector');
+  for (let i = 1; i <= 6; i++) {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `Slot ${i}`;
+    slotDropdown.appendChild(opt);
+  }
 });
 
 
@@ -1279,3 +1339,31 @@ document.getElementById('exportPkm').addEventListener('click', () => {
   a.click();
   URL.revokeObjectURL(url);
 });
+
+async function importPokemonToSlot(slotIndex, data) {
+  const slots = document.querySelectorAll('.team-slot');
+  const slot = slots[slotIndex];
+  if (!slot || !data) return;
+
+  const newSlot = createTeamSlot();
+  slots[slotIndex].replaceWith(newSlot);
+
+  await new Promise(res => setTimeout(res, 50));
+
+  // Apply Pokémon data
+  if (data.pokemon != null) newSlot.dataset.pokemonRow = data.pokemon;
+  if (data.fusion != null) newSlot.dataset.fusionRow = data.fusion;
+  if (data.items) teamItemSelections[slotIndex] = data.items;
+  if (data.disabledPassive) passiveAbilityDisabled[slotIndex] = true;
+
+  populatePokemonDropdown(newSlot, data.pokemon, false);
+  populateFusionDropdown(newSlot, data.fusion);
+  populateMoves(newSlot, data.moves || []);
+  populateAbilities(newSlot, data.ability, data.fusionAbility);
+  populateNature(newSlot, data.nature);
+  populateTera(newSlot, data.tera);
+
+  updateTeamSummary();
+}
+
+document.getElementById('preMadePokemonDropdown').addEventListener('change', loadPreMadePokemon);
