@@ -873,6 +873,22 @@ function clearAllCheckboxes() {
   });
 }
 
+function clearSlotCheckboxes(slotIndex) {
+  const slot = document.querySelectorAll('.team-slot')[slotIndex];
+  if (!slot) return;
+
+  // Uncheck move, nature, and fusion ability checkboxes
+  slot.querySelectorAll('.move-checkbox, .nature-checkbox, .fusion-ability-checkbox')
+    .forEach(cb => cb.checked = false);
+
+  // Restore passive checkbox based on stored value
+  const passiveCheckbox = slot.querySelector('.disable-passive-checkbox');
+  if (passiveCheckbox) {
+    passiveCheckbox.checked = passiveAbilityDisabled[slotIndex] || false;
+  }
+}
+
+
 
 //  Basic import logic using .row field matching
 async function waitForTomSelect(select, timeout = 1000) {
@@ -1439,11 +1455,15 @@ async function loadPreMadePokemon() {
     // Step 4: Import Pokémon
     await importPokemonToSlot(slotIndex, pokemonData[0]);
 
-    // Step 5 (optional): Clear selection
+    // Step 5: Clear checkboxes in this slot
+    clearSlotCheckboxes(slotIndex);
+
+    // Step 6 (optional): Clear selection
     document.getElementById('preMadePokemonDropdown').value = "";
   } catch (err) {
     console.error(err);
     alert("Error loading Pokémon.");
   }
 }
+
 document.getElementById('preMadePokemonDropdown').addEventListener('change', loadPreMadePokemon);
