@@ -356,17 +356,21 @@ async function loadPreMadePokemon() {
   }
 
   try {
+    // Step 1: Reset slot
+    resetSingleSlot(slotIndex);
+
+    // Step 2: Wait for DOM update
+    await new Promise(res => setTimeout(res, 100));
+
+    // Step 3: Load file
     const response = await fetch(`Pokemons/${fileName}`);
-    if (!response.ok) throw new Error("Failed to load Pokémon file.");
     const pokemonData = await response.json();
 
-    if (!Array.isArray(pokemonData) || !pokemonData[0]) {
-      alert("Invalid Pokémon data format.");
-      return;
-    }
-
-    resetSingleSlot(slotIndex);
+    // Step 4: Import Pokémon
     await importPokemonToSlot(slotIndex, pokemonData[0]);
+
+    // Step 5 (optional): Clear selection
+    document.getElementById('preMadePokemonDropdown').value = "";
   } catch (err) {
     console.error(err);
     alert("Error loading Pokémon.");
@@ -1348,24 +1352,33 @@ async function importPokemonToSlot(slotIndex, data) {
   const newSlot = createTeamSlot();
   oldSlot.replaceWith(newSlot);
 
-  await new Promise(res => setTimeout(res, 50));
+  // Inject the new slot manually
+  const updatedSlots = document.querySelectorAll('.team-slot');
+  const targetSlot = updatedSlots[slotIndex];
 
-  // BASE POKEMON
-  const baseSelect = newSlot.querySelector('select')?.tomselect;
-  if (baseSelect && data.pokemon != null) {
-    baseSelect.setValue(data.pokemon.toString(), true);
-    newSlot.dataset.pokemonRow = data.pokemon;
+  // Set base Pokémon first to trigger slot population logic
+  if (data.pokemon != null) {
+    const baseSelect = targetSlot.querySelector('select')?.tomselect;
+    if (baseSelect) {
+      baseSelect.setValue(data.pokemon.toString(), true);
+      targetSlot.dataset.pokemonRow = data.pokemon;
+    }
   }
 
-  // FUSION POKEMON
-  const fusionSelect = newSlot.querySelector('.fusion-select')?.tomselect;
-  if (fusionSelect && data.fusion != null) {
-    fusionSelect.setValue(data.fusion.toString(), true);
-    newSlot.dataset.fusionRow = data.fusion;
+  // Wait for population to complete (abilities, moves, fusions, etc.)
+  await new Promise(res => setTimeout(res, 100));
+
+  // Fusion
+  if (data.fusion != null) {
+    const fusionSelect = targetSlot.querySelector('.fusion-select')?.tomselect;
+    if (fusionSelect) {
+      fusionSelect.setValue(data.fusion.toString(), true);
+      targetSlot.dataset.fusionRow = data.fusion;
+    }
   }
 
-  // MOVES
-  const moveSelects = newSlot.querySelectorAll('.move-select');
+  // Moves
+  const moveSelects = targetSlot.querySelectorAll('.move-select');
   if (moveSelects.length && Array.isArray(data.moves)) {
     data.moves.forEach((moveId, i) => {
       const moveSelect = moveSelects[i]?.tomselect;
@@ -1375,36 +1388,36 @@ async function importPokemonToSlot(slotIndex, data) {
     });
   }
 
-  // ABILITIES
-  const baseAbilitySelect = newSlot.querySelector('.ability-select')?.tomselect;
+  // Abilities
+  const baseAbilitySelect = targetSlot.querySelector('.ability-select')?.tomselect;
   if (baseAbilitySelect && data.ability != null) {
     baseAbilitySelect.setValue(data.ability.toString(), true);
   }
 
-  const fusionAbilitySelect = newSlot.querySelector('.fusion-ability-select')?.tomselect;
+  const fusionAbilitySelect = targetSlot.querySelector('.fusion-ability-select')?.tomselect;
   if (fusionAbilitySelect && data.fusionAbility != null) {
     fusionAbilitySelect.setValue(data.fusionAbility.toString(), true);
   }
 
-  // NATURE
-  const natureSelect = newSlot.querySelector('.nature-select')?.tomselect;
+  // Nature
+  const natureSelect = targetSlot.querySelector('.nature-select')?.tomselect;
   if (natureSelect && data.nature) {
     natureSelect.setValue(data.nature, true);
   }
 
-  // TERA
-  const teraSelect = newSlot.querySelector('.tera-select')?.tomselect;
+  // Tera
+  const teraSelect = targetSlot.querySelector('.tera-select')?.tomselect;
   if (teraSelect && data.tera) {
     teraSelect.setValue(data.tera, true);
   }
 
-  // DISABLE PASSIVE
-  const passiveCheckbox = newSlot.querySelector('.disable-passive-checkbox');
-  if (passiveCheckbox && data.disabledPassive) {
-    passiveCheckbox.checked = true;
+  // Passive
+  const passiveCheckbox = targetSlot.querySelector('.disable-passive-checkbox');
+  if (passiveCheckbox) {
+    passiveCheckbox.checked = data.disabledPassive || false;
   }
 
-  // ITEMS
+  // Items
   teamItemSelections[slotIndex] = data.items || {};
 
   updateTeamSummary();
