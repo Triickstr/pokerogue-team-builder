@@ -1352,33 +1352,28 @@ async function importPokemonToSlot(slotIndex, data) {
   const newSlot = createTeamSlot();
   oldSlot.replaceWith(newSlot);
 
-  // Inject the new slot manually
   const updatedSlots = document.querySelectorAll('.team-slot');
-  const targetSlot = updatedSlots[slotIndex];
+  const slot = updatedSlots[slotIndex];
 
-  // Set base Pokémon first to trigger slot population logic
-  if (data.pokemon != null) {
-    const baseSelect = targetSlot.querySelector('select')?.tomselect;
-    if (baseSelect) {
-      baseSelect.setValue(data.pokemon.toString(), true);
-      targetSlot.dataset.pokemonRow = data.pokemon;
-    }
+  // Trigger base Pokémon selection first
+  const baseSelect = slot.querySelector('.base-select')?.tomselect;
+  if (baseSelect && data.pokemon != null) {
+    baseSelect.setValue(data.pokemon.toString(), true);
+    slot.dataset.pokemonRow = data.pokemon;
   }
 
-  // Wait for population to complete (abilities, moves, fusions, etc.)
-  await new Promise(res => setTimeout(res, 100));
+  // Wait for the slot to fully initialize (moves, abilities, etc.)
+  await new Promise(res => setTimeout(res, 150));
 
-  // Fusion
-  if (data.fusion != null) {
-    const fusionSelect = targetSlot.querySelector('.fusion-select')?.tomselect;
-    if (fusionSelect) {
-      fusionSelect.setValue(data.fusion.toString(), true);
-      targetSlot.dataset.fusionRow = data.fusion;
-    }
+  // Set fusion Pokémon
+  const fusionSelect = slot.querySelector('.fusion-select')?.tomselect;
+  if (fusionSelect && data.fusion != null) {
+    fusionSelect.setValue(data.fusion.toString(), true);
+    slot.dataset.fusionRow = data.fusion;
   }
 
-  // Moves
-  const moveSelects = targetSlot.querySelectorAll('.move-select');
+  // Set moves
+  const moveSelects = slot.querySelectorAll('.move-select');
   if (moveSelects.length && Array.isArray(data.moves)) {
     data.moves.forEach((moveId, i) => {
       const moveSelect = moveSelects[i]?.tomselect;
@@ -1388,31 +1383,31 @@ async function importPokemonToSlot(slotIndex, data) {
     });
   }
 
-  // Abilities
-  const baseAbilitySelect = targetSlot.querySelector('.ability-select')?.tomselect;
+  // Set abilities
+  const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
   if (baseAbilitySelect && data.ability != null) {
     baseAbilitySelect.setValue(data.ability.toString(), true);
   }
 
-  const fusionAbilitySelect = targetSlot.querySelector('.fusion-ability-select')?.tomselect;
+  const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
   if (fusionAbilitySelect && data.fusionAbility != null) {
     fusionAbilitySelect.setValue(data.fusionAbility.toString(), true);
   }
 
-  // Nature
-  const natureSelect = targetSlot.querySelector('.nature-select')?.tomselect;
+  // Set nature
+  const natureSelect = slot.querySelector('.nature-select')?.tomselect;
   if (natureSelect && data.nature) {
     natureSelect.setValue(data.nature, true);
   }
 
-  // Tera
-  const teraSelect = targetSlot.querySelector('.tera-select')?.tomselect;
+  // Set tera
+  const teraSelect = slot.querySelector('.tera-select')?.tomselect;
   if (teraSelect && data.tera) {
     teraSelect.setValue(data.tera, true);
   }
 
-  // Passive
-  const passiveCheckbox = targetSlot.querySelector('.disable-passive-checkbox');
+  // Passive ability checkbox
+  const passiveCheckbox = slot.querySelector('.disable-passive-checkbox');
   if (passiveCheckbox) {
     passiveCheckbox.checked = data.disabledPassive || false;
   }
