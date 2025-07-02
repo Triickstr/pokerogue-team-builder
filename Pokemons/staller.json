@@ -1,7 +1,7 @@
 [
   {
     "pokemon": 816,
-    "fusion": null,
+    "fusion": 0,
     "moves": [
       1092,
       null,
@@ -13,7 +13,7 @@
       null
     ],
     "ability": 168,
-    "fusionAbility": null,
+    "fusionAbility": 18,
     "nature": "Modest",
     "tera": null,
     "items": {
