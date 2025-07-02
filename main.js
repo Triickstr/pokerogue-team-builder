@@ -1342,26 +1342,70 @@ document.getElementById('exportPkm').addEventListener('click', () => {
 
 async function importPokemonToSlot(slotIndex, data) {
   const slots = document.querySelectorAll('.team-slot');
-  const slot = slots[slotIndex];
-  if (!slot || !data) return;
+  const oldSlot = slots[slotIndex];
+  if (!oldSlot || !data) return;
 
   const newSlot = createTeamSlot();
-  slots[slotIndex].replaceWith(newSlot);
+  oldSlot.replaceWith(newSlot);
 
   await new Promise(res => setTimeout(res, 50));
 
-  // Apply Pokémon data
-  if (data.pokemon != null) newSlot.dataset.pokemonRow = data.pokemon;
-  if (data.fusion != null) newSlot.dataset.fusionRow = data.fusion;
-  if (data.items) teamItemSelections[slotIndex] = data.items;
-  if (data.disabledPassive) passiveAbilityDisabled[slotIndex] = true;
+  // BASE POKEMON
+  const baseSelect = newSlot.querySelector('select')?.tomselect;
+  if (baseSelect && data.pokemon != null) {
+    baseSelect.setValue(data.pokemon.toString(), true);
+    newSlot.dataset.pokemonRow = data.pokemon;
+  }
 
-  populatePokemonDropdown(newSlot, data.pokemon, false);
-  populateFusionDropdown(newSlot, data.fusion);
-  populateMoves(newSlot, data.moves || []);
-  populateAbilities(newSlot, data.ability, data.fusionAbility);
-  populateNature(newSlot, data.nature);
-  populateTera(newSlot, data.tera);
+  // FUSION POKEMON
+  const fusionSelect = newSlot.querySelector('.fusion-select')?.tomselect;
+  if (fusionSelect && data.fusion != null) {
+    fusionSelect.setValue(data.fusion.toString(), true);
+    newSlot.dataset.fusionRow = data.fusion;
+  }
+
+  // MOVES
+  const moveSelects = newSlot.querySelectorAll('.move-select');
+  if (moveSelects.length && Array.isArray(data.moves)) {
+    data.moves.forEach((moveId, i) => {
+      const moveSelect = moveSelects[i]?.tomselect;
+      if (moveSelect && moveId != null) {
+        moveSelect.setValue(moveId.toString(), true);
+      }
+    });
+  }
+
+  // ABILITIES
+  const baseAbilitySelect = newSlot.querySelector('.ability-select')?.tomselect;
+  if (baseAbilitySelect && data.ability != null) {
+    baseAbilitySelect.setValue(data.ability.toString(), true);
+  }
+
+  const fusionAbilitySelect = newSlot.querySelector('.fusion-ability-select')?.tomselect;
+  if (fusionAbilitySelect && data.fusionAbility != null) {
+    fusionAbilitySelect.setValue(data.fusionAbility.toString(), true);
+  }
+
+  // NATURE
+  const natureSelect = newSlot.querySelector('.nature-select')?.tomselect;
+  if (natureSelect && data.nature) {
+    natureSelect.setValue(data.nature, true);
+  }
+
+  // TERA
+  const teraSelect = newSlot.querySelector('.tera-select')?.tomselect;
+  if (teraSelect && data.tera) {
+    teraSelect.setValue(data.tera, true);
+  }
+
+  // DISABLE PASSIVE
+  const passiveCheckbox = newSlot.querySelector('.disable-passive-checkbox');
+  if (passiveCheckbox && data.disabledPassive) {
+    passiveCheckbox.checked = true;
+  }
+
+  // ITEMS
+  teamItemSelections[slotIndex] = data.items || {};
 
   updateTeamSummary();
 }
