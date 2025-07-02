@@ -1198,3 +1198,67 @@ function downloadTeamSummaryImage() {
     console.error("Failed to capture image:", err);
   });
 }
+
+//EXPORT POKEMON FUNCTION
+document.getElementById('exportPkm').addEventListener('click', () => {
+  const slot = document.querySelector('.team-slot');
+  if (!slot) return alert("No Pokémon found in the first slot.");
+
+  const baseSelect = slot.querySelector('select');
+  const selectedPokemon = pokemonData[baseSelect?.value];
+  let pokemonRow = parseInt(slot.dataset.pokemonRow);
+  pokemonRow = isNaN(pokemonRow) ? null : pokemonRow;
+
+  const moveSelects = slot.querySelectorAll('.move-select');
+  const moves = Array.from(moveSelects).map((s) => {
+    const ts = s.tomselect;
+    const val = ts?.getValue();
+    return val !== '' ? parseInt(val) : null;
+  });
+
+  const baseAbility = slot.querySelector('.ability-select')?.tomselect?.getValue();
+  const baseAbilityParsed = baseAbility ? parseInt(baseAbility) : null;
+
+  const nature = slot.querySelector('.nature-select')?.tomselect?.getValue() || null;
+  const tera = slot.querySelector('.tera-select')?.tomselect?.getValue() || null;
+
+  if (pokemonRow === null && (moves.some(m => m !== null) || baseAbilityParsed !== null || nature)) {
+    pokemonRow = 0; // fallback to Bulbasaur
+  }
+
+  const fusionSelect = slot.querySelector('.fusion-container select');
+  const selectedFusion = pokemonData[fusionSelect?.value];
+  let fusionRow = parseInt(slot.dataset.fusionRow);
+  fusionRow = isNaN(fusionRow) ? null : fusionRow;
+
+  const fusionAbility = slot.querySelector('.fusion-ability-select')?.tomselect?.getValue();
+  const fusionAbilityParsed = fusionAbility ? parseInt(fusionAbility) : null;
+
+  if (fusionRow === null && fusionAbilityParsed !== null) {
+    fusionRow = 0;
+  }
+
+  const passiveCheckbox = slot.querySelector('.disable-passive-checkbox');
+
+  const itemData = { ...teamItemSelections[0] };
+
+  const singleData = [{
+    pokemon: pokemonRow,
+    fusion: fusionRow,
+    moves,
+    ability: baseAbilityParsed,
+    fusionAbility: fusionAbilityParsed,
+    nature,
+    tera,
+    items: itemData,
+    disabledPassive: passiveCheckbox?.checked || false
+  }];
+
+  const blob = new Blob([JSON.stringify(singleData, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "single_pokemon.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
