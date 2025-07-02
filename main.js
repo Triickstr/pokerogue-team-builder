@@ -341,6 +341,23 @@ function resetTeamBuilder() {
   }
 }
 
+function resetSingleSlot(slotIndex) {
+  const slots = document.querySelectorAll('.team-slot');
+  const slot = slots[slotIndex];
+  if (!slot) return;
+
+  // Reset internal data
+  teamItemSelections[slotIndex] = {};
+  passiveAbilityDisabled[slotIndex] = false;
+
+  // Replace with new clean slot
+  const newSlot = createTeamSlot();
+  slots[slotIndex].replaceWith(newSlot);
+
+  // Update summary after change
+  updateTeamSummary();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const teamGrid = document.getElementById("teamGrid");
   teamGrid.innerHTML = '';
