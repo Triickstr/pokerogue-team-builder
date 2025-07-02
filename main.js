@@ -1369,7 +1369,7 @@ async function setBasePokemon(slot, rowId) {
   if (teraSelect) teraSelect.clear(true);
 
   // Trigger population
-  await renderPokemonDetails(slot, rowId);
+  await renderPokemonBox(slot, rowId);
 }
 
 async function importPokemonToSlot(slotIndex, data) {
