@@ -1344,6 +1344,34 @@ document.getElementById('exportPkm').addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
+async function setBasePokemon(slot, rowId) {
+  slot.dataset.pokemonRow = rowId;
+
+  const fusionSection = slot.querySelector('.fusion-section');
+  if (fusionSection) fusionSection.style.display = 'block';
+
+  const fusionSelect = slot.querySelector('.fusion-select');
+  if (fusionSelect && fusionSelect.tomselect) {
+    fusionSelect.tomselect.clear(true);
+  }
+
+  // Reset abilities, nature, etc.
+  const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
+  const fusionAbilitySelect = slot.querySelector('.fusion-ability-select')?.tomselect;
+  const moveSelects = slot.querySelectorAll('.move-select');
+  const natureSelect = slot.querySelector('.nature-select')?.tomselect;
+  const teraSelect = slot.querySelector('.tera-select')?.tomselect;
+
+  if (baseAbilitySelect) baseAbilitySelect.clear(true);
+  if (fusionAbilitySelect) fusionAbilitySelect.clear(true);
+  moveSelects.forEach(sel => sel?.tomselect?.clear(true));
+  if (natureSelect) natureSelect.clear(true);
+  if (teraSelect) teraSelect.clear(true);
+
+  // Trigger population
+  await renderPokemonDetails(slot, rowId);
+}
+
 async function importPokemonToSlot(slotIndex, data) {
   const slots = document.querySelectorAll('.team-slot');
   const oldSlot = slots[slotIndex];
