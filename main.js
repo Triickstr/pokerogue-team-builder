@@ -1355,24 +1355,24 @@ async function importPokemonToSlot(slotIndex, data) {
   const updatedSlots = document.querySelectorAll('.team-slot');
   const slot = updatedSlots[slotIndex];
 
-  // Trigger base Pokémon selection first
-  const baseSelect = slot.querySelector('.base-select')?.tomselect;
-  if (baseSelect && data.pokemon != null) {
-    baseSelect.setValue(data.pokemon.toString(), true);
-    slot.dataset.pokemonRow = data.pokemon;
+  // Set base Pokémon the correct way
+  if (data.pokemon != null) {
+    await setBasePokemon(slot, data.pokemon);
   }
 
-  // Wait for the slot to fully initialize (moves, abilities, etc.)
-  await new Promise(res => setTimeout(res, 150));
+  // Wait for fusion/move/ability sections to load
+  await new Promise(res => setTimeout(res, 100));
 
-  // Set fusion Pokémon
-  const fusionSelect = slot.querySelector('.fusion-select')?.tomselect;
-  if (fusionSelect && data.fusion != null) {
-    fusionSelect.setValue(data.fusion.toString(), true);
-    slot.dataset.fusionRow = data.fusion;
+  // Fusion
+  if (data.fusion != null) {
+    const fusionSelect = slot.querySelector('.fusion-select')?.tomselect;
+    if (fusionSelect) {
+      fusionSelect.setValue(data.fusion.toString(), true);
+      slot.dataset.fusionRow = data.fusion;
+    }
   }
 
-  // Set moves
+  // Moves
   const moveSelects = slot.querySelectorAll('.move-select');
   if (moveSelects.length && Array.isArray(data.moves)) {
     data.moves.forEach((moveId, i) => {
@@ -1383,7 +1383,7 @@ async function importPokemonToSlot(slotIndex, data) {
     });
   }
 
-  // Set abilities
+  // Abilities
   const baseAbilitySelect = slot.querySelector('.ability-select')?.tomselect;
   if (baseAbilitySelect && data.ability != null) {
     baseAbilitySelect.setValue(data.ability.toString(), true);
@@ -1394,19 +1394,19 @@ async function importPokemonToSlot(slotIndex, data) {
     fusionAbilitySelect.setValue(data.fusionAbility.toString(), true);
   }
 
-  // Set nature
+  // Nature
   const natureSelect = slot.querySelector('.nature-select')?.tomselect;
   if (natureSelect && data.nature) {
     natureSelect.setValue(data.nature, true);
   }
 
-  // Set tera
+  // Tera
   const teraSelect = slot.querySelector('.tera-select')?.tomselect;
   if (teraSelect && data.tera) {
     teraSelect.setValue(data.tera, true);
   }
 
-  // Passive ability checkbox
+  // Passive
   const passiveCheckbox = slot.querySelector('.disable-passive-checkbox');
   if (passiveCheckbox) {
     passiveCheckbox.checked = data.disabledPassive || false;
@@ -1417,5 +1417,6 @@ async function importPokemonToSlot(slotIndex, data) {
 
   updateTeamSummary();
 }
+
 
 document.getElementById('preMadePokemonDropdown').addEventListener('change', loadPreMadePokemon);
