@@ -15,12 +15,16 @@
 
 <div id="exportImportControls" style="display: flex; align-items: center; gap: 10px;">
   <button onclick="resetTeamBuilder()">Reset Team</button>
-  <select id="preMadeTeamDropdown">
-    <option value="">Load Pre-Made Team</option>
-  </select>
   <button onclick="downloadTeamSummaryImage()">Download Summary</button>
   <button id="exportBtn">Export Team</button>
   <input type="file" id="importFile" accept=".json" />
+</div>
+
+<!-- Moved Dropdown Below -->
+<div style="margin-bottom: 24px;">
+  <select id="preMadeTeamDropdown">
+    <option value="">Load Pre-Made Team</option>
+  </select>
 </div>
 
   <div class="team-summary" id="teamSummary"></div>
