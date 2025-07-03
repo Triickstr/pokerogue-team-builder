@@ -317,19 +317,19 @@ async function loadPreMadeTeams() {
     const filterDropdown = document.getElementById('preMadeTeamFilter');
     const teamDropdown = document.getElementById('preMadeTeamDropdown');
 
-    // Clear both dropdowns
+    // Step 1: Clear both dropdowns
     filterDropdown.innerHTML = '';
     teamDropdown.innerHTML = '<option value="">Load Pre-Made Team</option>';
 
-    // Step 1: Extract unique filters
+    // Step 2: Extract unique filters
     const filterSet = new Set();
     teams.forEach(team => {
       (team.filters || []).forEach(f => filterSet.add(f));
     });
 
-    const allFilters = ['All Teams', ...Array.from(filterSet).sort()];
+    const allFilters = Array.from(filterSet).sort(); // No more "All Teams"
 
-    // Step 2: Populate filter dropdown
+    // Step 3: Populate filter dropdown
     allFilters.forEach(f => {
       const opt = document.createElement('option');
       opt.value = f;
@@ -337,10 +337,34 @@ async function loadPreMadeTeams() {
       filterDropdown.appendChild(opt);
     });
 
-    // Step 3: Store teams globally for filtering
+    // Step 4: Initialize TomSelect
+    if (filterDropdown.tomselect) {
+      filterDropdown.tomselect.destroy();
+    }
+
+    new TomSelect(filterDropdown, {
+      plugins: ['remove_button'],
+      maxItems: 3,
+      placeholder: 'Filter Options',
+      maxOptions: 100,
+      onChange: (values) => {
+        if (!Array.isArray(values)) values = [values];
+
+        if (values.length === 0) {
+          populateTeamDropdown(teams);
+        } else {
+          const filtered = teams.filter(team =>
+            team.filters.some(f => values.includes(f))
+          );
+          populateTeamDropdown(filtered);
+        }
+      }
+    });
+
+    // Step 5: Store globally
     window.allPreMadeTeams = teams;
 
-    // Step 4: Initially show all teams
+    // Step 6: Load all teams by default
     populateTeamDropdown(teams);
   } catch (err) {
     console.error("Failed to load teams.json", err);
@@ -1553,16 +1577,3 @@ async function loadPreMadePokemon() {
 
 document.getElementById('preMadePokemonDropdown').addEventListener('change', loadPreMadePokemon);
 
-document.getElementById('preMadeTeamFilter').addEventListener('change', (e) => {
-  const selectedFilter = e.target.value;
-  if (selectedFilter === 'All Teams') {
-    populateTeamDropdown(window.allPreMadeTeams);
-  } else {
-    const filtered = window.allPreMadeTeams.filter(team =>
-      team.filters.includes(selectedFilter)
-    );
-    populateTeamDropdown(filtered);
-  }
-});
-
-document.getElementById('preMadePkmFilter').addEventListener('change', (e) => {});
