@@ -398,18 +398,17 @@ async function populatePreMadePokemonDropdown() {
     const response = await fetch('Pokemons/pokemons.json');
     const list = await response.json();
 
-    // Store globally
     window.allPreMadePokemons = list;
 
-    // Step 1: Extract filters
+    // Step 1: Extract unique filters
     const filterSet = new Set();
     list.forEach(p => {
       (p.filters || []).forEach(f => filterSet.add(f));
     });
 
-    const allFilters = ['All Pokémon', ...Array.from(filterSet).sort()];
+    const allFilters = Array.from(filterSet).sort(); // Removed "All Pokémon"
 
-    // Step 2: Populate filter dropdown
+    // Step 2: Populate dropdown
     filterDropdown.innerHTML = '';
     allFilters.forEach(f => {
       const opt = document.createElement('option');
@@ -420,22 +419,16 @@ async function populatePreMadePokemonDropdown() {
 
     // Step 3: Apply TomSelect
     if (filterDropdown.tomselect) {
-      filterDropdown.tomselect.destroy(); // Clean up if reapplying
+      filterDropdown.tomselect.destroy();
     }
 
     new TomSelect(filterDropdown, {
       plugins: ['remove_button'],
-      placeholder: 'Filter Options',
+      maxItems: 3,
+      placeholder: 'Filter Options (max 3)',
       maxOptions: 100,
       onChange: (values) => {
         if (!Array.isArray(values)) values = [values];
-
-        // If "All Pokémon" is selected, reset everything else
-        if (values.includes('All Pokémon')) {
-          filterDropdown.tomselect.setValue(['All Pokémon'], true);
-          populateFilteredPokemonDropdown(window.allPreMadePokemons);
-          return;
-        }
 
         if (values.length === 0) {
           populateFilteredPokemonDropdown(window.allPreMadePokemons);
@@ -448,12 +441,13 @@ async function populatePreMadePokemonDropdown() {
       }
     });
 
-    // Step 4: Populate Pokémon dropdown initially
+    // Step 4: Initial load
     populateFilteredPokemonDropdown(list);
   } catch (e) {
     console.error("Failed to load pre-made Pokémon list:", e);
   }
 }
+
 
 function populateFilteredPokemonDropdown(list) {
   const pokemonDropdown = document.getElementById('preMadePokemonDropdown');
@@ -1571,29 +1565,4 @@ document.getElementById('preMadeTeamFilter').addEventListener('change', (e) => {
   }
 });
 
-document.getElementById('preMadePkmFilter').addEventListener('change', (e) => {
-  const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
-  const allOption = 'All Pokémon';
-
-  // If "All Pokémon" is selected, deselect everything else
-  if (selected.includes(allOption)) {
-    Array.from(e.target.options).forEach(opt => {
-      if (opt.value !== allOption) opt.selected = false;
-    });
-    populateFilteredPokemonDropdown(window.allPreMadePokemons);
-    return;
-  }
-
-  // If "All Pokémon" is NOT selected, remove selection from "All Pokémon" if it's still selected
-  const allOptionElement = Array.from(e.target.options).find(opt => opt.value === allOption);
-  if (allOptionElement) allOptionElement.selected = false;
-
-  if (selected.length === 0) {
-    populateFilteredPokemonDropdown(window.allPreMadePokemons);
-  } else {
-    const filtered = window.allPreMadePokemons.filter(pokemon =>
-      pokemon.filters.some(f => selected.includes(f))
-    );
-    populateFilteredPokemonDropdown(filtered);
-  }
-});
+document.getElementById('preMadePkmFilter').addEventListener('change', (e) => {});
