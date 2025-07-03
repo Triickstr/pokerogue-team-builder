@@ -1542,14 +1542,28 @@ document.getElementById('preMadeTeamFilter').addEventListener('change', (e) => {
 });
 
 document.getElementById('preMadePkmFilter').addEventListener('change', (e) => {
-  const selectedFilter = e.target.value;
-  if (selectedFilter === 'All Pokémon') {
+  const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
+  const allOption = 'All Pokémon';
+
+  // If "All Pokémon" is selected, deselect everything else
+  if (selected.includes(allOption)) {
+    Array.from(e.target.options).forEach(opt => {
+      if (opt.value !== allOption) opt.selected = false;
+    });
+    populateFilteredPokemonDropdown(window.allPreMadePokemons);
+    return;
+  }
+
+  // If "All Pokémon" is NOT selected, remove selection from "All Pokémon" if it's still selected
+  const allOptionElement = Array.from(e.target.options).find(opt => opt.value === allOption);
+  if (allOptionElement) allOptionElement.selected = false;
+
+  if (selected.length === 0) {
     populateFilteredPokemonDropdown(window.allPreMadePokemons);
   } else {
-    const filtered = window.allPreMadePokemons.filter(p =>
-      p.filters.includes(selectedFilter)
+    const filtered = window.allPreMadePokemons.filter(pokemon =>
+      pokemon.filters.some(f => selected.includes(f))
     );
     populateFilteredPokemonDropdown(filtered);
   }
 });
-
