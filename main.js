@@ -391,20 +391,49 @@ function resetSingleSlot(slotIndex) {
 }
 
 async function populatePreMadePokemonDropdown() {
-  const dropdown = document.getElementById('preMadePokemonDropdown');
+  const filterDropdown = document.getElementById('preMadePkmFilter');
+  const pokemonDropdown = document.getElementById('preMadePokemonDropdown');
+
   try {
     const response = await fetch('Pokemons/pokemons.json');
     const list = await response.json();
 
-    list.forEach(entry => {
-      const option = document.createElement('option');
-      option.value = entry.file;
-      option.textContent = entry.name;
-      dropdown.appendChild(option);
+    // Store globally
+    window.allPreMadePokemons = list;
+
+    // Step 1: Extract filters
+    const filterSet = new Set();
+    list.forEach(p => {
+      (p.filters || []).forEach(f => filterSet.add(f));
     });
+
+    const allFilters = ['All Pokémon', ...Array.from(filterSet).sort()];
+
+    // Step 2: Populate filter dropdown
+    filterDropdown.innerHTML = '';
+    allFilters.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = f;
+      filterDropdown.appendChild(opt);
+    });
+
+    // Step 3: Populate Pokémon dropdown initially
+    populateFilteredPokemonDropdown(list);
   } catch (e) {
     console.error("Failed to load pre-made Pokémon list:", e);
   }
+}
+
+function populateFilteredPokemonDropdown(list) {
+  const pokemonDropdown = document.getElementById('preMadePokemonDropdown');
+  pokemonDropdown.innerHTML = '<option value="">Select Pre-Made Pokémon</option>';
+  list.forEach(entry => {
+    const opt = document.createElement('option');
+    opt.value = entry.file;
+    opt.textContent = entry.name;
+    pokemonDropdown.appendChild(opt);
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1511,3 +1540,16 @@ document.getElementById('preMadeTeamFilter').addEventListener('change', (e) => {
     populateTeamDropdown(filtered);
   }
 });
+
+document.getElementById('preMadePkmFilter').addEventListener('change', (e) => {
+  const selectedFilter = e.target.value;
+  if (selectedFilter === 'All Pokémon') {
+    populateFilteredPokemonDropdown(window.allPreMadePokemons);
+  } else {
+    const filtered = window.allPreMadePokemons.filter(p =>
+      p.filters.includes(selectedFilter)
+    );
+    populateFilteredPokemonDropdown(filtered);
+  }
+});
+
