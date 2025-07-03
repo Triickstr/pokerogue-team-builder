@@ -368,7 +368,7 @@ new TomSelect(filterDropdown, {
   onChange: (values) => {
     if (!Array.isArray(values)) values = [values];
 
-    // 🧠 Keep only one per category
+    // Keep only one per category
     const seen = {};
     const pruned = [];
     for (let i = values.length - 1; i >= 0; i--) {
@@ -460,67 +460,103 @@ async function populatePreMadePokemonDropdown() {
     const response = await fetch('Pokemons/pokemons.json');
     const list = await response.json();
 
+    // Store globally
     window.allPreMadePokemons = list;
 
-    // Step 1: Extract unique filters
-    const filterSet = new Set();
-    list.forEach(p => {
-      (p.filters || []).forEach(f => filterSet.add(f));
+    // Step 1: Extract unique filter values by category
+    const filterMap = { Type: new Set(), Difficulty: new Set(), Role: new Set() };
+
+    list.forEach(pokemon => {
+      const filters = pokemon.filters || {};
+      if (filters.Type) filterMap.Type.add(filters.Type);
+      if (filters.Difficulty) filterMap.Difficulty.add(filters.Difficulty);
+      if (filters.Role) filterMap.Role.add(filters.Role);
     });
 
-    const allFilters = Array.from(filterSet).sort(); // Removed "All Pokémon"
+    // Step 2: Build ordered filter list
+    const orderedFilters = [
+      ...Array.from(filterMap.Type).sort().map(v => ({ category: 'Type', value: v })),
+      ...Array.from(filterMap.Difficulty).sort().map(v => ({ category: 'Difficulty', value: v })),
+      ...Array.from(filterMap.Role).sort().map(v => ({ category: 'Role', value: v }))
+    ];
 
-    // Step 2: Populate dropdown
+    // Step 3: Populate filter dropdown
     filterDropdown.innerHTML = '';
-    allFilters.forEach(f => {
+    orderedFilters.forEach(({ category, value }) => {
       const opt = document.createElement('option');
-      opt.value = f;
-      opt.textContent = f;
+      opt.value = `${category}:${value}`;
+      opt.textContent = value;
       filterDropdown.appendChild(opt);
     });
 
-    // Step 3: Apply TomSelect
+    // Step 4: Setup TomSelect
     if (filterDropdown.tomselect) {
       filterDropdown.tomselect.destroy();
     }
 
     new TomSelect(filterDropdown, {
       plugins: ['remove_button'],
-      maxItems: 3,
-      placeholder: 'Filter Options',
+      placeholder: 'Select Type, Difficulty, and Role',
       maxOptions: 100,
+      render: {
+        option: function(data, escape) {
+          const [category] = data.value.split(':');
+          const bgColor = category === 'Type' ? '#f8d7da'
+                         : category === 'Difficulty' ? '#d1ecf1'
+                         : '#e2d6f3'; // Role
+          return `<div style="background-color:${bgColor}; padding: 4px;">${escape(data.text)}</div>`;
+        },
+        item: function(data, escape) {
+          const [category] = data.value.split(':');
+          const bgColor = category === 'Type' ? '#f8d7da'
+                         : category === 'Difficulty' ? '#d1ecf1'
+                         : '#e2d6f3'; // Role
+          return `<div style="background-color:${bgColor}; padding: 2px 6px; border-radius: 4px;">${escape(data.text)}</div>`;
+        }
+      },
       onChange: (values) => {
         if (!Array.isArray(values)) values = [values];
 
-        if (values.length === 0) {
+        // Enforce one per category
+        const seen = {};
+        const pruned = [];
+        for (let i = values.length - 1; i >= 0; i--) {
+          const [cat, val] = values[i].split(':');
+          if (!seen[cat]) {
+            seen[cat] = true;
+            pruned.unshift(values[i]);
+          }
+        }
+
+        if (filterDropdown.tomselect) {
+          filterDropdown.tomselect.setValue(pruned, true);
+        }
+
+        // Filter Pokémon based on selected filters
+        if (pruned.length === 0) {
           populateFilteredPokemonDropdown(window.allPreMadePokemons);
         } else {
+          const selected = pruned.map(v => {
+            const [category, val] = v.split(':');
+            return { category, val };
+          });
+
           const filtered = window.allPreMadePokemons.filter(pokemon =>
-            values.every(f => pokemon.filters.includes(f))
+            selected.every(sel => pokemon.filters?.[sel.category] === sel.val)
           );
+
           populateFilteredPokemonDropdown(filtered);
         }
       }
     });
 
-    // Step 4: Initial load
+    // Step 5: Load all Pokémon by default
     populateFilteredPokemonDropdown(list);
   } catch (e) {
     console.error("Failed to load pre-made Pokémon list:", e);
   }
 }
 
-
-function populateFilteredPokemonDropdown(list) {
-  const pokemonDropdown = document.getElementById('preMadePokemonDropdown');
-  pokemonDropdown.innerHTML = '<option value="">Select Pre-Made Pokémon</option>';
-  list.forEach(entry => {
-    const opt = document.createElement('option');
-    opt.value = entry.file;
-    opt.textContent = entry.name;
-    pokemonDropdown.appendChild(opt);
-  });
-}
 
 document.addEventListener("DOMContentLoaded", () => {
   const teamGrid = document.getElementById("teamGrid");
