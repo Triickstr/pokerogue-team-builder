@@ -21,10 +21,14 @@
   <input type="file" id="importFile" accept=".json" />
 </div>
 
+<div id="loaderToggle" style="margin-bottom: 16px; display: flex; gap: 12px;">
+  <button onclick="showLoader('team')" id="toggleTeam" class="active">Full Team Loader</button>
+  <button onclick="showLoader('pokemon')" id="togglePokemon">Pokemon Loader</button>
+</div>
+
 <!-- Moved Dropdown Below -->
-<div style="margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 12px;">
-  <h3>Full Team Loader</h3>
-  <div style="margin-left: 24px;">
+<div id="loadPreMadeTeam" style="margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 12px;">
+  <div>
     <select id="preMadeTeamFilter">
       <option value="">Filter Options</option>
     </select>
@@ -36,14 +40,13 @@
   </div>
 </div>
 
-<div style="margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 12px;">
-  <h3>Pokemon Loader</h3>
-  <div style="margin-left: 24px;">
+<div id="loadPreMadePokemon" style="margin-bottom: 24px; display: none; flex-wrap: wrap; gap: 12px;">
+  <div>
     <select id="preMadePkmFilter">
       <option value="">Filter Options</option>
     </select>
   </div>
-  <div>
+  <div style="margin-left: 24px;">
     <select id="SlotSelector">
       <option value="">Select Slot</option>
     </select>
