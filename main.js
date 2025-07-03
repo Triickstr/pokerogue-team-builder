@@ -425,7 +425,7 @@ async function populatePreMadePokemonDropdown() {
     new TomSelect(filterDropdown, {
       plugins: ['remove_button'],
       maxItems: 3,
-      placeholder: 'Filter Options (max 3)',
+      placeholder: 'Filter Options',
       maxOptions: 100,
       onChange: (values) => {
         if (!Array.isArray(values)) values = [values];
