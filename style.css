@@ -238,3 +238,12 @@ select {
   color: white;
   border-color: #0056b3;
 }
+
+.ts-control {
+  max-width: 260px !important;
+}
+
+.ts-dropdown {
+  max-height: 120px;
+  overflow-y: auto;
+}
