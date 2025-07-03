@@ -418,7 +418,37 @@ async function populatePreMadePokemonDropdown() {
       filterDropdown.appendChild(opt);
     });
 
-    // Step 3: Populate Pokémon dropdown initially
+    // Step 3: Apply TomSelect
+    if (filterDropdown.tomselect) {
+      filterDropdown.tomselect.destroy(); // Clean up if reapplying
+    }
+
+    new TomSelect(filterDropdown, {
+      plugins: ['remove_button'],
+      placeholder: 'Filter Options',
+      maxOptions: 100,
+      onChange: (values) => {
+        if (!Array.isArray(values)) values = [values];
+
+        // If "All Pokémon" is selected, reset everything else
+        if (values.includes('All Pokémon')) {
+          filterDropdown.tomselect.setValue(['All Pokémon'], true);
+          populateFilteredPokemonDropdown(window.allPreMadePokemons);
+          return;
+        }
+
+        if (values.length === 0) {
+          populateFilteredPokemonDropdown(window.allPreMadePokemons);
+        } else {
+          const filtered = window.allPreMadePokemons.filter(pokemon =>
+            pokemon.filters.some(f => values.includes(f))
+          );
+          populateFilteredPokemonDropdown(filtered);
+        }
+      }
+    });
+
+    // Step 4: Populate Pokémon dropdown initially
     populateFilteredPokemonDropdown(list);
   } catch (e) {
     console.error("Failed to load pre-made Pokémon list:", e);
