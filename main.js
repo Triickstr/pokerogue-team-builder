@@ -568,7 +568,6 @@ function populateFilteredPokemonDropdown(list) {
   });
 }
 
-
 document.addEventListener("DOMContentLoaded", () => {
   const teamGrid = document.getElementById("teamGrid");
   teamGrid.innerHTML = '';
