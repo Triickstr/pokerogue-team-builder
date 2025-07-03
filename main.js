@@ -354,7 +354,7 @@ async function loadPreMadeTeams() {
           populateTeamDropdown(teams);
         } else {
           const filtered = teams.filter(team =>
-            team.filters.some(f => values.includes(f))
+            values.every(f => team.filters.includes(f))
           );
           populateTeamDropdown(filtered);
         }
@@ -458,7 +458,7 @@ async function populatePreMadePokemonDropdown() {
           populateFilteredPokemonDropdown(window.allPreMadePokemons);
         } else {
           const filtered = window.allPreMadePokemons.filter(pokemon =>
-            pokemon.filters.some(f => values.includes(f))
+            values.every(f => pokemon.filters.includes(f))
           );
           populateFilteredPokemonDropdown(filtered);
         }
