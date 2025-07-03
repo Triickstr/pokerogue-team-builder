@@ -313,17 +313,49 @@ async function loadPreMadeTeams() {
   try {
     const response = await fetch('Teams/teams.json');
     const teams = await response.json();
-    const dropdown = document.getElementById('preMadeTeamDropdown');
 
+    const filterDropdown = document.getElementById('preMadeTeamFilter');
+    const teamDropdown = document.getElementById('preMadeTeamDropdown');
+
+    // Clear both dropdowns
+    filterDropdown.innerHTML = '';
+    teamDropdown.innerHTML = '<option value="">Load Pre-Made Team</option>';
+
+    // Step 1: Extract unique filters
+    const filterSet = new Set();
     teams.forEach(team => {
-      const option = document.createElement('option');
-      option.value = team.file;
-      option.textContent = team.name;
-      dropdown.appendChild(option);
+      (team.filters || []).forEach(f => filterSet.add(f));
     });
+
+    const allFilters = ['All Teams', ...Array.from(filterSet).sort()];
+
+    // Step 2: Populate filter dropdown
+    allFilters.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = f;
+      filterDropdown.appendChild(opt);
+    });
+
+    // Step 3: Store teams globally for filtering
+    window.allPreMadeTeams = teams;
+
+    // Step 4: Initially show all teams
+    populateTeamDropdown(teams);
   } catch (err) {
     console.error("Failed to load teams.json", err);
   }
+}
+
+function populateTeamDropdown(teamList) {
+  const teamDropdown = document.getElementById('preMadeTeamDropdown');
+  teamDropdown.innerHTML = '<option value="">Load Pre-Made Team</option>';
+  teamList.forEach(team => {
+    const opt = document.createElement('option');
+    opt.value = team.file;
+    opt.textContent = team.name;
+    teamDropdown.appendChild(opt);
+  });
 }
 
 function resetTeamBuilder() {
@@ -1467,3 +1499,15 @@ async function loadPreMadePokemon() {
 }
 
 document.getElementById('preMadePokemonDropdown').addEventListener('change', loadPreMadePokemon);
+
+document.getElementById('preMadeTeamFilter').addEventListener('change', (e) => {
+  const selectedFilter = e.target.value;
+  if (selectedFilter === 'All Teams') {
+    populateTeamDropdown(window.allPreMadeTeams);
+  } else {
+    const filtered = window.allPreMadeTeams.filter(team =>
+      team.filters.includes(selectedFilter)
+    );
+    populateTeamDropdown(filtered);
+  }
+});
