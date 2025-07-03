@@ -557,6 +557,17 @@ async function populatePreMadePokemonDropdown() {
   }
 }
 
+function populateFilteredPokemonDropdown(list) {
+  const pokemonDropdown = document.getElementById('preMadePokemonDropdown');
+  pokemonDropdown.innerHTML = '<option value="">Select Pre-Made Pokémon</option>';
+  list.forEach(entry => {
+    const opt = document.createElement('option');
+    opt.value = entry.file;
+    opt.textContent = entry.name;
+    pokemonDropdown.appendChild(opt);
+  });
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const teamGrid = document.getElementById("teamGrid");
