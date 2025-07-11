@@ -728,6 +728,7 @@ const createMoveDropdown = (basePokemon) => {
   const index = Array.from(document.querySelectorAll('.team-slot')).indexOf(slot);
   const newSlot = createTeamSlot();
   slot.replaceWith(newSlot);
+  teamItemSelections[index] = {};
   passiveAbilityDisabled[index] = false;
   updateTeamSummary();
 };
