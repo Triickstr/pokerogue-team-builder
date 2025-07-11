@@ -426,6 +426,7 @@ function resetTeamBuilder() {
 
   // Clear item selections and visual areas
   teamItemSelections = [{}, {}, {}, {}, {}, {}];
+  passiveAbilityDisabled = [false, false, false, false, false, false];
   teamGrid.innerHTML = '';
   summaryContainer.innerHTML = '';
 
@@ -726,6 +727,7 @@ const createMoveDropdown = (basePokemon) => {
     img.onclick = () => {
   const newSlot = createTeamSlot();
   slot.replaceWith(newSlot);
+  resetSingleSlot(newSlot);
   updateTeamSummary();
 };
     slot.appendChild(img);
