@@ -727,7 +727,7 @@ const createMoveDropdown = (basePokemon) => {
     img.onclick = () => {
   const newSlot = createTeamSlot();
   slot.replaceWith(newSlot);
-  resetSingleSlot(newSlot);
+  passiveAbilityDisabled[newSlot] = false;
   updateTeamSummary();
 };
     slot.appendChild(img);
