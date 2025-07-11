@@ -725,9 +725,10 @@ const createMoveDropdown = (basePokemon) => {
     img.className = 'pokemon-img';
     img.onerror = () => img.style.display = 'none';
     img.onclick = () => {
+  const index = Array.from(document.querySelectorAll('.team-slot')).indexOf(slot);
   const newSlot = createTeamSlot();
   slot.replaceWith(newSlot);
-  passiveAbilityDisabled[newSlot] = false;
+  passiveAbilityDisabled[index] = false;
   updateTeamSummary();
 };
     slot.appendChild(img);
